@@ -96,14 +96,44 @@ export default class Settings {
             this.importData(e.target.files[0]);
         });
 
-        // Clear cache
-        container.querySelector('#btn-clear-cache').addEventListener('click', async () => {
-            if ('caches' in window) {
-                const names = await caches.keys();
-                await Promise.all(names.map(name => caches.delete(name)));
+        // Clear cache logic
+        const clearCacheAndReload = async () => {
+            if (!confirm('Vuoi forzare l\'aggiornamento dell\'app?')) return;
+
+            const btn = container.querySelector('#btn-clear-cache');
+            if (btn) btn.textContent = 'Aggiornamento...';
+
+            try {
+                // 1. Unregister Service Worker
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+
+                // 2. Delete all Caches
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    await Promise.all(names.map(name => caches.delete(name)));
+                }
+
+                // 3. Reload
+                window.location.reload(true);
+            } catch (e) {
+                alert('Errore durante l\'aggiornamento: ' + e.message);
+                window.location.reload();
             }
-            window.location.reload();
-        });
+        };
+
+        container.querySelector('#btn-clear-cache').addEventListener('click', clearCacheAndReload);
+
+        // Make version clickable as requested
+        const versionEl = container.querySelector('#app-version');
+        versionEl.style.cursor = 'pointer';
+        versionEl.style.textDecoration = 'underline';
+        versionEl.title = 'Clicca per aggiornare';
+        versionEl.addEventListener('click', clearCacheAndReload);
     }
 
     exportData() {
