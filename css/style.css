@@ -731,9 +731,11 @@ select {
     /* Reduced gap from 12px */
 }
 
-display: flex;
-flex-direction: column;
-gap: 15px;
+
+.traits-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .trait-row {
