@@ -208,8 +208,7 @@ export default class CreateWizard {
                     </div>
                 </div>
             </div>
-        `;
-        `;
+
 
         window.selectEdition = async (ed) => {
             this.edition = ed;
