@@ -1,4 +1,4 @@
-const CACHE_NAME = '7thsea-v0.3.2';
+const CACHE_NAME = '7thsea-v0.3.3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -8,7 +8,20 @@ const ASSETS_TO_CACHE = [
     './js/router.js',
     './js/storage.js',
     './js/dice.js',
-    './manifest.json'
+    './manifest.json',
+    './js/components/CreateWizard.js',
+    './js/components/CharacterList.js',
+    './js/components/CharacterSheet.js',
+    './js/components/DiceRoller.js',
+    './js/components/Settings.js',
+    './data/v1/nations.json',
+    './data/v1/skills.json',
+    './data/v1/schools.json',
+    './data/v1/advantages.json',
+    './data/v2/nations.json',
+    './data/v2/skills.json',
+    './data/v2/backgrounds.json',
+    './data/v2/advantages.json'
 ];
 
 // Install event
