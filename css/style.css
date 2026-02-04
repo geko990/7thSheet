@@ -637,6 +637,15 @@ select {
 }
 
 /* Trait Controls */
+.skills-columns {
+    display: flex;
+    gap: 20px;
+}
+
+.skills-col {
+    flex: 1;
+}
+
 .traits-container {
     display: flex;
     flex-direction: column;

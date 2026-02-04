@@ -51,7 +51,7 @@
     },
     {
         "id": "sailing",
-        "name": "Navigazione",
+        "name": "Navigare",
         "trait": "wits"
     },
     {
@@ -61,7 +61,7 @@
     },
     {
         "id": "tempt",
-        "name": "Sedurre",
+        "name": "Allettare",
         "trait": "panache"
     },
     {

@@ -685,11 +685,23 @@ export default class CreateWizard {
         }
     }
 
-    renderStep4V2(container) {
-        // V2: 10 Points for Skills/Advantages
-        // Skills cost 1/rank (max 3 start).
-        // Advantages cost listed value.
+    translateTrait(trait) {
+        const map = {
+            brawn: 'Vigore',
+            finesse: 'Grazia',
+            resolve: 'Risolutezza',
+            wits: 'Acume',
+            panache: 'Panache'
+        };
+        return map[trait] || trait;
+    }
 
+    translateSkill(skillId) {
+        const skill = this.data.skills.find(s => s.id === skillId);
+        return skill ? skill.name : skillId;
+    }
+
+    renderStep4V2(container) {
         container.innerHTML = `
             <div class="card">
                 <h3 class="card-title">Abilità & Vantaggi (2ª Ed)</h3>
@@ -700,17 +712,9 @@ export default class CreateWizard {
 
                 <div class="sheet-section">
                     <h4 class="sheet-section-title">Abilità (1 punto/grado)</h4>
-                    <div class="skills-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 250px; overflow-y: auto;">
-                        ${this.data.skills.map(skill => `
-                            <div class="skill-row" style="display: flex; justify-content: space-between; padding: 5px;">
-                                <span>${skill.name}</span>
-                                <div class="trait-controls">
-                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', -1)" style="width: 20px; height: 20px; font-size: 1rem;">-</button>
-                                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1rem; min-width: 20px;">${this.character.skills[skill.id] || 0}</span>
-                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', 1)" style="width: 20px; height: 20px; font-size: 1rem;">+</button>
-                                </div>
-                            </div>
-                        `).join('')}
+                    <div class="skills-columns" style="display: flex; gap: 20px;">
+                        <div class="skills-col" id="skills-col-1" style="flex: 1;"></div>
+                        <div class="skills-col" id="skills-col-2" style="flex: 1;"></div>
                     </div>
                 </div>
 
@@ -723,8 +727,8 @@ export default class CreateWizard {
                                     <strong>${adv.name}</strong> (${adv.cost} pti)
                                     <div style="font-size: 0.8em; color: var(--text-faded);">${adv.description || ''}</div>
                                 </div>
-                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'}"
-                                        onclick="window.toggleAdvV2('${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
+                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'} btn-adv-toggle"
+                                        data-name="${adv.name.replace(/'/g, "\\'")}" data-cost="${adv.cost}"
                                         style="font-size: 0.8rem; padding: 4px 8px;">
                                     ${this.character.advantages.includes(adv.name) ? 'Rimuovi' : 'Prendi'}
                                 </button>
@@ -735,9 +739,36 @@ export default class CreateWizard {
             </div>
         `;
 
+        // Column Logic
+        const col1Names = ['Allettare', 'Arte della Guerra', 'Atletica', 'Cavalcare', 'Convincere', 'Empatia', 'Esibirsi', 'Furto'];
+        const col2Names = ['Intimidire', 'Istruzione', 'Mira', 'Mischia', 'Nascondersi', 'Navigare', 'Notare', 'Rissa'];
+
+        const renderSkillRow = (skill) => `
+            <div class="skill-row" style="display: flex; justify-content: space-between; padding: 5px; align-items: center;">
+                <span style="font-size: 0.9em;">${skill.name}</span>
+                <div class="trait-controls">
+                    <button class="btn-circle btn-skill-dec" data-id="${skill.id}" style="width: 24px; height: 24px; font-size: 1rem;">-</button>
+                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1rem; min-width: 20px;">${this.character.skills[skill.id] || 0}</span>
+                    <button class="btn-circle btn-skill-inc" data-id="${skill.id}" style="width: 24px; height: 24px; font-size: 1rem;">+</button>
+                </div>
+            </div>
+        `;
+
+        const col1Container = container.querySelector('#skills-col-1');
+        const col2Container = container.querySelector('#skills-col-2');
+
+        col1Names.forEach(name => {
+            const skill = this.data.skills.find(s => s.name === name);
+            if (skill) col1Container.innerHTML += renderSkillRow(skill);
+        });
+
+        col2Names.forEach(name => {
+            const skill = this.data.skills.find(s => s.name === name);
+            if (skill) col2Container.innerHTML += renderSkillRow(skill);
+        });
+
         // V2 Point Logic
         const getBackgroundSkillBonus = (skillId) => {
-            // Calculate if background gives this skill
             let bonus = 0;
             this.character.backgrounds.forEach(bgName => {
                 const bg = this.data.backgrounds.find(b => b.name === bgName);
@@ -746,29 +777,20 @@ export default class CreateWizard {
             return bonus;
         };
 
-        // Initial sync of skills from background (if not already set in logic, but here we edit state dynamically)
-        // Wait, character.skills checks should allow going below background bonus? No.
-        // Simplified: user buys upgrades.
-
         const calcSpent = () => {
             let spent = 0;
-            // Skills purchases (Current val - Background Bonus)
+            // Skills
             Object.keys(this.character.skills).forEach(sId => {
                 const current = this.character.skills[sId];
-                const base = getBackgroundSkillBonus(sId); // Actually logic says you add to it?
-                // Rules: "Background gives Rank 1. Raising to 2 costs 1 point."
-                // Wait, Background gives 1. raising from 1 to 2 costs 1 point.
-                // So Cost = Current - Base.
+                const base = getBackgroundSkillBonus(sId);
                 if (current > base) {
                     spent += (current - base);
                 }
             });
-
             // Advantages
             this.character.advantages.forEach(advName => {
                 const adv = this.data.advantages.find(a => a.name === advName);
                 if (adv) {
-                    // Check if background gave it free?
                     let free = false;
                     this.character.backgrounds.forEach(bgName => {
                         const bg = this.data.backgrounds.find(b => b.name === bgName);
@@ -791,8 +813,7 @@ export default class CreateWizard {
             return remaining;
         };
 
-        // Initialize background bonuses if not present
-        // This modifies state which might persist if user goes back? Yes.
+        // Initialize background bonuses
         this.data.skills.forEach(s => {
             const base = getBackgroundSkillBonus(s.id);
             if ((this.character.skills[s.id] || 0) < base) {
@@ -802,16 +823,17 @@ export default class CreateWizard {
 
         setTimeout(updateUI, 0);
 
-        window.adjustSkillV2 = (skillId, delta) => {
+        // Event Delegation for Skills
+        const adjustSkillV2 = (skillId, delta) => {
             const base = getBackgroundSkillBonus(skillId);
             const current = this.character.skills[skillId] || 0;
             const newVal = current + delta;
 
-            if (newVal < base) return; // Cannot go below background
-            if (newVal > 3) return; // Cap at 3 for creation
+            if (newVal < base) return;
+            if (newVal > 3) return;
 
             if (delta > 0) {
-                const rem = updateUI();
+                const rem = 10 - calcSpent(); // Re-calc fresh
                 if (rem <= 0) return;
             }
 
@@ -820,34 +842,50 @@ export default class CreateWizard {
             updateUI();
         };
 
-        window.toggleAdvV2 = (advName) => {
-            const index = this.character.advantages.indexOf(advName);
-            // Check cost
-            const adv = this.data.advantages.find(a => a.name === advName);
-            const cost = adv ? adv.cost : 0;
-
-            if (index > -1) {
-                // Remove? Check if background
-                let free = false;
-                this.character.backgrounds.forEach(bgName => {
-                    const bg = this.data.backgrounds.find(b => b.name === bgName);
-                    if (bg && bg.advantages.includes(advName)) free = true;
-                });
-                if (free) {
-                    alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
-                    return;
-                }
-                this.character.advantages.splice(index, 1);
-            } else {
-                const rem = 10 - calcSpent();
-                if (rem < cost) {
-                    alert('Punti insufficienti.');
-                    return;
-                }
-                this.character.advantages.push(advName);
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-skill-inc')) {
+                const btn = e.target.closest('.btn-skill-inc');
+                adjustSkillV2(btn.dataset.id, 1);
             }
-            this.renderStep4V2(container); // Re-render to update buttons
-        };
+            if (e.target.closest('.btn-skill-dec')) {
+                const btn = e.target.closest('.btn-skill-dec');
+                adjustSkillV2(btn.dataset.id, -1);
+            }
+
+            if (e.target.closest('.btn-adv-toggle')) {
+                // Advantages logic needs toggle re-render
+                // Here we can just call the method directly or use delegation
+                // Since toggleAdvV2 re-renders logic, it's safer to keep it simple but avoid global pollution if possible.
+                // But toggleAdvV2 was global in previous code.
+                // Let's implement it here.
+                const btn = e.target.closest('.btn-adv-toggle');
+                const advName = btn.dataset.name;
+                const cost = parseInt(btn.dataset.cost);
+
+                const index = this.character.advantages.indexOf(advName);
+                if (index > -1) {
+                    // Remove? Check if background
+                    let free = false;
+                    this.character.backgrounds.forEach(bgName => {
+                        const bg = this.data.backgrounds.find(b => b.name === bgName);
+                        if (bg && bg.advantages.includes(advName)) free = true;
+                    });
+                    if (free) {
+                        alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
+                        return;
+                    }
+                    this.character.advantages.splice(index, 1);
+                } else {
+                    const rem = 10 - calcSpent();
+                    if (rem < cost) {
+                        alert('Punti insufficienti.');
+                        return;
+                    }
+                    this.character.advantages.push(advName);
+                }
+                this.renderStep4V2(container);
+            }
+        });
     }
 
     renderStep4V1(container) {
