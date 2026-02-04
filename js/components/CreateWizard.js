@@ -1306,11 +1306,22 @@ export default class CreateWizard {
         }
 
         // Generate ID
-        this.character.id = Date.now().toString();
-        this.character.createdAt = new Date().toISOString();
+        if (!this.character.id) {
+            this.character.id = Storage.generateId();
+            this.character.createdAt = new Date().toISOString();
+        }
+        this.character.updatedAt = new Date().toISOString();
 
-        Storage.saveCharacter(this.character);
-        this.app.router.navigate('characters');
+        const result = Storage.saveCharacter(this.character);
+
+        if (result.success) {
+            if (result.warning) {
+                alert(result.warning);
+            }
+            this.app.router.navigate('characters');
+        } else {
+            alert('Errore durante il salvataggio: ' + (result.error || 'Sconosciuto'));
+        }
     }
 
     translateTrait(trait) {

@@ -58,8 +58,28 @@ export const Storage = {
             characters.push(character);
         }
 
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(characters));
-        return character;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(characters));
+            return { success: true, character: character };
+        } catch (e) {
+            console.error('Storage Error:', e);
+
+            // Handle Quota Exceeded (likely due to image)
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                if (character.image && character.image.length > 1000) {
+                    console.warn('Image too large. Retrying without image.');
+                    character.image = null;
+                    // Character object is referenced in 'characters' array, so modification persists in array
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(characters));
+                        return { success: true, warning: 'Immagine troppo grande. Personaggio salvato senza immagine.' };
+                    } catch (retryErr) {
+                        return { success: false, error: 'Memoria piena. Impossibile salvare.' };
+                    }
+                }
+            }
+            return { success: false, error: e.message };
+        }
     },
 
     /**
