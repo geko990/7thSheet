@@ -56,10 +56,13 @@ export default class CharacterList {
 
     renderCharacterCard(char) {
         const nationEmoji = this.getNationEmoji(char.nation);
-        const editionLabel = char.edition === '1e' ? '1ª Ed' : '2ª Ed';
 
-        let details = `${char.nation || 'Apolide'}`;
-        if (char.concept) details += ` • ${char.concept}`;
+        // Build details string: "Liv. X • Nazione" + maybe " • Fede"
+        let details = `Liv. ${char.level || 1} • ${char.nation || 'Apolide'}`;
+
+        if (char.religion) {
+            details += ` • ${char.religion}`;
+        }
 
         const imageStyle = char.image ?
             `background-image: url('${char.image}'); background-size: cover; background-position: center;` :
@@ -69,16 +72,16 @@ export default class CharacterList {
 
         return `
             <div class="card character-card" data-id="${char.id}" style="display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255, 255, 255, 0.6); margin-bottom: 12px;">
-                <div class="character-avatar" style="width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
+                <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
                     ${content}
                 </div>
                 <div class="character-info" style="flex: 1; overflow: hidden;">
-                    <div class="character-name" style="font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${char.name || 'Senza Nome'}</div>
-                    <div class="character-details" style="font-size: 0.85rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        <span style="font-weight: 600; color: var(--accent-gold); font-size: 0.75rem; text-transform: uppercase;">${editionLabel}</span> | ${details}
+                    <div class="character-name" style="font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-ink);">${char.name || 'Senza Nome'}</div>
+                    <div class="character-details" style="font-size: 0.85rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                        ${details}
                     </div>
                 </div>
-                <div style="color: var(--text-faded); font-size: 1.2rem;">⋮</div>
+                <div style="color: var(--accent-gold); font-size: 1.2rem;">›</div>
             </div>
         `;
     }
