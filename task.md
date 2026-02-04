@@ -24,8 +24,8 @@
     - [x] Multi-character support <!-- id: 91 -->
 
 - [/] Character Creation Wizard <!-- id: 92 -->
-    - [ ] Step 0: Edition Selection <!-- id: 117 -->
-    - [x] Step 1: Nation selection <!-- id: 93 -->
+    - [x] Step 0: Edition Selection <!-- id: 117 -->
+    - [x] Step 1: Identity & Nation (Image, Details) <!-- id: 93 -->
     - [x] Step 2: Traits allocation <!-- id: 94 -->
     - [x] Step 3: Background selection <!-- id: 95 -->
     - [x] Step 4: Skills selection <!-- id: 96 -->
@@ -44,8 +44,8 @@
     - [x] Hero Points tracker <!-- id: 107 -->
 
 - [/] Deployment <!-- id: 108 -->
-    - [/] Create GitHub repository <!-- id: 109 -->
-    - [ ] Configure GitHub Pages <!-- id: 110 -->
+    - [x] Create GitHub repository <!-- id: 109 -->
+    - [x] Configure GitHub Pages <!-- id: 110 -->
     - [ ] Test PWA on iPhone <!-- id: 111 -->
 
 ## Completed Tasks

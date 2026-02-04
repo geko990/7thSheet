@@ -1,0 +1,62 @@
+[
+    {
+        "id": "able_drinker",
+        "name": "Bevitore Formidabile",
+        "cost": 1,
+        "description": "L'alcol non ha effetto su di te fino a dosi massicce."
+    },
+    {
+        "id": "academy",
+        "name": "Accademia",
+        "cost": 4,
+        "description": "Hai studiato in un'accademia militare. Ottieni abilità marziali a costo ridotto."
+    },
+    {
+        "id": "combat_reflexes",
+        "name": "Riflessi da Combattimento",
+        "cost": 3,
+        "description": "Puoi agire più velocemente. Reroll iniziativa fallita?"
+    },
+    {
+        "id": "commission",
+        "name": "Commissione",
+        "cost": 3,
+        "description": "Possiedi un grado in un esercito o marina."
+    },
+    {
+        "id": "connections",
+        "name": "Connessioni",
+        "cost": 2,
+        "description": "Conosci qualcuno che può aiutarti."
+    },
+    {
+        "id": "noble",
+        "name": "Nobile",
+        "cost": 10,
+        "description": "Sei di sangue nobile. Ottieni rendita e status."
+    },
+    {
+        "id": "frightening_countenance",
+        "name": "Aspetto Spaventoso",
+        "cost": 2,
+        "description": "Ottieni bonus alle prove di Intimidire."
+    },
+    {
+        "id": "large",
+        "name": "Grosso",
+        "cost": 5,
+        "description": "Sei fisicamente imponente. +1 Brawn (max 6)."
+    },
+    {
+        "id": "linguist",
+        "name": "Linguista",
+        "cost": 2,
+        "description": "Impari lingue a costo ridotto."
+    },
+    {
+        "id": "membership",
+        "name": "Membro di Società Segreta",
+        "cost": 3,
+        "description": "Fai parte di una società segreta (es. Rilascia, Die Kreuzritter)."
+    }
+]

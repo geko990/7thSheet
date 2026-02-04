@@ -30,6 +30,12 @@ export default class CharacterSheet {
             <div class="card" style="position: relative; padding-top: 40px;">
                 <button class="btn btn-secondary" id="btn-close" style="position: absolute; top: 10px; right: 10px; border: none;">✖</button>
                 
+                ${this.character.image ? `
+                <div class="char-sheet-avatar" style="width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
+                    <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                ` : ''}
+                
                 <h2 class="page-title" style="margin-bottom: 5px;">${this.character.name}</h2>
                 <p class="text-center" style="margin-bottom: 20px; font-style: italic;">${this.character.nation}</p>
                 
@@ -87,12 +93,37 @@ export default class CharacterSheet {
                 </div>
 
                 <!-- Backgrounds & Advantages -->
+                <!-- Backgrounds & Advantages -->
                 <div class="sheet-section">
-                    <div class="sheet-section-title">Background & Vantaggi</div>
-                    <p><strong>Background:</strong> ${this.character.backgrounds.join(', ')}</p>
-                    <ul style="margin-top: 10px; padding-left: 20px;">
-                        ${this.character.advantages.map(adv => `<li>${adv}</li>`).join('')}
-                    </ul>
+                    <div class="sheet-section-title">
+                        ${this.character.edition === '1e' ? 'Vantaggi & Scuole' : 'Background & Vantaggi'}
+                    </div>
+                    
+                    ${this.character.edition === '2e' ?
+                `<p><strong>Background:</strong> ${this.character.backgrounds.join(', ')}</p>` : ''
+            }
+                    
+                    ${this.character.edition === '1e' && this.character.school ?
+                `<p><strong>Scuola:</strong> ${this.character.school}</p>` : ''
+            }
+                    
+                    ${this.character.edition === '1e' && this.character.sorceryLevel ?
+                `<p><strong>Stregoneria:</strong> Livello ${this.character.sorceryLevel}</p>` : ''
+            }
+
+                    <div style="margin-top: 10px;">
+                        <strong>Vantaggi:</strong>
+                        <ul style="margin-top: 5px; padding-left: 20px;">
+                            ${this.character.advantages.map(adv => `<li>${adv}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    ${this.character.edition === '2e' && this.character.stories ?
+                `<div class="mt-20">
+                           <strong>Storie:</strong>
+                           ${this.character.stories.map(s => `<p>${s.name} (Goal: ${s.goal})</p>`).join('')}
+                       </div>` : ''
+            }
                 </div>
                 
                  <!-- Delete Character -->

@@ -16,10 +16,44 @@ App per la creazione, visualizzazione e gestione di schede personaggio per 7th S
   - **V2**: Roll & Keep (tutto), Raise (Somme di 10), Background, Vantaggi, Storie.
 
 ### 2. Character Creation Wizard
-Creazione guidata adattiva:
-- **Step 0**: Selezione Edizione
-- **V2 Flow**: Nazione -> Tratti -> Background -> Abilità -> Vantaggi
-- **V1 Flow**: Nazione -> Tratti -> Abilità (Knacks) -> Vantaggi -> Arcani -> Scuole/Stregoneria
+Creazione guidata completa (V1 & V2):
+
+#### Common Fields (All Editions)
+- **Step 0: Edition Selection**: Scelta tra 1ª Edizione (Roll & Keep) e 2ª Edizione.
+- **Step 1: Identity**:
+  - Nome, Concetto, Religione.
+  - **[NEW] Immagine Personaggio**: Upload o URL.
+  - **Nazione**: Caricamento dinamico bonus in base all'edizione.
+
+#### V2 Flow (2nd Edition)
+- **Step 2: Traits**: Assegnazione punti a Brawn, Finesse, Resolve, Wits, Panache.
+- **Step 3: Backgrounds**: Selezione 2 Background (Skill e Vantaggi automatici).
+- **Step 4: Skills & Advantages**:
+  - Spesa punti residui per Skill e Vantaggi.
+  - **Arcana**: Selezione Virtue/Hubris (Opzionale).
+  - **Stories**: Definizione prima storia (Goal, Reward, Step).
+- **Step 5: Review**: Riepilogo e Salvataggio.
+
+#### V1 Flow (1st Edition)
+- **Step 2: Traits**: Brawn, Finesse, Wits, Resolve, Panache.
+- **Step 3: Civil Skills & Knacks**:
+  - Selezione Skill Civili e relativi Knack.
+  - Spesa punti Hero/Building.
+- **Step 4: Martial Skills & Schools**:
+  - Selezione Skill Marziali.
+  - Selezione Scuola di Scherma (se applicabile).
+- **Step 5: Sorcery**:
+  - Se la nazione lo permette, acquisto Stregoneria e gradi (es. Porte, Sorté).
+- **Step 6: Advantages & Arcana**:
+  - Acquisto vantaggi.
+  - Selezione Arcana (Carte dei Tarocchi).
+
+### 4. Character Sheet & Evolution
+- **Visualizzazione**: Scheda completa adattiva (V1/V2).
+- **[NEW] Edit Mode (Level Up)**:
+  - Possibilità di modificare valori (Tratti, Skill) direttamente dalla scheda.
+  - Aggiunta esperienza (XP) e tracciamento spesa.
+  - Cambio immagine e dettagli.
 
 ### 3. Character Sheet View
 Layout adattivo:
@@ -101,3 +135,19 @@ Layout adattivo:
 ### Data Validation
 - Controllo corrispondenza dati con manuale 7th Sea 2e
 - Verifica calcoli automatici (punti spesi, raise)
+
+## Deployment & Versioning Workflow
+
+### Versioning
+Adottiamo **Semantic Versioning** (MAJOR.MINOR.PATCH):
+1. Aggiornare `APP_VERSION` in `js/config.js`.
+2. Aggiornare `CACHE_NAME` in `service-worker.js` (es. `7thsea-vX.Y.Z`).
+
+### GitHub Push
+Per ogni aggiornamento stabile:
+```bash
+git add .
+git commit -m "vX.Y.Z: Descrizione modifiche"
+git push
+```
+Questo garantisce che la PWA su GitHub Pages sia sempre allineata e l'aggiornamento della cache forzi la nuova versione.
