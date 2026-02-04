@@ -30,8 +30,8 @@ class App {
             try {
                 // Determine scope based on location (GitHub Pages vs Localhost)
                 const isGitHubPages = window.location.hostname.includes('github.io');
-                const scope = isGitHubPages ? '/7th-sea-sheet/' : '/';
-                const swPath = isGitHubPages ? '/7th-sea-sheet/service-worker.js' : '/service-worker.js';
+                const scope = isGitHubPages ? '/7thSheet/' : '/';
+                const swPath = isGitHubPages ? '/7thSheet/service-worker.js' : '/service-worker.js';
 
                 await navigator.serviceWorker.register(swPath, { scope });
                 console.log('ServiceWorker registered');

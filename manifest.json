@@ -2,7 +2,7 @@
     "name": "7th Sea - Schede Personaggio",
     "short_name": "7th Sea",
     "description": "Gestione schede personaggio per 7th Sea 2a Edizione",
-    "start_url": "/",
+    "start_url": ".",
     "display": "standalone",
     "background_color": "#f4e4bc",
     "theme_color": "#2c1810",
