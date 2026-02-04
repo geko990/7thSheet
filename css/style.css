@@ -703,17 +703,37 @@ select {
 /* Trait Controls */
 .skills-columns {
     display: flex;
-    gap: 20px;
+    gap: 10px;
+    /* Reduced gap from 20px */
 }
 
 .skills-col {
     flex: 1;
+    min-width: 0;
+    /* Prevents flex items from overflowing container */
 }
 
-.traits-container {
+.skill-row {
+    white-space: nowrap;
+    /* Prevent wrapping of row text if possible, or handle better */
+}
+
+.skill-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+}
+
+.trait-controls {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    gap: 5px;
+    /* Reduced gap from 12px */
+}
+
+display: flex;
+flex-direction: column;
+gap: 15px;
 }
 
 .trait-row {

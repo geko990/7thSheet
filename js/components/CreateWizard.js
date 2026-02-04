@@ -842,50 +842,63 @@ export default class CreateWizard {
             updateUI();
         };
 
-        container.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-skill-inc')) {
-                const btn = e.target.closest('.btn-skill-inc');
-                adjustSkillV2(btn.dataset.id, 1);
-            }
-            if (e.target.closest('.btn-skill-dec')) {
-                const btn = e.target.closest('.btn-skill-dec');
-                adjustSkillV2(btn.dataset.id, -1);
-            }
-
-            if (e.target.closest('.btn-adv-toggle')) {
-                // Advantages logic needs toggle re-render
-                // Here we can just call the method directly or use delegation
-                // Since toggleAdvV2 re-renders logic, it's safer to keep it simple but avoid global pollution if possible.
-                // But toggleAdvV2 was global in previous code.
-                // Let's implement it here.
-                const btn = e.target.closest('.btn-adv-toggle');
-                const advName = btn.dataset.name;
-                const cost = parseInt(btn.dataset.cost);
-
-                const index = this.character.advantages.indexOf(advName);
-                if (index > -1) {
-                    // Remove? Check if background
-                    let free = false;
-                    this.character.backgrounds.forEach(bgName => {
-                        const bg = this.data.backgrounds.find(b => b.name === bgName);
-                        if (bg && bg.advantages.includes(advName)) free = true;
-                    });
-                    if (free) {
-                        alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
-                        return;
-                    }
-                    this.character.advantages.splice(index, 1);
-                } else {
-                    const rem = 10 - calcSpent();
-                    if (rem < cost) {
-                        alert('Punti insufficienti.');
-                        return;
-                    }
-                    this.character.advantages.push(advName);
-                }
-                this.renderStep4V2(container);
+        // Initialize background bonuses
+        this.data.skills.forEach(s => {
+            const base = getBackgroundSkillBonus(s.id);
+            if ((this.character.skills[s.id] || 0) < base) {
+                this.character.skills[s.id] = base;
             }
         });
+
+        setTimeout(updateUI, 0);
+
+        // Use a flag on the container to prevent duplicate listeners
+        if (!container.dataset.step4ListenerAttached) {
+            container.addEventListener('click', (e) => {
+                if (e.target.closest('.btn-skill-inc')) {
+                    const btn = e.target.closest('.btn-skill-inc');
+                    adjustSkillV2(btn.dataset.id, 1);
+                }
+                if (e.target.closest('.btn-skill-dec')) {
+                    const btn = e.target.closest('.btn-skill-dec');
+                    adjustSkillV2(btn.dataset.id, -1);
+                }
+
+                if (e.target.closest('.btn-adv-toggle')) {
+                    const btn = e.target.closest('.btn-adv-toggle');
+                    const advName = btn.dataset.name;
+                    const cost = parseInt(btn.dataset.cost);
+
+                    const index = this.character.advantages.indexOf(advName);
+                    if (index > -1) {
+                        // Remove? Check if background
+                        let free = false;
+                        this.character.backgrounds.forEach(bgName => {
+                            const bg = this.data.backgrounds.find(b => b.name === bgName);
+                            if (bg && bg.advantages.includes(advName)) free = true;
+                        });
+                        if (free) {
+                            alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
+                            return;
+                        }
+                        this.character.advantages.splice(index, 1);
+                    } else {
+                        const rem = 10 - calcSpent();
+                        if (rem < cost) {
+                            alert('Punti insufficienti.');
+                            return;
+                        }
+                        this.character.advantages.push(advName);
+                    }
+
+                    // Re-render UI only (keeping listener)
+                    // We need to re-run the HTML generation part but NOT re-attach listener.
+                    // The easiest way is to call renderStep4V2 again, which now has the guard clause.
+                    this.renderStep4V2(container);
+                }
+            });
+            container.dataset.step4ListenerAttached = 'true';
+        }
     }
 
     renderStep4V1(container) {
