@@ -24,7 +24,8 @@ export default class CreateWizard {
             advantages: [],
             arcana: null,
             stories: [],
-            edition: null // Track edition in character data
+            edition: null, // Track edition in character data
+            level: 1 // Default Level 1
         };
         this.tempPoints = {
             traits: 2,
@@ -185,47 +186,31 @@ export default class CreateWizard {
     }
 
     // STEP 0: Edition Selection
-    renderStep0(container) {
-        container.innerHTML = `
             <div class="edition-selector">
-                <h3 class="mb-20 text-center" style="font-family: var(--font-display); letter-spacing: 1px; color: var(--accent-gold); font-size: 1.4rem;">Seleziona Edizione</h3>
-                
-                <div class="edition-cards">
-                    
-                    <div class="edition-card" onclick="window.selectEdition('1e')">
-                        <div class="edition-header">
-                            <span class="edition-icon">⚔️</span>
-                            <h3 class="card-title">1ª Edizione</h3>
-                        </div>
-                        <p class="edition-subtitle">Roll & Keep Classico</p>
-                        <div class="edition-features">
-                            <ul>
-                                <li>Abilità & Knacks</li>
-                                <li>Scuole di Scherma</li>
-                                <li>Stregoneria per Nazione</li>
-                            </ul>
-                        </div>
-                        <div class="edition-select-btn">Seleziona</div>
-                    </div>
+    <h3 class="mb-20 text-center" style="font-family: var(--font-display); letter-spacing: 1px; color: var(--accent-gold); font-size: 1.4rem;">Seleziona Edizione</h3>
 
-                    <div class="edition-card" onclick="window.selectEdition('2e')">
-                         <div class="edition-header">
-                            <span class="edition-icon">🎭</span>
-                            <h3 class="card-title">2ª Edizione</h3>
-                        </div>
-                        <p class="edition-subtitle">Narrativa & Raise</p>
-                        <div class="edition-features">
-                            <ul>
-                                <li>Backgrounds & Vantaggi</li>
-                                <li>Storie & Arcani</li>
-                                <li>Approccio Cinematografico</li>
-                            </ul>
-                        </div>
-                        <div class="edition-select-btn">Seleziona</div>
-                    </div>
-                </div>
+    <div class="edition-cards-compact">
+
+        <div class="edition-card-compact" onclick="window.selectEdition('1e')">
+            <div class="edition-icon-compact">⚔️</div>
+            <div class="edition-info-compact">
+                <h3 class="card-title">1ª Edizione</h3>
+                <p class="edition-subtitle">Roll & Keep Classico</p>
             </div>
-        `;
+            <div class="edition-select-btn-compact">›</div>
+        </div>
+
+        <div class="edition-card-compact" onclick="window.selectEdition('2e')">
+            <div class="edition-icon-compact">🎭</div>
+            <div class="edition-info-compact">
+                <h3 class="card-title">2ª Edizione</h3>
+                <p class="edition-subtitle">Narrativa & Raise</p>
+            </div>
+            <div class="edition-select-btn-compact">›</div>
+        </div>
+    </div>
+</div>
+`;
 
         window.selectEdition = async (ed) => {
             this.edition = ed;
@@ -247,7 +232,7 @@ export default class CreateWizard {
     // STEP 1: Concept & Nation
     renderStep1(container) {
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Identità (${this.edition === '1e' ? '1ª Ed' : '2ª Ed'})</h3>
                 
                 <div class="form-group" style="text-align: center; margin-bottom: 20px;">
@@ -283,7 +268,7 @@ export default class CreateWizard {
                 
                 <div id="nation-desc" class="mt-20" style="font-style: italic; color: var(--text-faded);"></div>
             </div>
-        `;
+`;
 
         const nameInput = container.querySelector('#char-name');
         const conceptInput = container.querySelector('#char-concept');
@@ -330,7 +315,7 @@ export default class CreateWizard {
                 // Apply bonus
                 if (nation.bonus_trait && this.character.traits[nation.bonus_trait] !== undefined) {
                     this.character.traits[nation.bonus_trait]++;
-                    nationDesc.textContent = `${nation.description} (+1 ${this.translateTrait(nation.bonus_trait)})`;
+                    nationDesc.textContent = `${ nation.description } (+1 ${ this.translateTrait(nation.bonus_trait) })`;
                 } else {
                     nationDesc.textContent = nation.description;
                 }
@@ -360,7 +345,7 @@ export default class CreateWizard {
         // We track "spent" points against the pool of 2.
 
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Tratti (2ª Ed)</h3>
                 <p class="mb-20">Hai <strong>2 punti</strong> da distribuire sui Tratti.</p>
                 
@@ -381,8 +366,8 @@ export default class CreateWizard {
                     <p>Punti disponibili: <span id="points-remaining" style="font-weight: bold; font-size: 1.2rem; color: var(--accent-gold);">2</span></p>
                     <p id="error-msg" style="color: var(--accent-red); font-size: 0.9rem; margin-top: 5px;"></p>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         // Calculate initial spent points (delta from base)
         // Base is 2 + Nation Bonus.
@@ -430,7 +415,7 @@ export default class CreateWizard {
             if (newVal > 5) return; // Hard cap 5
 
             this.character.traits[trait] = newVal;
-            document.getElementById(`val-${trait}`).textContent = newVal;
+            document.getElementById(`val - ${ trait } `).textContent = newVal;
             updateUI();
         };
     }
@@ -440,7 +425,7 @@ export default class CreateWizard {
         // Starts at 2. Nation bonus +1 (free?). Usually yes.
 
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Tratti (1ª Ed)</h3>
                 <p class="mb-20">Usa i Punti Eroe (100 totali) per i Tratti.<br>Costo: <strong>8 PE</strong> per punto.</p>
                 
@@ -461,8 +446,8 @@ export default class CreateWizard {
                     <p>Costo Totale Tratti: <span id="traits-cost" style="font-weight: bold; color: var(--accent-gold);">0</span> PE</p>
                     <p style="font-size: 0.9rem; color: var(--text-faded);">PE residui per Skill/Vantaggi: <span id="hp-remaining">100</span></p>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         const getBaseTrait = (trait) => {
             let base = 2;
@@ -497,7 +482,7 @@ export default class CreateWizard {
             if (newVal > 5) return; // Cap
 
             this.character.traits[trait] = newVal;
-            document.getElementById(`val-${trait}`).textContent = newVal;
+            document.getElementById(`val - ${ trait } `).textContent = newVal;
             updateCost();
         };
     }
@@ -513,7 +498,7 @@ export default class CreateWizard {
 
     renderStep3V2(container) {
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Background (2ª Ed)</h3>
                 <p class="mb-20">Seleziona 2 Background.</p>
                 
@@ -532,8 +517,8 @@ export default class CreateWizard {
                         </div>
                     `).join('')}
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         container.querySelectorAll('.background-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -559,7 +544,7 @@ export default class CreateWizard {
         }
 
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Abilità & Knacks (1ª Ed)</h3>
                 <p>Costo Skill: <strong>2 PE</strong>. Costo Knack: <strong>1 PE</strong>/grado.</p>
                 <div class="text-center mb-20">
@@ -603,8 +588,8 @@ export default class CreateWizard {
                         `;
         }).join('')}
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         // Calculate Cost Shared logic
         const getBaseTrait = (trait) => {
@@ -681,7 +666,7 @@ export default class CreateWizard {
             }
 
             // Update UI specific element
-            const id = `val-knack-${knack.replace(/\s+/g, '-')}`;
+            const id = `val - knack - ${ knack.replace(/\s+/g, '-') } `;
             const el = document.getElementById(id);
             if (el) el.textContent = newVal;
 
@@ -716,7 +701,7 @@ export default class CreateWizard {
 
     renderStep4V2(container) {
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Abilità & Vantaggi (2ª Ed)</h3>
                 <p>Hai <strong>10 punti</strong> da distribuire.</p>
                 <div class="text-center mb-20">
@@ -757,8 +742,8 @@ export default class CreateWizard {
                         `).join('')}
                     </div>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         // V2 Point Logic
         const getBackgroundSkillBonus = (skillId) => {
@@ -831,7 +816,7 @@ export default class CreateWizard {
             }
 
             this.character.skills[skillId] = newVal;
-            document.getElementById(`val-skill-${skillId}`).textContent = newVal;
+            document.getElementById(`val - skill - ${ skillId } `).textContent = newVal;
             updateUI();
         };
 
@@ -897,7 +882,7 @@ export default class CreateWizard {
     renderStep4V1(container) {
         // V1 Advantages
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Vantaggi (1ª Ed)</h3>
                 <p>Acquista Vantaggi usando i Punti Eroe residui.</p>
                 <div class="text-center mb-20">
@@ -919,8 +904,8 @@ export default class CreateWizard {
                         </div>
                     `).join('')}
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         // Need access to total HP calculation from Step 2/3
         // We really need a shared 'calculateHPSpent' method.
@@ -1010,7 +995,7 @@ export default class CreateWizard {
                 const baseSum = 10 + nationBonus;
                 const spent = currentSum - baseSum;
                 if (spent < 2) {
-                    alert(`Hai ancora ${2 - spent} punti da assegnare ai Tratti.`);
+                    alert(`Hai ancora ${ 2 - spent } punti da assegnare ai Tratti.`);
                     return false;
                 }
             }
@@ -1037,7 +1022,7 @@ export default class CreateWizard {
 
     renderStep5V2(container) {
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Storie & Arcani (2ª Ed)</h3>
                 
                 <div class="sheet-section">
@@ -1072,8 +1057,8 @@ export default class CreateWizard {
                         <input type="text" class="form-input" id="story-step1" placeholder="Trovare dove si nasconde">
                     </div>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         // Bind inputs
         const virtueInput = container.querySelector('#char-virtue');
@@ -1108,7 +1093,7 @@ export default class CreateWizard {
 
     renderStep5V1(container) {
         container.innerHTML = `
-            <div class="card">
+    < div class="card" >
                 <h3 class="card-title">Scuole & Stregoneria (1ª Ed)</h3>
                 <p>Costo elevato (20-30 PE). Solitamente uno solo.</p>
                 <div class="text-center mb-20">
@@ -1141,8 +1126,8 @@ export default class CreateWizard {
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            </div >
+    `;
 
         const schoolSelect = container.querySelector('#char-school');
         const schoolDesc = container.querySelector('#school-desc');
@@ -1198,7 +1183,7 @@ export default class CreateWizard {
     // STEP 6: Review & Finalize (Actually step 6 in UI)
     renderStep6(container) {
         container.innerHTML = `
-            <div class="card text-center">
+    < div class="card text-center" >
                 <h3 class="card-title">Riepilogo</h3>
                 <ul style="text-align: left; list-style: none; padding: 0; font-size: 0.9rem;">
                     <li><strong>${this.character.name}</strong>, ${this.character.nation}</li>
@@ -1217,8 +1202,8 @@ export default class CreateWizard {
             }
                 </ul>
                 <p class="mt-20">Se sei soddisfatto, clicca Completa per salvare!</p>
-            </div>
-        `;
+            </div >
+    `;
     }
 
     _calculateTotalSpentV1() {

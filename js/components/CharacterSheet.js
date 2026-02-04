@@ -37,7 +37,9 @@ export default class CharacterSheet {
                 ` : ''}
                 
                 <h2 class="page-title" style="margin-bottom: 5px;">${this.character.name}</h2>
-                <p class="text-center" style="margin-bottom: 20px; font-style: italic;">${this.character.nation}</p>
+                <div class="text-center" style="margin-bottom: 20px; font-style: italic; color: var(--text-faded);">
+                    ${this.character.nation} • Livello ${this.character.level || 1}
+                </div>
                 
                 <div class="sheet-header-grid">
                     <div class="info-block">

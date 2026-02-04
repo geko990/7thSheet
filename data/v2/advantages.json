@@ -1,15 +1,57 @@
 [
     {
+        "id": "connection",
+        "name": "Contatto",
+        "cost": 1,
+        "description": "Hai un alleato che può fornirti informazioni o aiuto."
+    },
+    {
+        "id": "direction_sense",
+        "name": "Senso dell'Orientamento",
+        "cost": 1,
+        "description": "Non ti perdi mai finché hai un punto di riferimento."
+    },
+    {
+        "id": "foreign_born",
+        "name": "Straniero",
+        "cost": 1,
+        "description": "Nato in un'altra nazione, ottieni bonus su rischi legati alla tua doppia eredità."
+    },
+    {
+        "id": "languages",
+        "name": "Lingue",
+        "cost": 1,
+        "description": "Conosci lingue aggiuntive oltre alla nativa."
+    },
+    {
+        "id": "perfect_balance",
+        "name": "Equilibrio Perfetto",
+        "cost": 1,
+        "description": "Bonus su atletica e equilibrio. Non cadi mai."
+    },
+    {
+        "id": "sea_legs",
+        "name": "Gambe da Marinaio",
+        "cost": 1,
+        "description": "Non soffri mal di mare e ti muovi perfettamente sulle navi."
+    },
+    {
+        "id": "way_of_the_land",
+        "name": "Conoscenza del Territorio",
+        "cost": 1,
+        "description": "Conosci a memoria una regione specifica."
+    },
+    {
+        "id": "wealthy",
+        "name": "Benestante",
+        "cost": 1,
+        "description": "Hai più denaro iniziale."
+    },
+    {
         "id": "able_drinker",
         "name": "Bevitore Reggente",
         "cost": 2,
         "description": "L'alcol non ha effetto negativo su di te. Vinci tutte le gare di bevute."
-    },
-    {
-        "id": "academy",
-        "name": "Accademia Militare",
-        "cost": 4,
-        "description": "Ottieni bonus tattici in guerra e strategie."
     },
     {
         "id": "allies",
@@ -24,52 +66,10 @@
         "description": "Ottieni dadi bonus in situazioni sociali grazie al tuo aspetto."
     },
     {
-        "id": "barroom_brawler",
-        "name": "Rissoso",
-        "cost": 2,
-        "description": "Nelle risse da taverna, i tuoi Attacchi Improvvisati fanno più danni."
-    },
-    {
-        "id": "clear_thinker",
-        "name": "Pensatore Lucido",
-        "cost": 3,
-        "description": "Resistente a confusione e manipolazione mentale."
-    },
-    {
-        "id": "connection",
-        "name": "Contatto",
-        "cost": 1,
-        "description": "Hai un contatto che può fornirti informazioni o aiuto."
-    },
-    {
         "id": "dangerous_beauty",
         "name": "Bellezza Pericolosa",
         "cost": 2,
         "description": "Ottieni dadi bonus quando usi il tuo aspetto per sedurre con intenti ostili."
-    },
-    {
-        "id": "daredevil",
-        "name": "Scavezzacollo",
-        "cost": 3,
-        "description": "Ottieni più dadi quando spendi Punti Eroe per azioni pericolose."
-    },
-    {
-        "id": "direction_sense",
-        "name": "Senso dell'Orientamento",
-        "cost": 1,
-        "description": "Non ti perdi mai finché hai un punto di riferimento."
-    },
-    {
-        "id": "duelist_academy",
-        "name": "Accademia di Duello",
-        "cost": 4,
-        "description": "Conosci uno stile di duello. Ottieni manovre speciali."
-    },
-    {
-        "id": "esoteric_knowledge",
-        "name": "Conoscenza Esoterica",
-        "cost": 3,
-        "description": "Conosci segreti proibiti o dimenticati."
     },
     {
         "id": "exploit_weakness",
@@ -84,16 +84,142 @@
         "description": "Puoi trovare un cugino lontano ovunque per aiuto."
     },
     {
+        "id": "indomitable_will",
+        "name": "Volontà Indomita",
+        "cost": 2,
+        "description": "Bonus pesante a resistere a intimidazione e seduzione."
+    },
+    {
+        "id": "leadership",
+        "name": "Leadership",
+        "cost": 2,
+        "description": "Puoi donare la tua iniziativa agli alleati."
+    },
+    {
+        "id": "left_handed",
+        "name": "Mancino",
+        "cost": 2,
+        "description": "Combattere con la mano sinistra ti dà vantaggi contro destrimani."
+    },
+    {
+        "id": "linguist",
+        "name": "Linguista",
+        "cost": 2,
+        "description": "Impari due lingue per ogni punto speso."
+    },
+    {
+        "id": "night_trained",
+        "name": "Addestramento Notturno",
+        "cost": 2,
+        "description": "Penalità ridotte al buio."
+    },
+    {
+        "id": "poison_resistance",
+        "name": "Resistenza ai Veleni",
+        "cost": 2,
+        "description": "Bonus a resistere ai veleni e droghe."
+    },
+    {
+        "id": "precise_memory",
+        "name": "Memoria Eidetica",
+        "cost": 2,
+        "description": "Ricordi tutto ciò che vedi o leggi perfettamente."
+    },
+    {
+        "id": "psst_over_here",
+        "name": "Psst... Da questa parte",
+        "cost": 2,
+        "description": "Spendi 1 PE per attirare e stordire un nemico senza farti notare dagli altri."
+    },
+    {
+        "id": "read_lips",
+        "name": "Leggere le Labbra",
+        "cost": 2,
+        "description": "Puoi capire cosa dicono le persone a distanza."
+    },
+    {
+        "id": "reputation",
+        "name": "Reputazione",
+        "cost": 2,
+        "description": "Sei famoso per qualcosa. Ottieni dadi quando usi la tua fama."
+    },
+    {
+        "id": "riot_breaker",
+        "name": "Spaccafolla",
+        "cost": 2,
+        "description": "Subisci meno ferite dalle Squadre di Bruti."
+    },
+    {
+        "id": "rissoso",
+        "name": "Rissoso",
+        "cost": 2,
+        "description": "Nelle risse da taverna, i tuoi Attacchi Improvvisati fanno più danni."
+    },
+    {
+        "id": "servants",
+        "name": "Servitori",
+        "cost": 2,
+        "description": "Hai uno staff di servitori fedeli."
+    },
+    {
+        "id": "signature_item",
+        "name": "Oggetto Distintivo",
+        "cost": 2,
+        "description": "Possiedi un oggetto unico. Bonus quando lo usi."
+    },
+    {
+        "id": "small",
+        "name": "Piccolo",
+        "cost": 2,
+        "description": "Sei piccolo e agile. Bonus a nascondersi, difficile da colpire."
+    },
+    {
+        "id": "tenure",
+        "name": "Cattedra",
+        "cost": 2,
+        "description": "Hai accesso a università, biblioteche e risorse accademiche."
+    },
+    {
+        "id": "toughness",
+        "name": "Robustezza",
+        "cost": 2,
+        "description": "Le ferite ti penalizzano meno."
+    },
+    {
+        "id": "voice",
+        "name": "Voce",
+        "cost": 2,
+        "description": "La tua voce è potente e affascinante. Bonus a Esibirsi/Oratoria."
+    },
+    {
+        "id": "wary",
+        "name": "Diffidente",
+        "cost": 2,
+        "description": "Bonus a Notare contro agguati e inganni."
+    },
+    {
+        "id": "clear_thinker",
+        "name": "Pensatore Lucido",
+        "cost": 3,
+        "description": "Resistente a confusione e manipolazione mentale."
+    },
+    {
+        "id": "daredevil",
+        "name": "Scavezzacollo",
+        "cost": 3,
+        "description": "Ottieni più dadi quando spendi Punti Eroe per azioni pericolose."
+    },
+    {
+        "id": "esoteric_knowledge",
+        "name": "Conoscenza Esoterica",
+        "cost": 3,
+        "description": "Conosci segreti proibiti o dimenticati."
+    },
+    {
         "id": "faith",
         "name": "Fede",
         "cost": 3,
         "description": "La tua devozione ti protegge o guida (a discrezione del GM)."
-    },
-    {
-        "id": "foreign_born",
-        "name": "Straniero",
-        "cost": 1,
-        "description": "Nato in un'altra nazione, ottieni bonus su rischi legati alla tua doppia eredità."
     },
     {
         "id": "foul_weather_jack",
@@ -126,52 +252,10 @@
         "description": "Richiedi più ferite drammatiche per essere messo KO."
     },
     {
-        "id": "indomitable_will",
-        "name": "Volontà Indomita",
-        "cost": 2,
-        "description": "Bonus pesante a resistere a intimidazione e seduzione."
-    },
-    {
-        "id": "i_wont_die_here",
-        "name": "Non Morirò Qui",
-        "cost": 5,
-        "description": "Spendi un PE per ignorare le penalità ferite per un round."
-    },
-    {
-        "id": "languages",
-        "name": "Lingue",
-        "cost": 1,
-        "description": "Conosci lingue aggiuntive oltre alla nativa."
-    },
-    {
         "id": "large",
         "name": "Grosso",
         "cost": 3,
         "description": "Sei imponente. +1 Danno con armi pesanti, +1 Intimidire."
-    },
-    {
-        "id": "leadership",
-        "name": "Leadership",
-        "cost": 2,
-        "description": "Puoi donare la tua iniziativa agli alleati."
-    },
-    {
-        "id": "left_handed",
-        "name": "Mancino",
-        "cost": 2,
-        "description": "Combattere con la mano sinistra ti dà vantaggi contro destrimani."
-    },
-    {
-        "id": "legendary_attribute",
-        "name": "Attributo Leggendario",
-        "cost": 4,
-        "description": "Un tuo Tratto può arrivare a 6."
-    },
-    {
-        "id": "linguist",
-        "name": "Linguista",
-        "cost": 2,
-        "description": "Impari due lingue per ogni punto speso."
     },
     {
         "id": "luck",
@@ -186,46 +270,10 @@
         "description": "Istruzione superiore, bonus su conoscenze."
     },
     {
-        "id": "night_trained",
-        "name": "Addestramento Notturno",
-        "cost": 2,
-        "description": "Penalità ridotte al buio."
-    },
-    {
-        "id": "noble",
-        "name": "Nobile",
-        "cost": 4,
-        "description": "Hai un titolo nobiliare, autorità e rendita."
-    },
-    {
-        "id": "ordained",
-        "name": "Ordinato",
-        "cost": 3,
-        "description": "Sei un prete o figura religiosa con autorità."
-    },
-    {
         "id": "patron",
         "name": "Mecenate",
         "cost": 3,
         "description": "Hai un ricco sponsor che finanzia le tue imprese."
-    },
-    {
-        "id": "perfect_balance",
-        "name": "Equilibrio Perfetto",
-        "cost": 1,
-        "description": "Bonus su atletica e equilibrio. Non cadi mai."
-    },
-    {
-        "id": "poison_resistance",
-        "name": "Resistenza ai Veleni",
-        "cost": 2,
-        "description": "Bonus a resistere ai veleni e droghe."
-    },
-    {
-        "id": "precise_memory",
-        "name": "Memoria Eidetica",
-        "cost": 2,
-        "description": "Ricordi tutto ciò che vedi o leggi perfettamente."
     },
     {
         "id": "quick_reflexes",
@@ -234,70 +282,16 @@
         "description": "Agisci prima nelle Scene d'Azione."
     },
     {
-        "id": "read_lips",
-        "name": "Leggere le Labbra",
-        "cost": 2,
-        "description": "Puoi capire cosa dicono le persone a distanza."
-    },
-    {
-        "id": "reputation",
-        "name": "Reputazione",
-        "cost": 2,
-        "description": "Sei famoso per qualcosa. Ottieni dadi quando usi la tua fama."
-    },
-    {
-        "id": "rich",
-        "name": "Ricco",
-        "cost": 3,
-        "description": "Inizi con più Ricchezza e hai rendite costanti."
-    },
-    {
-        "id": "riot_breaker",
-        "name": "Spaccafolla",
-        "cost": 2,
-        "description": "Subisci meno ferite dalle Squadre di Bruti."
-    },
-    {
         "id": "sage",
         "name": "Saggio",
         "cost": 3,
         "description": "Hai conoscenze vaste. Non hai penalità per prove di Conoscenza non addestrate."
     },
     {
-        "id": "sea_legs",
-        "name": "Gambe da Marinaio",
-        "cost": 1,
-        "description": "Non soffri mal di mare e ti muovi perfettamente sulle navi."
-    },
-    {
         "id": "secret_society",
         "name": "Società Segreta",
         "cost": 3,
         "description": "Sei membro di una società segreta. Hai accesso a risorse nascoste."
-    },
-    {
-        "id": "servants",
-        "name": "Servitori",
-        "cost": 2,
-        "description": "Hai uno staff di servitori fedeli."
-    },
-    {
-        "id": "signature_item",
-        "name": "Oggetto Distintivo",
-        "cost": 2,
-        "description": "Possiedi un oggetto unico. Bonus quando lo usi."
-    },
-    {
-        "id": "small",
-        "name": "Piccolo",
-        "cost": 2,
-        "description": "Sei piccolo e agile. Bonus a nascondersi, difficile da colpire."
-    },
-    {
-        "id": "sorcery",
-        "name": "Stregoneria",
-        "cost": 4,
-        "description": "Hai il dono della magia della tua nazione."
     },
     {
         "id": "spark_of_genius",
@@ -312,34 +306,10 @@
         "description": "Puoi vedere o interagire con gli spiriti."
     },
     {
-        "id": "strength_of_ten",
-        "name": "Forza di Dieci",
-        "cost": 4,
-        "description": "Puoi compiere imprese di forza sovrumana spendendo PE."
-    },
-    {
         "id": "tactician",
         "name": "Tattico",
         "cost": 3,
         "description": "Bonus in guerra e combattimenti di massa."
-    },
-    {
-        "id": "tenure",
-        "name": "Cattedra",
-        "cost": 2,
-        "description": "Hai accesso a università, biblioteche e risorse accademiche."
-    },
-    {
-        "id": "together_we_are_strong",
-        "name": "Insieme Siamo Forti",
-        "cost": 4,
-        "description": "Puoi dare azioni ai tuoi alleati spendendo PE."
-    },
-    {
-        "id": "toughness",
-        "name": "Robustezza",
-        "cost": 2,
-        "description": "Le ferite ti penalizzano meno."
     },
     {
         "id": "trusted_companion",
@@ -348,45 +318,81 @@
         "description": "Hai un animale o seguace fedele (Livello gregario)."
     },
     {
+        "id": "academy",
+        "name": "Accademia Militare",
+        "cost": 4,
+        "description": "Ottieni bonus tattici in guerra e strategie."
+    },
+    {
+        "id": "duelist_academy",
+        "name": "Accademia di Duello",
+        "cost": 4,
+        "description": "Conosci uno stile di duello. Ottieni manovre speciali."
+    },
+    {
+        "id": "legendary_attribute",
+        "name": "Attributo Leggendario",
+        "cost": 4,
+        "description": "Un tuo Tratto può arrivare a 6."
+    },
+    {
+        "id": "noble",
+        "name": "Nobile",
+        "cost": 4,
+        "description": "Hai un titolo nobiliare, autorità e rendita."
+    },
+    {
+        "id": "sorcery",
+        "name": "Stregoneria",
+        "cost": 4,
+        "description": "Hai il dono della magia della tua nazione."
+    },
+    {
+        "id": "strength_of_ten",
+        "name": "Forza di Dieci",
+        "cost": 4,
+        "description": "Puoi compiere imprese di forza sovrumana spendendo PE."
+    },
+    {
+        "id": "together_we_are_strong",
+        "name": "Insieme Siamo Forti",
+        "cost": 4,
+        "description": "Puoi dare azioni ai tuoi alleati spendendo PE."
+    },
+    {
         "id": "university",
         "name": "Università",
         "cost": 4,
         "description": "Accesso a Skill civili a costo ridotto."
     },
     {
-        "id": "virtue",
-        "name": "Virtù",
-        "cost": 0,
-        "description": "Ogni eroe ha una Virtù (gratis)."
-    },
-    {
-        "id": "voice",
-        "name": "Voce",
-        "cost": 2,
-        "description": "La tua voce è potente e affascinante. Bonus a Esibirsi/Oratoria."
-    },
-    {
-        "id": "wary",
-        "name": "Diffidente",
-        "cost": 2,
-        "description": "Bonus a Notare contro agguati e inganni."
-    },
-    {
-        "id": "way_of_the_land",
-        "name": "Conoscenza del Territorio",
-        "cost": 1,
-        "description": "Conosci a memoria una regione specifica."
-    },
-    {
-        "id": "wealthy",
-        "name": "Benestante",
-        "cost": 1,
-        "description": "Hai più denaro iniziale."
-    },
-    {
         "id": "we_are_not_so_different",
         "name": "Non Siamo Così Diversi",
         "cost": 4,
         "description": "Puoi convincere un Malvagio che siete simili per evitare uno scontro."
+    },
+    {
+        "id": "i_wont_die_here",
+        "name": "Non Morirò Qui",
+        "cost": 5,
+        "description": "Spendi un PE per ignorare le penalità ferite per un round."
+    },
+    {
+        "id": "letter_of_marque",
+        "name": "Lettera di Corsa",
+        "cost": 2,
+        "description": "Sei un corsaro autorizzato (Pirate Nations)."
+    },
+    {
+        "id": "speed_load",
+        "name": "Ricarica Rapida",
+        "cost": 3,
+        "description": "Ricarichi armi da fuoco più velocemente spendendo PE (Pirate Nations)."
+    },
+    {
+        "id": "virtue",
+        "name": "Virtù",
+        "cost": 0,
+        "description": "Ogni eroe ha una Virtù (gratis)."
     }
 ]

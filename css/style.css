@@ -802,6 +802,65 @@ select {
     z-index: 1;
 }
 
+/* Compact Edition Selection */
+.edition-cards-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.edition-card-compact {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-worn);
+    border-radius: 12px;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.edition-card-compact:hover {
+    transform: translateX(5px);
+    background: white;
+    border-color: var(--accent-gold);
+    box-shadow: 0 5px 15px var(--shadow-soft);
+}
+
+.edition-icon-compact {
+    font-size: 2rem;
+    margin-right: 20px;
+}
+
+.edition-info-compact {
+    flex: 1;
+    text-align: left;
+}
+
+.edition-info-compact .card-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--text-ink);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.edition-info-compact .edition-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-faded);
+    margin: 2px 0 0 0;
+    font-style: italic;
+}
+
+.edition-select-btn-compact {
+    font-size: 1.5rem;
+    color: var(--accent-gold);
+    font-weight: bold;
+}
+
 /* Trait Controls */
 .skills-columns {
     display: flex;
