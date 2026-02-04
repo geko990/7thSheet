@@ -188,27 +188,40 @@ export default class CreateWizard {
     renderStep0(container) {
         container.innerHTML = `
             <div class="edition-selector">
-                <h3 class="mb-20 text-center">Seleziona Edizione</h3>
-                <div class="edition-cards" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <h3 class="mb-20 text-center" style="font-family: var(--font-display); letter-spacing: 1px; color: var(--accent-gold); font-size: 1.4rem;">Seleziona Edizione</h3>
+                
+                <div class="edition-cards">
                     
-                    <div class="card edition-card" onclick="window.selectEdition('1e')" style="cursor: pointer; width: 250px; text-align: center; hover: border-color: var(--accent-gold);">
-                        <h3 class="card-title">1ª Edizione</h3>
-                        <p>Roll & Keep Classico</p>
-                        <ul style="text-align: left; margin-top: 10px; font-size: 0.9em;">
-                            <li>Abilità & Knacks</li>
-                            <li>Scuole di Scherma</li>
-                            <li>Stregoneria per Nazione</li>
-                        </ul>
+                    <div class="edition-card" onclick="window.selectEdition('1e')">
+                        <div class="edition-header">
+                            <span class="edition-icon">⚔️</span>
+                            <h3 class="card-title">1ª Edizione</h3>
+                        </div>
+                        <p class="edition-subtitle">Roll & Keep Classico</p>
+                        <div class="edition-features">
+                            <ul>
+                                <li>Abilità & Knacks</li>
+                                <li>Scuole di Scherma</li>
+                                <li>Stregoneria per Nazione</li>
+                            </ul>
+                        </div>
+                        <div class="edition-select-btn">Seleziona</div>
                     </div>
 
-                    <div class="card edition-card" onclick="window.selectEdition('2e')" style="cursor: pointer; width: 250px; text-align: center;">
-                        <h3 class="card-title">2ª Edizione</h3>
-                        <p>Narrativa & Raise</p>
-                        <ul style="text-align: left; margin-top: 10px; font-size: 0.9em;">
-                            <li>Backgrounds & Vantaggi</li>
-                            <li>Storie & Arcani</li>
-                            <li>Approccio Cinematografico</li>
-                        </ul>
+                    <div class="edition-card" onclick="window.selectEdition('2e')">
+                         <div class="edition-header">
+                            <span class="edition-icon">🎭</span>
+                            <h3 class="card-title">2ª Edizione</h3>
+                        </div>
+                        <p class="edition-subtitle">Narrativa & Raise</p>
+                        <div class="edition-features">
+                            <ul>
+                                <li>Backgrounds & Vantaggi</li>
+                                <li>Storie & Arcani</li>
+                                <li>Approccio Cinematografico</li>
+                            </ul>
+                        </div>
+                        <div class="edition-select-btn">Seleziona</div>
                     </div>
                 </div>
             </div>

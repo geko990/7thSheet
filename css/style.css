@@ -527,6 +527,108 @@ select {
     letter-spacing: 2px;
 }
 
+/* Edition Selection */
+.edition-cards {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+
+.edition-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid var(--border-worn);
+    border-radius: 12px;
+    padding: 20px;
+    width: 260px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edition-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px var(--shadow-strong);
+    border-color: var(--accent-gold);
+    background: white;
+}
+
+.edition-header {
+    margin-bottom: 10px;
+}
+
+.edition-icon {
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.edition-card .card-title {
+    font-family: var(--font-display);
+    color: var(--text-ink);
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.edition-subtitle {
+    font-style: italic;
+    color: var(--accent-gold);
+    margin-bottom: 15px;
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
+.edition-features {
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--text-faded);
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.edition-features ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.edition-features li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.edition-features li::before {
+    content: "•";
+    color: var(--accent-gold);
+    position: absolute;
+    left: 5px;
+    font-weight: bold;
+}
+
+.edition-select-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    border: 1px solid var(--accent-gold);
+    border-radius: 20px;
+    color: var(--accent-gold);
+    font-weight: 600;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.edition-card:hover .edition-select-btn {
+    background: var(--accent-gold);
+    color: white;
+}
+
 /* Dice Controls */
 .dice-controls {
     display: flex;
