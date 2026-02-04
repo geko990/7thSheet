@@ -59,11 +59,13 @@ export default class CreateWizard {
                 this.data.advantages = advantages;
             } else {
                 // V1 Specifics
-                const schools = await fetch(`${basePath}/schools.json`).then(r => r.json());
+                const [schools, advantages] = await Promise.all([
+                    fetch(`${basePath}/schools.json`).then(r => r.json()),
+                    fetch(`${basePath}/advantages.json`).then(r => r.json())
+                ]);
                 this.data.schools = schools;
-                // V1 might not have backgrounds/advantages in the same format yet
+                this.data.advantages = advantages;
                 this.data.backgrounds = [];
-                this.data.advantages = [];
             }
         } catch (e) {
             console.error('Error loading data:', e);
@@ -208,7 +210,7 @@ export default class CreateWizard {
                     </div>
                 </div>
             </div>
-
+        `;
 
         window.selectEdition = async (ed) => {
             this.edition = ed;
@@ -313,7 +315,7 @@ export default class CreateWizard {
                 // Apply bonus
                 if (nation.bonus_trait && this.character.traits[nation.bonus_trait] !== undefined) {
                     this.character.traits[nation.bonus_trait]++;
-                    nationDesc.textContent = `${ nation.description } (+1 ${ this.translateTrait(nation.bonus_trait) })`;
+                    nationDesc.textContent = `${nation.description} (+1 ${this.translateTrait(nation.bonus_trait)})`;
                 } else {
                     nationDesc.textContent = nation.description;
                 }
@@ -413,7 +415,7 @@ export default class CreateWizard {
             if (newVal > 5) return; // Hard cap 5
 
             this.character.traits[trait] = newVal;
-            document.getElementById(`val - ${ trait } `).textContent = newVal;
+            document.getElementById(`val - ${trait} `).textContent = newVal;
             updateUI();
         };
     }
@@ -480,7 +482,7 @@ export default class CreateWizard {
             if (newVal > 5) return; // Cap
 
             this.character.traits[trait] = newVal;
-            document.getElementById(`val - ${ trait } `).textContent = newVal;
+            document.getElementById(`val-${trait}`).textContent = newVal;
             updateCost();
         };
     }
@@ -664,7 +666,7 @@ export default class CreateWizard {
             }
 
             // Update UI specific element
-            const id = `val - knack - ${ knack.replace(/\s+/g, '-') } `;
+            const id = `val - knack - ${knack.replace(/\s+/g, '-')} `;
             const el = document.getElementById(id);
             if (el) el.textContent = newVal;
 
@@ -681,21 +683,7 @@ export default class CreateWizard {
         }
     }
 
-    translateTrait(trait) {
-        const map = {
-            brawn: 'Vigore',
-            finesse: 'Grazia',
-            resolve: 'Risolutezza',
-            wits: 'Acume',
-            panache: 'Panache'
-        };
-        return map[trait] || trait;
-    }
 
-    translateSkill(skillId) {
-        const skill = this.data.skills.find(s => s.id === skillId);
-        return skill ? skill.name : skillId;
-    }
 
     renderStep4V2(container) {
         container.innerHTML = `
@@ -814,7 +802,7 @@ export default class CreateWizard {
             }
 
             this.character.skills[skillId] = newVal;
-            document.getElementById(`val - skill - ${ skillId } `).textContent = newVal;
+            document.getElementById(`val - skill - ${skillId} `).textContent = newVal;
             updateUI();
         };
 
@@ -993,7 +981,7 @@ export default class CreateWizard {
                 const baseSum = 10 + nationBonus;
                 const spent = currentSum - baseSum;
                 if (spent < 2) {
-                    alert(`Hai ancora ${ 2 - spent } punti da assegnare ai Tratti.`);
+                    alert(`Hai ancora ${2 - spent} punti da assegnare ai Tratti.`);
                     return false;
                 }
             }
