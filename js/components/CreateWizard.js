@@ -712,9 +712,17 @@ export default class CreateWizard {
 
                 <div class="sheet-section">
                     <h4 class="sheet-section-title">Abilità (1 punto/grado)</h4>
-                    <div class="skills-columns" style="display: flex; gap: 20px;">
-                        <div class="skills-col" id="skills-col-1" style="flex: 1;"></div>
-                        <div class="skills-col" id="skills-col-2" style="flex: 1;"></div>
+                    <div class="skills-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                        ${this.data.skills.map(skill => `
+                            <div class="skill-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dotted var(--border-color); background: rgba(255,255,255,0.3); border-radius: 5px;">
+                                <span style="font-weight: 600; font-size: 1rem;">${skill.name}</span>
+                                <div class="trait-controls">
+                                    <button class="btn-circle btn-skill-dec" data-id="${skill.id}" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
+                                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1.2rem; min-width: 24px; text-align: center;">${this.character.skills[skill.id] || 0}</span>
+                                    <button class="btn-circle btn-skill-inc" data-id="${skill.id}" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
 
@@ -738,34 +746,6 @@ export default class CreateWizard {
                 </div>
             </div>
         `;
-
-        // Column Logic
-        const col1Names = ['Allettare', 'Arte della Guerra', 'Atletica', 'Cavalcare', 'Convincere', 'Empatia', 'Esibirsi', 'Furto'];
-        const col2Names = ['Intimidire', 'Istruzione', 'Mira', 'Mischia', 'Nascondersi', 'Navigare', 'Notare', 'Rissa'];
-
-        const renderSkillRow = (skill) => `
-            <div class="skill-row" style="display: flex; justify-content: space-between; padding: 5px; align-items: center;">
-                <span style="font-size: 0.9em;">${skill.name}</span>
-                <div class="trait-controls">
-                    <button class="btn-circle btn-skill-dec" data-id="${skill.id}" style="width: 24px; height: 24px; font-size: 1rem;">-</button>
-                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1rem; min-width: 20px;">${this.character.skills[skill.id] || 0}</span>
-                    <button class="btn-circle btn-skill-inc" data-id="${skill.id}" style="width: 24px; height: 24px; font-size: 1rem;">+</button>
-                </div>
-            </div>
-        `;
-
-        const col1Container = container.querySelector('#skills-col-1');
-        const col2Container = container.querySelector('#skills-col-2');
-
-        col1Names.forEach(name => {
-            const skill = this.data.skills.find(s => s.name === name);
-            if (skill) col1Container.innerHTML += renderSkillRow(skill);
-        });
-
-        col2Names.forEach(name => {
-            const skill = this.data.skills.find(s => s.name === name);
-            if (skill) col2Container.innerHTML += renderSkillRow(skill);
-        });
 
         // V2 Point Logic
         const getBackgroundSkillBonus = (skillId) => {

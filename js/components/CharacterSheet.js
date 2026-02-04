@@ -196,9 +196,15 @@ export default class CharacterSheet {
     }
 
     translateSkill(skillId) {
-        // Should use skills.json map but for speed doing basic mapping or titlecase
-        // If skillId is "aim", return "Mira" etc.
-        // For MVP, if we don't have the full map loaded here easily, return capitalized
-        return skillId.charAt(0).toUpperCase() + skillId.slice(1);
+        // Map common IDs to Italian names if data not loaded
+        const fallbackMap = {
+            'aim': 'Mira', 'athletics': 'Atletica', 'brawl': 'Rissa',
+            'convince': 'Convincere', 'empathy': 'Empatia', 'hide': 'Nascondersi',
+            'intimidate': 'Intimidire', 'notice': 'Notare', 'perform': 'Esibirsi',
+            'ride': 'Cavalcare', 'sailing': 'Navigare', 'scholarship': 'Istruzione',
+            'tempt': 'Allettare', 'theft': 'Furto', 'warfare': 'Arte della Guerra',
+            'weaponry': 'Mischia'
+        };
+        return fallbackMap[skillId] || skillId.charAt(0).toUpperCase() + skillId.slice(1);
     }
 }
