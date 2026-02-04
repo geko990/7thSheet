@@ -18,6 +18,18 @@
         "description": "Devastata dalla guerra, ma non spezzata. Terra di ferro, orrori e volontà indomita."
     },
     {
+        "id": "highland",
+        "name": "Highland",
+        "bonus_trait": "brawn",
+        "description": "Clan fieri e antichi. Terra di montagne nebbiose e guerrieri indomiti."
+    },
+    {
+        "id": "inismore",
+        "name": "Inismore",
+        "bonus_trait": "panache",
+        "description": "L'Isola di Smeraldo. Terra ribelle, di bardi e spiriti fatati."
+    },
+    {
         "id": "montaigne",
         "name": "Montaigne",
         "bonus_trait": "panache",
@@ -46,5 +58,41 @@
         "name": "Sarmazie",
         "bonus_trait": "brawn",
         "description": "La Libertà Dorata. Unione di due nazioni dove tutti i cittadini sono nobili eguali."
+    },
+    {
+        "id": "labucca",
+        "name": "La Bucca",
+        "bonus_trait": "wits",
+        "description": "L'isola prigione divenuta nazione libera. Terra di intrighi, pirati e redenzione."
+    },
+    {
+        "id": "numa",
+        "name": "Numa",
+        "bonus_trait": "resolve",
+        "description": "Dove nacque la civiltà. Terra di antiche rovine, leggende e democrazia."
+    },
+    {
+        "id": "aragosta",
+        "name": "Aragosta",
+        "bonus_trait": "brawn",
+        "description": "Il Regno dei Pirati. Un'isola governata dal Consiglio dei Capitani."
+    },
+    {
+        "id": "jaragua",
+        "name": "Jaragua",
+        "bonus_trait": "panache",
+        "description": "Colonia di schiavi liberati. Terra di spiriti Loa e rivoluzione."
+    },
+    {
+        "id": "aztlan",
+        "name": "Impero Aztlan",
+        "bonus_trait": "wits",
+        "description": "Vaste città d'oro e giungla. Terra di antichi dei e magia del sangue."
+    },
+    {
+        "id": "crescent",
+        "name": "Impero della Mezzaluna",
+        "bonus_trait": "wits",
+        "description": "Terra di sabbia e stelle. Scienza, poesia e i Jinn del deserto."
     }
 ]

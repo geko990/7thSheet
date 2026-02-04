@@ -2,7 +2,7 @@
     {
         "id": "avalon",
         "name": "Avalon",
-        "bonus_trait": "panache",
+        "bonus_trait": "resolve",
         "sorcery": "Glamour",
         "description": "Terra di leggende e magia fatata."
     },
@@ -18,7 +18,21 @@
         "name": "Eisen",
         "bonus_trait": "brawn",
         "sorcery": "None",
-        "description": "Ferro e volontà."
+        "description": "Ferro e volontà. (Accademie invece di stregoneria)"
+    },
+    {
+        "id": "highland",
+        "name": "Highland",
+        "bonus_trait": "brawn",
+        "sorcery": "Glamour",
+        "description": "Clan delle montagne."
+    },
+    {
+        "id": "inismore",
+        "name": "Inismore",
+        "bonus_trait": "panache",
+        "sorcery": "Glamour",
+        "description": "Isola ribelle e instabile."
     },
     {
         "id": "montaigne",
@@ -39,7 +53,7 @@
         "name": "Vestenmennavenjar",
         "bonus_trait": "brawn",
         "sorcery": "Laerdom",
-        "description": "Rune."
+        "description": "Rune e razziatori."
     },
     {
         "id": "vodacce",
@@ -47,5 +61,26 @@
         "bonus_trait": "wits",
         "sorcery": "Sorte",
         "description": "Streghe del destino."
+    },
+    {
+        "id": "crescent",
+        "name": "Crescent Empire",
+        "bonus_trait": "wits",
+        "sorcery": "Mirage",
+        "description": "Deserto e misteri."
+    },
+    {
+        "id": "cathay",
+        "name": "Cathay",
+        "bonus_trait": "finesse",
+        "sorcery": "Ki",
+        "description": "Il misterioso oriente."
+    },
+    {
+        "id": "midnight",
+        "name": "Midnight Archipelago",
+        "bonus_trait": "panache",
+        "sorcery": "Zombi / Voodoo",
+        "description": "Isole misteriose e pirati."
     }
 ]
