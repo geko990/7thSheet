@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>7th Sea - Schede Personaggio</title>
+    <meta name="description" content="Gestione schede personaggio per 7th Sea 2a Edizione">
+    <link rel="stylesheet" href="css/style.css?v=0.1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
+    <meta name="theme-color" content="#2c1810">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+
+<body>
+    <div id="app">
+        <header id="app-header">
+            <h1>⚓ 7th Sea</h1>
+        </header>
+
+        <main id="main-content">
+            <!-- Content injected by router -->
+        </main>
+
+        <nav id="bottom-nav">
+            <button class="nav-btn active" data-tab="characters">
+                <span class="nav-icon">📜</span>
+                <span class="nav-label">Personaggi</span>
+            </button>
+            <button class="nav-btn" data-tab="dice">
+                <span class="nav-icon">🎲</span>
+                <span class="nav-label">Dadi</span>
+            </button>
+            <button class="nav-btn" data-tab="settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Opzioni</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modal container -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-content" class="modal-content">
+            <!-- Modal content injected here -->
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+[
+    {
+        "id": "courtier",
+        "name": "Cortigiano",
+        "trait": "panache",
+        "knacks": [
+            "Dancing",
+            "Etiquette",
+            "Fashion",
+            "Oratory",
+            "Diplomacy",
+            "Gossip",
+            "Politics",
+            "Sincerity"
+        ]
+    },
+    {
+        "id": "fencing",
+        "name": "Scherma",
+        "trait": "finesse",
+        "knacks": [
+            "Attack (Fencing)",
+            "Parry (Fencing)"
+        ]
+    },
+    {
+        "id": "firearms",
+        "name": "Armi da Fuoco",
+        "trait": "finesse",
+        "knacks": [
+            "Attack (Firearms)",
+            "Reload"
+        ]
+    },
+    {
+        "id": "sailor",
+        "name": "Marinaio",
+        "trait": "balance",
+        "knacks": [
+            "Balance",
+            "Climbing",
+            "Knotwork",
+            "Rigging",
+            "Navigation",
+            "Pilot",
+            "Weather"
+        ]
+    },
+    {
+        "id": "streetwise",
+        "name": "Bassifondi",
+        "trait": "wits",
+        "knacks": [
+            "Socializing",
+            "Street Navigation",
+            "Underworld Lore",
+            "Scrounging"
+        ]
+    }
+]

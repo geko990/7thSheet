@@ -1,0 +1,51 @@
+[
+    {
+        "id": "avalon",
+        "name": "Avalon",
+        "bonus_trait": "panache",
+        "sorcery": "Glamour",
+        "description": "Terra di leggende e magia fatata."
+    },
+    {
+        "id": "castille",
+        "name": "Castille",
+        "bonus_trait": "finesse",
+        "sorcery": "El Fuego Adentro",
+        "description": "Fede e fuoco."
+    },
+    {
+        "id": "eisen",
+        "name": "Eisen",
+        "bonus_trait": "brawn",
+        "sorcery": "None",
+        "description": "Ferro e volontà."
+    },
+    {
+        "id": "montaigne",
+        "name": "Montaigne",
+        "bonus_trait": "panache",
+        "sorcery": "Porte",
+        "description": "Portali e sangue nobile."
+    },
+    {
+        "id": "ussura",
+        "name": "Ussura",
+        "bonus_trait": "resolve",
+        "sorcery": "Pyeryem",
+        "description": "Mutaforma."
+    },
+    {
+        "id": "vesten",
+        "name": "Vestenmennavenjar",
+        "bonus_trait": "brawn",
+        "sorcery": "Laerdom",
+        "description": "Rune."
+    },
+    {
+        "id": "vodacce",
+        "name": "Vodacce",
+        "bonus_trait": "wits",
+        "sorcery": "Sorte",
+        "description": "Streghe del destino."
+    }
+]

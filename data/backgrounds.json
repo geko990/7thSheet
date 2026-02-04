@@ -1,0 +1,82 @@
+[
+    {
+        "id": "aristocrat",
+        "name": "Aristocratico",
+        "quirk": "Guadagni un Punto Eroe quando provi che la nobiltà è più dei soli titoli.",
+        "skills": [
+            "aim",
+            "convince",
+            "ride",
+            "scholarship",
+            "weaponry"
+        ],
+        "advantages": [
+            "Rich",
+            "Noble"
+        ]
+    },
+    {
+        "id": "duelist",
+        "name": "Duellante",
+        "quirk": "Guadagni un Punto Eroe quando ti lanci nel pericolo spada in pugno.",
+        "skills": [
+            "athletics",
+            "empathy",
+            "intimidate",
+            "perform",
+            "weaponry"
+        ],
+        "advantages": [
+            "Duelist Academy",
+            "Quick Reflexes"
+        ]
+    },
+    {
+        "id": "pirate",
+        "name": "Pirata",
+        "quirk": "Guadagni un Punto Eroe quando fai qualcosa di illegale per una giusta causa.",
+        "skills": [
+            "aim",
+            "brawl",
+            "intimidate",
+            "sailing",
+            "theft"
+        ],
+        "advantages": [
+            "Sea Legs",
+            "Barroom Brawler"
+        ]
+    },
+    {
+        "id": "spy",
+        "name": "Spia",
+        "quirk": "Guadagni un Punto Eroe quando scopri un segreto pericoloso.",
+        "skills": [
+            "empathy",
+            "hide",
+            "notice",
+            "tempt",
+            "theft"
+        ],
+        "advantages": [
+            "Connection",
+            "Linguist"
+        ]
+    },
+    {
+        "id": "scholar",
+        "name": "Studioso",
+        "quirk": "Guadagni un Punto Eroe quando usi la tua conoscenza per risolvere un problema.",
+        "skills": [
+            "convince",
+            "history",
+            "notice",
+            "scholarship",
+            "warfare"
+        ],
+        "advantages": [
+            "University",
+            "Linguist"
+        ]
+    }
+]

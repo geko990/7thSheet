@@ -1,0 +1,82 @@
+[
+    {
+        "id": "aim",
+        "name": "Mira",
+        "trait": "finesse"
+    },
+    {
+        "id": "athletics",
+        "name": "Atletica",
+        "trait": "brawn"
+    },
+    {
+        "id": "brawl",
+        "name": "Rissa",
+        "trait": "brawn"
+    },
+    {
+        "id": "convince",
+        "name": "Convincere",
+        "trait": "wits"
+    },
+    {
+        "id": "empathy",
+        "name": "Empatia",
+        "trait": "wits"
+    },
+    {
+        "id": "hide",
+        "name": "Nascondersi",
+        "trait": "finesse"
+    },
+    {
+        "id": "intimidate",
+        "name": "Intimidire",
+        "trait": "brawn"
+    },
+    {
+        "id": "notice",
+        "name": "Notare",
+        "trait": "wits"
+    },
+    {
+        "id": "perform",
+        "name": "Esibirsi",
+        "trait": "panache"
+    },
+    {
+        "id": "ride",
+        "name": "Cavalcare",
+        "trait": "wits"
+    },
+    {
+        "id": "sailing",
+        "name": "Navigazione",
+        "trait": "wits"
+    },
+    {
+        "id": "scholarship",
+        "name": "Istruzione",
+        "trait": "wits"
+    },
+    {
+        "id": "tempt",
+        "name": "Sedurre",
+        "trait": "panache"
+    },
+    {
+        "id": "theft",
+        "name": "Furto",
+        "trait": "finesse"
+    },
+    {
+        "id": "warfare",
+        "name": "Arte della Guerra",
+        "trait": "wits"
+    },
+    {
+        "id": "weaponry",
+        "name": "Mischia",
+        "trait": "finesse"
+    }
+]

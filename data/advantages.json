@@ -1,0 +1,86 @@
+[
+    {
+        "id": "able_drinker",
+        "name": "Bevitore Reggente",
+        "cost": 1,
+        "description": "L'alcol non ha effetto negativo su di te. Vinci tutte le gare di bevute."
+    },
+    {
+        "id": "academy",
+        "name": "Accademia Militare",
+        "cost": 2,
+        "description": "Ottieni bonus tattici in combattimento di massa."
+    },
+    {
+        "id": "barroom_brawler",
+        "name": "Rissoso",
+        "cost": 2,
+        "description": "Nelle risse da taverna, i tuoi Attacchi Improvvisati fanno più danni."
+    },
+    {
+        "id": "connection",
+        "name": "Contatto",
+        "cost": 1,
+        "description": "Hai un alleato che può fornirti informazioni o aiuto."
+    },
+    {
+        "id": "dangerous_beauty",
+        "name": "Bellezza Pericolosa",
+        "cost": 2,
+        "description": "Ottieni dadi bonus quando usi il tuo aspetto per distrarre o sedurre, fintanto che hai intenzioni ostili."
+    },
+    {
+        "id": "duelist_academy",
+        "name": "Accademia di Duello",
+        "cost": 4,
+        "description": "Conosci uno stile di duello. Ottieni manovre speciali."
+    },
+    {
+        "id": "hard_to_kill",
+        "name": "Duro a Morire",
+        "cost": 3,
+        "description": "Richiedi più ferite drammatiche per essere messo KO."
+    },
+    {
+        "id": "linguist",
+        "name": "Linguista",
+        "cost": 1,
+        "description": "Parli, leggi e scrivi fluentemente in un'altra lingua."
+    },
+    {
+        "id": "noble",
+        "name": "Nobile",
+        "cost": 4,
+        "description": "Hai un titolo nobiliare, terre e rendita."
+    },
+    {
+        "id": "quick_reflexes",
+        "name": "Riflessi Rapidi",
+        "cost": 3,
+        "description": "Agisci prima nelle Scene d'Azione."
+    },
+    {
+        "id": "rich",
+        "name": "Ricco",
+        "cost": 3,
+        "description": "Inizi con più Ricchezza e hai rendite costanti."
+    },
+    {
+        "id": "sea_legs",
+        "name": "Gambe da Marinaio",
+        "cost": 1,
+        "description": "Non soffri mal di mare e ti muovi perfettamente sulle navi."
+    },
+    {
+        "id": "signature_item",
+        "name": "Oggetto Distintivo",
+        "cost": 2,
+        "description": "Possiedi un oggetto unico con una storia. Se lo brandisci, hai bonus."
+    },
+    {
+        "id": "trusted_companion",
+        "name": "Compagno Fidato",
+        "cost": 3,
+        "description": "Hai un animale o seguace fedele che ti aiuta."
+    }
+]

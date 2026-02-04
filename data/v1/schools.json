@@ -1,0 +1,44 @@
+[
+    {
+        "id": "aldana",
+        "name": "Aldana",
+        "nation": "Castille",
+        "bonus": "Raddoppi i dadi tenuti per la Parata se usi una Fencing Weapon.",
+        "skills": [
+            "Fencing",
+            "Courtier"
+        ]
+    },
+    {
+        "id": "valroux",
+        "name": "Valroux",
+        "nation": "Montaigne",
+        "bonus": "Puoi parare con Main Gauche senza penalità alla mano secondaria.",
+        "skills": [
+            "Fencing",
+            "Knife"
+        ]
+    },
+    {
+        "id": "ambrogia",
+        "name": "Ambrogia",
+        "nation": "Vodacce",
+        "bonus": "Usa 'Pugnale' al posto di 'Scherma' per i tiri di Attacco se combatti con Pugnale e Spada.",
+        "skills": [
+            "Fencing",
+            "Knife",
+            "Dirty Fighting"
+        ]
+    },
+    {
+        "id": "eisenfaust",
+        "name": "Eisenfaust",
+        "nation": "Eisen",
+        "bonus": "Bonus ai Punti Ferita se indossi armatura pesante.",
+        "skills": [
+            "Fencing",
+            "Panzerhand",
+            "Heavy Weapon"
+        ]
+    }
+]
