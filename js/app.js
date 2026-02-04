@@ -4,6 +4,7 @@ import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
 import Settings from './components/Settings.js';
 import CharacterSheet from './components/CharacterSheet.js';
+import CreateWizard from './components/CreateWizard.js';
 
 class App {
     constructor() {
