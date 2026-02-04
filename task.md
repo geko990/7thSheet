@@ -48,6 +48,10 @@
     - [x] Configure GitHub Pages <!-- id: 110 -->
     - [ ] Test PWA on iPhone <!-- id: 111 -->
 
+- [/] UI Redesign <!-- id: 120 -->
+    - [ ] Liquid Glass Navigation <!-- id: 121 -->
+    - [ ] Modern Character List (Search, Cards, FAB) <!-- id: 122 -->
+
 ## Completed Tasks
 
 - [x] Seiryuu Dojo App (previous project) <!-- id: 0 -->

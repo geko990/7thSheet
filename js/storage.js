@@ -39,14 +39,19 @@ export const Storage = {
         const characters = this.getCharacters();
 
         if (character.id) {
-            // Update existing
+            // Update existing or Add if not found (but has ID)
             const index = characters.findIndex(c => c.id === character.id);
             if (index !== -1) {
                 character.updatedAt = new Date().toISOString();
                 characters[index] = character;
+            } else {
+                // ID exists but not in storage (New with pre-generated ID)
+                if (!character.createdAt) character.createdAt = new Date().toISOString();
+                character.updatedAt = new Date().toISOString();
+                characters.push(character);
             }
         } else {
-            // New character
+            // New character (Generate ID)
             character.id = this.generateId();
             character.createdAt = new Date().toISOString();
             character.updatedAt = character.createdAt;

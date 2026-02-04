@@ -12,74 +12,116 @@ export default class CharacterList {
     async render() {
         const characters = Storage.getCharacters();
         const div = document.createElement('div');
+        div.className = 'character-list-page';
 
+        div.innerHTML = `
+            <!-- Search Bar -->
+            <div style="padding: 20px 20px 0;">
+                <h2 class="page-title text-left" style="text-align: left; margin-bottom: 10px; border: none; font-size: 1.8rem;">Personaggi</h2>
+                <div class="search-bar" style="position: relative;">
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5;">🔍</span>
+                    <input type="text" id="char-search" placeholder="Cerca personaggio..." 
+                           style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255,255,255,0.5);">
+                </div>
+            </div>
+
+            <!-- List -->
+            <div class="character-list" id="character-list-container" style="padding: 20px; padding-bottom: 100px;">
+                ${this.renderList(characters)}
+            </div>
+
+            <!-- FAB Create Button -->
+            <div class="fab-container">
+                <button class="btn-fab" id="btn-create-new">
+                    <span>✨</span> Nuovo Personaggio
+                </button>
+            </div>
+        `;
+
+        setTimeout(() => this.attachListeners(div, characters), 0);
+        return div;
+    }
+
+    renderList(characters) {
         if (characters.length === 0) {
-            div.innerHTML = `
+            return `
                 <div class="empty-state">
                     <div class="empty-state-icon">⚓</div>
-                    <h2 class="empty-state-title">Nessun Personaggio</h2>
-                    <p class="empty-state-text">Crea il tuo primo eroe per iniziare l'avventura!</p>
-                    <button class="btn btn-primary" id="btn-create-new">
-                        ✨ Nuovo Personaggio
-                    </button>
-                </div>
-            `;
-        } else {
-            div.innerHTML = `
-                <h2 class="page-title">I Tuoi Personaggi</h2>
-                <div class="character-list" id="character-list">
-                    ${characters.map(char => this.renderCharacterCard(char)).join('')}
-                </div>
-                <div class="text-center mt-20">
-                    <button class="btn btn-primary" id="btn-create-new">
-                        ✨ Nuovo Personaggio
-                    </button>
+                    <p class="empty-state-text">Nessun personaggio trovato.</p>
                 </div>
             `;
         }
-
-        setTimeout(() => this.attachListeners(div), 0);
-        return div;
+        return characters.map(char => this.renderCharacterCard(char)).join('');
     }
 
     renderCharacterCard(char) {
         const nationEmoji = this.getNationEmoji(char.nation);
+        const editionLabel = char.edition === '1e' ? '1ª Ed' : '2ª Ed';
+
+        let details = `${char.nation || 'Apolide'}`;
+        if (char.concept) details += ` • ${char.concept}`;
+
+        const imageStyle = char.image ?
+            `background-image: url('${char.image}'); background-size: cover; background-position: center;` :
+            `display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--accent-navy); color: white;`;
+
+        const content = char.image ? '' : nationEmoji;
+
         return `
-            <div class="card character-card" data-id="${char.id}">
-                <div class="character-avatar">${nationEmoji}</div>
-                <div class="character-info">
-                    <div class="character-name">${char.name || 'Senza Nome'}</div>
-                    <div class="character-nation">${char.nation || 'Nazione sconosciuta'}</div>
+            <div class="card character-card" data-id="${char.id}" style="display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255, 255, 255, 0.6); margin-bottom: 12px;">
+                <div class="character-avatar" style="width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
+                    ${content}
                 </div>
-                <span style="font-size: 1.5rem; color: var(--accent-gold);">›</span>
+                <div class="character-info" style="flex: 1; overflow: hidden;">
+                    <div class="character-name" style="font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${char.name || 'Senza Nome'}</div>
+                    <div class="character-details" style="font-size: 0.85rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <span style="font-weight: 600; color: var(--accent-gold); font-size: 0.75rem; text-transform: uppercase;">${editionLabel}</span> | ${details}
+                    </div>
+                </div>
+                <div style="color: var(--text-faded); font-size: 1.2rem;">⋮</div>
             </div>
         `;
     }
 
     getNationEmoji(nation) {
         const emojis = {
-            'Avalon': '🦁',
-            'Castille': '🌹',
-            'Montaigne': '⚜️',
-            'Ussura': '🐻',
-            'Vodacce': '🎭',
-            'Eisen': '⚔️',
-            'Vestenmennavenjar': '⚡',
-            'Sarmatia': '🦅'
+            'Avalon': '🦁', 'Castille': '🌹', 'Montaigne': '⚜️', 'Ussura': '🐻',
+            'Vodacce': '🎭', 'Eisen': '⚔️', 'Vestenmennavenjar': '⚡', 'Sarmatia': '🦅',
+            'La Bucca': '🏴‍☠️', 'Numa': '🏛️', 'Aragosta': '🦞'
         };
         return emojis[nation] || '⚓';
     }
 
-    attachListeners(container) {
-        // New character button
-        const createBtn = container.querySelector('#btn-create-new');
-        if (createBtn) {
-            createBtn.addEventListener('click', () => {
+    attachListeners(container, allCharacters) {
+        // Create Button
+        const btnCreate = container.querySelector('#btn-create-new');
+        if (btnCreate) {
+            btnCreate.addEventListener('click', () => {
                 this.app.startCharacterCreation();
             });
         }
 
-        // Character cards
+        // Search Logic
+        const searchInput = container.querySelector('#char-search');
+        const listContainer = container.querySelector('#character-list-container');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allCharacters.filter(c =>
+                    (c.name && c.name.toLowerCase().includes(term)) ||
+                    (c.nation && c.nation.toLowerCase().includes(term)) ||
+                    (c.concept && c.concept.toLowerCase().includes(term))
+                );
+                listContainer.innerHTML = this.renderList(filtered);
+                this.attachCardListeners(listContainer);
+            });
+        }
+
+        this.attachCardListeners(listContainer);
+    }
+
+    attachCardListeners(container) {
         container.querySelectorAll('.character-card').forEach(card => {
             card.addEventListener('click', () => {
                 const id = card.dataset.id;
