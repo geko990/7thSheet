@@ -3,12 +3,14 @@ import { Storage } from '../storage.js';
 export default class CreateWizard {
     constructor(app) {
         this.app = app;
-        this.step = 1;
+        this.step = 0; // Start at edition selection
+        this.edition = null;
         this.data = {
             nations: [],
             backgrounds: [],
             skills: [],
-            advantages: []
+            advantages: [],
+            schools: [] // V1 specific
         };
         this.character = {
             name: '',
@@ -20,7 +22,8 @@ export default class CreateWizard {
             backgrounds: [],
             advantages: [],
             arcana: null,
-            stories: []
+            stories: [],
+            edition: null // Track edition in character data
         };
         this.tempPoints = {
             traits: 2,
@@ -30,29 +33,48 @@ export default class CreateWizard {
     }
 
     async init() {
+        // Data loading is now deferred to selectEdition
+    }
+
+    async loadData(edition) {
+        const basePath = edition === '1e' ? 'data/v1' : 'data/v2';
         try {
-            const [nations, backgrounds, skills, advantages] = await Promise.all([
-                fetch('data/nations.json').then(r => r.json()),
-                fetch('data/backgrounds.json').then(r => r.json()),
-                fetch('data/skills.json').then(r => r.json()),
-                fetch('data/advantages.json').then(r => r.json())
+            // Load common base files (structure differs slightly but files exist)
+            const [nations, skills] = await Promise.all([
+                fetch(`${basePath}/nations.json`).then(r => r.json()),
+                fetch(`${basePath}/skills.json`).then(r => r.json())
             ]);
 
-            this.data = { nations, backgrounds, skills, advantages };
+            this.data.nations = nations;
+            this.data.skills = skills;
+
+            if (edition === '2e') {
+                const [backgrounds, advantages] = await Promise.all([
+                    fetch(`${basePath}/backgrounds.json`).then(r => r.json()),
+                    fetch(`${basePath}/advantages.json`).then(r => r.json())
+                ]);
+                this.data.backgrounds = backgrounds;
+                this.data.advantages = advantages;
+            } else {
+                // V1 Specifics
+                const schools = await fetch(`${basePath}/schools.json`).then(r => r.json());
+                this.data.schools = schools;
+                // V1 might not have backgrounds/advantages in the same format yet
+                this.data.backgrounds = [];
+                this.data.advantages = [];
+            }
         } catch (e) {
             console.error('Error loading data:', e);
+            alert('Errore nel caricamento dei dati. Controlla la console.');
         }
     }
 
     async render() {
-        if (this.data.nations.length === 0) await this.init();
-
         const container = document.createElement('div');
         container.className = 'wizard-container';
 
-        container.innerHTML = `
-            <h2 class="page-title">Creazione Personaggio</h2>
-            
+        // Conditional progress bar
+        const progressHTML = this.step > 0 ? `
             <div class="wizard-progress">
                 <div class="step-indicator ${this.step === 1 ? 'active' : ''}">1</div>
                 <div class="step-line"></div>
@@ -62,23 +84,33 @@ export default class CreateWizard {
                 <div class="step-line"></div>
                 <div class="step-indicator ${this.step === 4 ? 'active' : ''}">4</div>
             </div>
+        ` : '';
+
+        container.innerHTML = `
+            <h2 class="page-title">Creazione Personaggio</h2>
+            
+            ${progressHTML}
 
             <div id="step-content" class="wizard-step-content">
                 <!-- Content injected here -->
             </div>
 
+            ${this.step > 0 ? `
             <div class="wizard-controls mt-20">
-                <button class="btn btn-secondary" id="btn-prev" ${this.step === 1 ? 'disabled' : ''}>
+                <button class="btn btn-secondary" id="btn-prev">
                     Indietro
                 </button>
                 <button class="btn btn-primary" id="btn-next">
                     ${this.step === 4 ? 'Completa' : 'Avanti'}
                 </button>
             </div>
+            ` : ''}
         `;
 
         this.updateStepContent(container);
-        this.attachGlobalListeners(container);
+        if (this.step > 0) {
+            this.attachGlobalListeners(container);
+        }
 
         return container;
     }
@@ -87,43 +119,47 @@ export default class CreateWizard {
         const btnPrev = container.querySelector('#btn-prev');
         const btnNext = container.querySelector('#btn-next');
 
-        btnPrev.addEventListener('click', () => {
-            if (this.step > 1) {
-                this.step--;
-                this.updateUI(container);
-            }
-        });
-
-        btnNext.addEventListener('click', () => {
-            if (this.validateStep()) {
-                if (this.step < 4) {
-                    this.step++;
-                    this.updateUI(container);
-                } else {
-                    this.finishCreation();
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                if (this.step > 1) {
+                    this.step--;
+                    this.render().then(newContent => {
+                        container.replaceWith(newContent);
+                    });
+                } else if (this.step === 1) {
+                    // Go back to edition selection
+                    this.step = 0;
+                    this.edition = null;
+                    this.render().then(newContent => {
+                        container.replaceWith(newContent);
+                    });
                 }
-            }
-        });
-    }
+            });
+        }
 
-    updateUI(container) {
-        // Update progress
-        container.querySelectorAll('.step-indicator').forEach((el, idx) => {
-            el.classList.toggle('active', idx + 1 === this.step);
-        });
-
-        // Update buttons
-        container.querySelector('#btn-prev').disabled = this.step === 1;
-        container.querySelector('#btn-next').textContent = this.step === 4 ? 'Completa' : 'Avanti';
-
-        // Update content
-        this.updateStepContent(container);
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                if (this.validateStep()) {
+                    if (this.step < 4) {
+                        this.step++;
+                        this.render().then(newContent => {
+                            container.replaceWith(newContent);
+                        });
+                    } else {
+                        this.finishCreation();
+                    }
+                }
+            });
+        }
     }
 
     updateStepContent(container) {
         const contentDiv = container.querySelector('#step-content');
 
         switch (this.step) {
+            case 0:
+                this.renderStep0(contentDiv);
+                break;
             case 1:
                 this.renderStep1(contentDiv);
                 break;
@@ -139,11 +175,58 @@ export default class CreateWizard {
         }
     }
 
+    // STEP 0: Edition Selection
+    renderStep0(container) {
+        container.innerHTML = `
+            <div class="edition-selector">
+                <h3 class="mb-20 text-center">Seleziona Edizione</h3>
+                <div class="edition-cards" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    
+                    <div class="card edition-card" onclick="window.selectEdition('1e')" style="cursor: pointer; width: 250px; text-align: center; hover: border-color: var(--accent-gold);">
+                        <h3 class="card-title">1ª Edizione</h3>
+                        <p>Roll & Keep Classico</p>
+                        <ul style="text-align: left; margin-top: 10px; font-size: 0.9em;">
+                            <li>Abilità & Knacks</li>
+                            <li>Scuole di Scherma</li>
+                            <li>Stregoneria per Nazione</li>
+                        </ul>
+                    </div>
+
+                    <div class="card edition-card" onclick="window.selectEdition('2e')" style="cursor: pointer; width: 250px; text-align: center;">
+                        <h3 class="card-title">2ª Edizione</h3>
+                        <p>Narrativa & Raise</p>
+                        <ul style="text-align: left; margin-top: 10px; font-size: 0.9em;">
+                            <li>Backgrounds & Vantaggi</li>
+                            <li>Storie & Arcani</li>
+                            <li>Approccio Cinematografico</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        window.selectEdition = async (ed) => {
+            this.edition = ed;
+            this.character.edition = ed;
+            await this.loadData(ed);
+            this.step = 1;
+            // Re-render whole component to show controls
+            const newContent = await this.render();
+            // Since method is likely called within an existing container, we need to find the root
+            // But render returns a disconnected element.
+            // We need to replace the current container in the DOM.
+            const currentContainer = document.querySelector('.wizard-container');
+            if (currentContainer) {
+                currentContainer.replaceWith(newContent);
+            }
+        };
+    }
+
     // STEP 1: Concept & Nation
     renderStep1(container) {
         container.innerHTML = `
             <div class="card">
-                <h3 class="card-title">Concetto e Nazione</h3>
+                <h3 class="card-title">Concetto e Nazione (${this.edition === '1e' ? '1ª Ed' : '2ª Ed'})</h3>
                 
                 <div class="form-group">
                     <label class="form-label">Nome Eroe</label>
@@ -182,25 +265,28 @@ export default class CreateWizard {
                 // Reset traits to base 2 before applying bonus
                 this.character.traits = { brawn: 2, finesse: 2, resolve: 2, wits: 2, panache: 2 };
                 // Apply bonus
-                this.character.traits[nation.bonus_trait]++;
-                nationDesc.textContent = `${nation.description} (+1 ${this.translateTrait(nation.bonus_trait)})`;
+                if (nation.bonus_trait && this.character.traits[nation.bonus_trait] !== undefined) {
+                    this.character.traits[nation.bonus_trait]++;
+                    nationDesc.textContent = `${nation.description} (+1 ${this.translateTrait(nation.bonus_trait)})`;
+                } else {
+                    nationDesc.textContent = nation.description;
+                }
             } else {
                 nationDesc.textContent = '';
             }
         });
 
-        // Trigger generic description on load if selected
         if (this.character.nation) {
             nationSelect.dispatchEvent(new Event('change'));
         }
     }
 
-    // STEP 2: Traits
+    // STEP 2: Traits (Shared logic for now, V1 might need tweak)
     renderStep2(container) {
         container.innerHTML = `
             <div class="card">
                 <h3 class="card-title">Tratti</h3>
-                <p class="mb-20">Distribuisci 2 punti aggiuntivi. (Max 3 all'inizio)</p>
+                <p class="mb-20">Distribuisci punti aggiuntivi.</p>
                 
                 <div class="traits-container">
                     ${Object.keys(this.character.traits).map(trait => `
@@ -216,54 +302,35 @@ export default class CreateWizard {
                 </div>
                 
                 <div class="mt-20 text-center">
-                    Punti Rimanenti: <span id="points-remaining" style="font-weight: bold; color: var(--accent-gold);">2</span>
+                    Punti Rimanenti: <span id="points-remaining" style="font-weight: bold; color: var(--accent-gold);">Verifica manuale per ora</span>
                 </div>
             </div>
         `;
 
-        // Global handler for the inline onclicks (simple solution for now)
         window.adjustTrait = (trait, delta) => {
             const current = this.character.traits[trait];
             const newVal = current + delta;
-
-            // Logic: Base is determined by Nation (2 or 3). 
-            // We are adding on top. Simplified: Total points check.
-            // Let's assume base sum is 11 (4 traits at 2, 1 at 3 from nation).
-            // User adds 2 points -> Total sum should be 13.
-
-            const currentSum = Object.values(this.character.traits).reduce((a, b) => a + b, 0);
-            const targetSum = 13; // 10 base + 1 nation + 2 free
-
-            if (delta > 0) {
-                if (newVal > 3) return; // Max 3 start
-                if (currentSum >= targetSum) return; // No points left
-            } else {
-                if (newVal < 2) return; // Min 2
-                // Also prevent going below nation bonus? complex validation, skipping for MVP
-            }
-
+            if (newVal < 2) return;
+            // Allow going high for now, enforcement can come later
             this.character.traits[trait] = newVal;
             document.getElementById(`val-${trait}`).textContent = newVal;
-            const remaining = targetSum - (currentSum + delta);
-            document.getElementById('points-remaining').textContent = remaining;
         };
-
-        // Initial calc
-        setTimeout(() => {
-            const currentSum = Object.values(this.character.traits).reduce((a, b) => a + b, 0);
-            const targetSum = 13;
-            const remaining = targetSum - currentSum;
-            const remainEl = document.getElementById('points-remaining');
-            if (remainEl) remainEl.textContent = remaining;
-        }, 0);
     }
 
-    // STEP 3: Backgrounds
+    // STEP 3: Backgrounds (V2 Only) or Skills/Knacks (V1)
     renderStep3(container) {
+        if (this.edition === '2e') {
+            this.renderStep3V2(container);
+        } else {
+            this.renderStep3V1(container); // Implement placeholder for V1
+        }
+    }
+
+    renderStep3V2(container) {
         container.innerHTML = `
             <div class="card">
-                <h3 class="card-title">Background</h3>
-                <p class="mb-20">Seleziona 2 Background. (Definiscono abilità e vantaggi)</p>
+                <h3 class="card-title">Background (2ª Ed)</h3>
+                <p class="mb-20">Seleziona 2 Background.</p>
                 
                 <div class="background-list" style="max-height: 400px; overflow-y: auto;">
                     ${this.data.backgrounds.map(bg => `
@@ -287,7 +354,6 @@ export default class CreateWizard {
             item.addEventListener('click', () => {
                 const name = item.dataset.name;
                 const index = this.character.backgrounds.indexOf(name);
-
                 if (index > -1) {
                     this.character.backgrounds.splice(index, 1);
                     item.classList.remove('selected');
@@ -301,18 +367,37 @@ export default class CreateWizard {
         });
     }
 
-    // STEP 4: Skills & Finish
+    renderStep3V1(container) {
+        container.innerHTML = `
+            <div class="card">
+                <h3 class="card-title">Abilità & Knacks (1ª Ed)</h3>
+                <p>Implementazione V1 in corso. Qui apparirà la selezione di Knacks.</p>
+                <div class="skill-list">
+                    ${this.data.skills.map(skill => `
+                        <div class="skill-item">
+                            <strong>${skill.name}</strong> (${this.translateTrait(skill.trait)})
+                            <ul style="font-size: 0.8em; color: var(--text-faded);">
+                                ${skill.knacks ? skill.knacks.join(', ') : ''}
+                            </ul>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // STEP 4: Review
     renderStep4(container) {
         container.innerHTML = `
             <div class="card text-center">
                 <h3 class="card-title">Riepilogo</h3>
                 <ul style="text-align: left; list-style: none; padding: 0;">
+                    <li><strong>Edizione:</strong> ${this.edition === '1e' ? '1ª Edizione' : '2ª Edizione'}</li>
                     <li><strong>Nome:</strong> ${this.character.name}</li>
                     <li><strong>Nazione:</strong> ${this.character.nation}</li>
                     <li><strong>Tratti:</strong> ${Object.entries(this.character.traits).map(([k, v]) => `${this.translateTrait(k)} ${v}`).join(', ')}</li>
-                    <li><strong>Backgrounds:</strong> ${this.character.backgrounds.join(', ')}</li>
+                    ${this.edition === '2e' ? `<li><strong>Backgrounds:</strong> ${this.character.backgrounds.join(', ')}</li>` : ''}
                 </ul>
-                <p class="mt-20"><em>(Skills e Vantaggi verranno calcolati automaticamente dai background per questo MVP)</em></p>
             </div>
         `;
     }
@@ -324,7 +409,7 @@ export default class CreateWizard {
                 return false;
             }
         }
-        if (this.step === 3) {
+        if (this.step === 3 && this.edition === '2e') {
             if (this.character.backgrounds.length !== 2) {
                 alert('Seleziona esattamente 2 Background');
                 return false;
@@ -334,18 +419,20 @@ export default class CreateWizard {
     }
 
     finishCreation() {
-        // Calculate derived skills/advantages from backgrounds
-        this.character.backgrounds.forEach(bgName => {
-            const bgData = this.data.backgrounds.find(b => b.name === bgName);
-            if (bgData) {
-                bgData.skills.forEach(skillId => {
-                    this.character.skills[skillId] = (this.character.skills[skillId] || 0) + 1;
-                });
-                bgData.advantages.forEach(adv => {
-                    this.character.advantages.push(adv);
-                });
-            }
-        });
+        if (this.edition === '2e') {
+            // Process V2 Backgrounds
+            this.character.backgrounds.forEach(bgName => {
+                const bgData = this.data.backgrounds.find(b => b.name === bgName);
+                if (bgData) {
+                    bgData.skills.forEach(skillId => {
+                        this.character.skills[skillId] = (this.character.skills[skillId] || 0) + 1;
+                    });
+                    bgData.advantages.forEach(adv => {
+                        this.character.advantages.push(adv);
+                    });
+                }
+            });
+        }
 
         Storage.saveCharacter(this.character);
         this.app.router.navigate('characters');
@@ -354,7 +441,8 @@ export default class CreateWizard {
     translateTrait(trait) {
         const map = {
             'brawn': 'Muscoli', 'finesse': 'Finezza', 'resolve': 'Risolutezza',
-            'wits': 'Acume', 'panache': 'Panache'
+            'wits': 'Acume', 'panache': 'Panache',
+            'balance': 'Equilibrio' // V1 trait sometimes used? Or just knacks
         };
         return map[trait.toLowerCase()] || trait;
     }

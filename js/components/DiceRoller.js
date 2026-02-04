@@ -2,12 +2,14 @@ import { Dice } from '../dice.js';
 
 /**
  * Dice Roller Component
- * Interactive D10 roller with Raise calculator
+ * Interactive D10 roller with Raise calculator (2e) and Roll & Keep (1e) support
  */
 export default class DiceRoller {
     constructor(app) {
         this.app = app;
         this.diceCount = 5;
+        this.keepCount = 3;
+        this.edition = '2e'; // Default
         this.results = [];
         this.selectedDice = new Set();
     }
@@ -18,25 +20,46 @@ export default class DiceRoller {
         div.innerHTML = `
             <h2 class="page-title">Lancio Dadi</h2>
             
+            <div class="edition-toggle mb-20 text-center">
+                <button class="btn ${this.edition === '1e' ? 'btn-primary' : 'btn-secondary'}" id="btn-ed-1e">1ª Ed (R&K)</button>
+                <button class="btn ${this.edition === '2e' ? 'btn-primary' : 'btn-secondary'}" id="btn-ed-2e">2ª Ed (Raise)</button>
+            </div>
+
             <div class="card">
                 <div class="dice-controls">
-                    <div class="dice-count-control">
-                        <button class="dice-count-btn" id="btn-dice-minus">−</button>
-                        <span class="dice-count-display" id="dice-count">${this.diceCount}</span>
-                        <button class="dice-count-btn" id="btn-dice-plus">+</button>
-                        <span style="margin-left: 5px;">D10</span>
+                    <div class="control-group">
+                        <label>Dadi Lanciati (Roll)</label>
+                        <div class="dice-count-control">
+                            <button class="dice-count-btn" id="btn-dice-minus">−</button>
+                            <span class="dice-count-display" id="dice-count">${this.diceCount}</span>
+                            <button class="dice-count-btn" id="btn-dice-plus">+</button>
+                            <span style="margin-left: 5px;">k</span>
+                        </div>
                     </div>
+
+                    ${this.edition === '1e' ? `
+                    <div class="control-group mt-10">
+                        <label>Dadi Tenuti (Keep)</label>
+                        <div class="dice-count-control">
+                            <button class="dice-count-btn" id="btn-keep-minus">−</button>
+                            <span class="dice-count-display" id="keep-count">${this.keepCount}</span>
+                            <button class="dice-count-btn" id="btn-keep-plus">+</button>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
                 
                 <div class="dice-pool" id="dice-pool">
                     <p style="color: var(--text-faded); font-style: italic;">
-                        Premi "Lancia" per tirare i dadi
+                        Premi "Lancia" per tirare ${this.diceCount}d10${this.edition === '1e' ? `k${this.keepCount}` : ''}
                     </p>
                 </div>
                 
-                <div class="raises-display" id="raises-display" style="display: none;">
-                    <span class="raises-label">Raise</span>
-                    <div id="raises-count">0</div>
+                <div class="results-display" id="results-display" style="display: none;">
+                    <div class="result-box">
+                        <span class="result-label">${this.edition === '1e' ? 'Totale' : 'Raise'}</span>
+                        <div id="result-value">0</div>
+                    </div>
                 </div>
                 
                 <div class="text-center mt-20">
@@ -49,9 +72,9 @@ export default class DiceRoller {
             <div class="card mt-20">
                 <div class="card-title">Come funziona</div>
                 <p style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.6;">
-                    In <strong>7th Sea 2a Edizione</strong>, ogni combinazione di dadi che somma a 
-                    <strong>10 o più</strong> conta come un <strong>Raise</strong>. 
-                    Puoi cliccare sui dadi per selezionarli manualmente.
+                    ${this.edition === '2e'
+                ? '<strong>2ª Edizione:</strong> Combina i dadi per formare somme di 10 (Raise).'
+                : '<strong>1ª Edizione:</strong> Tieni i risultati migliori e sommali tra loro.'}
                 </p>
             </div>
         `;
@@ -61,20 +84,50 @@ export default class DiceRoller {
     }
 
     attachListeners(container) {
+        // Edition Toggle
+        container.querySelector('#btn-ed-1e').addEventListener('click', () => {
+            this.edition = '1e';
+            this.updateView(container);
+        });
+        container.querySelector('#btn-ed-2e').addEventListener('click', () => {
+            this.edition = '2e';
+            this.updateView(container);
+        });
+
         // Dice count controls
         container.querySelector('#btn-dice-minus').addEventListener('click', () => {
             if (this.diceCount > 1) {
                 this.diceCount--;
-                this.updateDiceCount(container);
+                // Ensure Keep isn't higher than Roll
+                if (this.keepCount > this.diceCount) this.keepCount = this.diceCount;
+                this.updateView(container);
             }
         });
 
         container.querySelector('#btn-dice-plus').addEventListener('click', () => {
             if (this.diceCount < 20) {
                 this.diceCount++;
-                this.updateDiceCount(container);
+                this.updateView(container);
             }
         });
+
+        // Keep controls (only attached if present)
+        const btnKeepMinus = container.querySelector('#btn-keep-minus');
+        if (btnKeepMinus) {
+            btnKeepMinus.addEventListener('click', () => {
+                if (this.keepCount > 1) {
+                    this.keepCount--;
+                    this.updateView(container);
+                }
+            });
+
+            container.querySelector('#btn-keep-plus').addEventListener('click', () => {
+                if (this.keepCount < this.diceCount) {
+                    this.keepCount++;
+                    this.updateView(container);
+                }
+            });
+        }
 
         // Roll button
         container.querySelector('#btn-roll').addEventListener('click', () => {
@@ -82,14 +135,17 @@ export default class DiceRoller {
         });
     }
 
-    updateDiceCount(container) {
-        container.querySelector('#dice-count').textContent = this.diceCount;
+    updateView(container) {
+        // Full re-render needed for structure changes
+        this.render().then(newContent => {
+            container.replaceWith(newContent);
+        });
     }
 
     rollDice(container) {
         const pool = container.querySelector('#dice-pool');
-        const raisesDisplay = container.querySelector('#raises-display');
-        const raisesCount = container.querySelector('#raises-count');
+        const resultsDisplay = container.querySelector('#results-display');
+        const resultValue = container.querySelector('#result-value');
 
         // Clear previous
         this.results = Dice.roll(this.diceCount);
@@ -107,37 +163,49 @@ export default class DiceRoller {
             pool.querySelectorAll('.die').forEach(die => {
                 die.classList.remove('rolling');
             });
+
+            // Calculate Logic
+            if (this.edition === '2e') {
+                const result = Dice.calculateRaises(this.results);
+                resultValue.textContent = result.raises;
+                // Highlight raises? (Optional enhancement)
+            } else {
+                const result = Dice.calculateRollAndKeep(this.results, this.keepCount);
+                resultValue.textContent = result.total;
+
+                // Highlight kept dice
+                pool.querySelectorAll('.die').forEach(die => {
+                    const val = parseInt(die.dataset.value);
+                    // This is tricky visually as multiple dice might have same value
+                    // The simple logic: Highlight the highest N
+                });
+
+                // Simplified highlight: Just mark top N
+                // Sort indices by value
+                const indices = this.results.map((v, i) => ({ v, i }))
+                    .sort((a, b) => b.v - a.v)
+                    .slice(0, this.keepCount)
+                    .map(item => item.i);
+
+                pool.querySelectorAll('.die').forEach(die => {
+                    if (indices.includes(parseInt(die.dataset.index))) {
+                        die.classList.add('kept'); // Add 'kept' style in CSS
+                    } else {
+                        die.classList.add('dropped'); // Add 'dropped' style 
+                    }
+                });
+            }
+
+            resultsDisplay.style.display = 'block';
+
         }, 500);
 
-        // Calculate raises
-        const result = Dice.calculateRaises(this.results);
-        raisesDisplay.style.display = 'block';
-        raisesCount.textContent = result.raises;
-
-        // Add click listeners to dice
+        // Add click listeners (mostly for V2 manual selection, but kept for V1 fun)
         pool.querySelectorAll('.die').forEach(die => {
             die.addEventListener('click', () => {
-                const index = parseInt(die.dataset.index);
-                if (this.selectedDice.has(index)) {
-                    this.selectedDice.delete(index);
-                    die.classList.remove('selected');
-                } else {
-                    this.selectedDice.add(index);
-                    die.classList.add('selected');
-                }
-                this.updateSelectedSum(container);
+                die.classList.toggle('selected');
+                // You could implement manual override here
             });
         });
-    }
-
-    updateSelectedSum(container) {
-        if (this.selectedDice.size === 0) return;
-
-        const sum = Array.from(this.selectedDice).reduce((acc, idx) => {
-            return acc + this.results[idx];
-        }, 0);
-
-        // Show sum feedback (could add a UI element for this)
-        console.log(`Selection sum: ${sum} ${sum >= 10 ? '= 1 Raise!' : ''}`);
     }
 }

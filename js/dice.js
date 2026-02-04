@@ -142,5 +142,18 @@ export const Dice = {
 
         tryPartition(dice, 0);
         return maxRaises;
+    },
+
+    /**
+     * Calculate Roll & Keep total (V1)
+     * @param {Array} dice - Array of dice results
+     * @param {number} keep - Number of dice to keep
+     * @returns {Object} { total: number, keptDice: Array }
+     */
+    calculateRollAndKeep(dice, keep) {
+        const sorted = [...dice].sort((a, b) => b - a); // Descending
+        const keptDice = sorted.slice(0, keep);
+        const total = keptDice.reduce((a, b) => a + b, 0);
+        return { total, keptDice };
     }
 };
