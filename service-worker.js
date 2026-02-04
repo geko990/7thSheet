@@ -1,14 +1,14 @@
-const CACHE_NAME = '7thsea-v0.1.0';
+const CACHE_NAME = '7thsea-v0.2.0';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/css/style.css',
-    '/js/app.js',
-    '/js/config.js',
-    '/js/router.js',
-    '/js/storage.js',
-    '/js/dice.js',
-    '/manifest.json'
+    './',
+    './index.html',
+    './css/style.css',
+    './js/app.js',
+    './js/config.js',
+    './js/router.js',
+    './js/storage.js',
+    './js/dice.js',
+    './manifest.json'
 ];
 
 // Install event
