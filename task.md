@@ -49,8 +49,17 @@
     - [ ] Test PWA on iPhone <!-- id: 111 -->
 
 - [/] UI Redesign <!-- id: 120 -->
-    - [ ] Liquid Glass Navigation <!-- id: 121 -->
-    - [ ] Modern Character List (Search, Cards, FAB) <!-- id: 122 -->
+    - [x] Liquid Glass Navigation <!-- id: 121 -->
+    - [x] Modern Character List (Search, Cards, FAB) <!-- id: 122 -->
+
+- [ ] Character Growth & Management (v0.4) <!-- id: 130 -->
+    - [ ] Data Model: Inventory & Journal <!-- id: 131 -->
+    - [ ] UI: Sheet Tabs (Stats, Equip, Journal) <!-- id: 132 -->
+    - [ ] UI: Editable Wealth & XP <!-- id: 133 -->
+    - [ ] Logic: Level Up / Advancement Mode <!-- id: 134 -->
+
+- [ ] Campaign Mode (Future) <!-- id: 140 -->
+    - [ ] Feasibility Study: Firebase Integration <!-- id: 141 -->
 
 ## Completed Tasks
 
