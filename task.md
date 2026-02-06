@@ -60,8 +60,14 @@
 
 - [ ] Interactive Character Sheet (v0.5) <!-- id: 150 -->
     - [ ] Tooltip System (Descriptions on tap) <!-- id: 151 -->
-    - [ ] Dynamic Dice Rolling UI (Clickable Stats) <!-- id: 152 -->
-    - [ ] Dice Result Overlay <!-- id: 153 -->
+- [x] List Enhancements (v0.6) <!-- id: 160 -->
+    - [x] Swipe-to-Edit / Swipe-to-Delete <!-- id: 161 -->
+    - [x] "Edit Profile" Modal (Restricted fields) <!-- id: 162 -->
+- [x] Sheet Refinements (v0.6) <!-- id: 170 -->
+    - [x] Standardize Layout (Advantages/Backgrounds) <!-- id: 171 -->
+    - [x] Clean up Translations <!-- id: 172 -->
+    - [x] Move "Level Up" UI <!-- id: 173 -->
+- [ ] Logic: XP Spending & Rank Cost <!-- id: 180 -->
 
 ## Completed Tasks
 

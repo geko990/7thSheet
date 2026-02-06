@@ -92,7 +92,6 @@ export default class CharacterSheet {
                     <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
                     <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
                         ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
-                        <button class="btn-xs btn-primary" id="btn-lvl-up" style="margin-left: 10px;">⚡ Avanza</button>
                     </div>
                 </div>
 
@@ -130,7 +129,7 @@ export default class CharacterSheet {
                 </div>
 
                 <!-- Tooltip -->
-                <div id="sheet-tooltip" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 15px; border-radius: 10px; font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 200; width: 90%; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5);"></div>
+                <div id="sheet-tooltip" style="position: fixed; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.6); backdrop-filter: blur(10px); background: rgba(44, 24, 16, 0.95); border: 1px solid var(--accent-gold); padding: 15px; border-radius: 10px; max-width: 250px; text-align: left; font-size: 0.9rem;"></div>
             </div>
         `;
 
@@ -213,14 +212,17 @@ export default class CharacterSheet {
                 `<p><strong>Scuola:</strong> ${this.character.school}</p>` : ''
             }
                     
-                    <div style="margin-top: 10px;">
-                        <strong>Vantaggi:</strong>
-                        <ul style="margin-top: 5px; padding-left: 20px;">
-                            ${this.character.advantages ? this.character.advantages.map(adv => `
-                                <li class="interactive-text" data-type="advantage" data-key="${adv.replace(/"/g, '&quot;')}">${adv}</li>
-                            `).join('') : ''}
-                        </ul>
+                    <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        ${this.character.advantages ? this.character.advantages.map(adv => `
+                            <div class="interactive-text adv-pill" data-type="advantage" data-key="${adv.replace(/"/g, '&quot;')}" style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 5px; font-size: 0.9rem; text-align: center; border: 1px solid transparent; cursor: help;">
+                                ${adv}
+                            </div>
+                        `).join('') : ''}
                     </div>
+                </div>
+                
+                <div class="text-center mt-20">
+                     <button class="btn-xs btn-secondary" id="btn-lvl-up" style="opacity: 0.7;">+ Livello</button>
                 </div>
         `;
         this.attachSheetListeners(container);
@@ -360,18 +362,6 @@ export default class CharacterSheet {
             });
         });
 
-        const lvlBtn = container.querySelector('#btn-lvl-up');
-        if (lvlBtn) {
-            lvlBtn.addEventListener('click', () => {
-                const newLvl = prompt("Nuovo Livello:", this.character.level || 1);
-                if (newLvl && !isNaN(newLvl)) {
-                    this.character.level = parseInt(newLvl);
-                    container.querySelector('#lvl-display').textContent = this.character.level;
-                    Storage.saveCharacter(this.character);
-                }
-            });
-        }
-
         const fab = container.querySelector('#dice-fab');
         if (fab) {
             container.querySelector('#btn-pool-reset').addEventListener('click', () => {
@@ -382,6 +372,8 @@ export default class CharacterSheet {
             container.querySelector('#btn-pool-roll').addEventListener('click', () => this.rollDicePool());
             container.querySelector('#btn-close-dice').addEventListener('click', () => {
                 document.querySelector('#dice-overlay').style.display = 'none';
+                this.dicePool = [];
+                this.updateDiceFab();
             });
         }
     }
@@ -396,6 +388,20 @@ export default class CharacterSheet {
                 Storage.saveCharacter(this.character);
             }
         });
+
+        // Level Up Button Logic (Moved to bottom)
+        const lvlBtn = container.querySelector('#btn-lvl-up');
+        if (lvlBtn) {
+            lvlBtn.addEventListener('click', () => {
+                const newLvl = prompt("Nuovo Livello:", this.character.level || 1);
+                if (newLvl && !isNaN(newLvl)) {
+                    this.character.level = parseInt(newLvl);
+                    const lvlDisplay = document.querySelector('#lvl-display');
+                    if (lvlDisplay) lvlDisplay.textContent = this.character.level;
+                    Storage.saveCharacter(this.character);
+                }
+            });
+        }
 
         const hpVal = container.querySelector('#hp-val');
         if (hpVal) {
@@ -436,16 +442,18 @@ export default class CharacterSheet {
         // TOOLTIPS
         container.querySelectorAll('.interactive-label, .interactive-text').forEach(el => {
             el.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 const key = e.target.dataset.key;
                 const type = e.target.dataset.type;
-                this.showTooltip(type, key);
+                this.showTooltip(type, key, e.clientX, e.clientY);
             });
         });
 
         // DICE POOL
         container.querySelectorAll('.interactive-stat').forEach(el => {
             el.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 const key = e.target.dataset.key;
                 const val = parseInt(e.target.dataset.val);
@@ -476,7 +484,7 @@ export default class CharacterSheet {
         document.querySelector('#dice-pool-total').textContent = total;
     }
 
-    showTooltip(type, key) {
+    showTooltip(type, key, x, y) {
         let text = '';
         if (type === 'trait' || type === 'skill') {
             text = this.descriptions[key] || key;
@@ -486,10 +494,23 @@ export default class CharacterSheet {
         }
 
         const tooltip = document.querySelector('#sheet-tooltip');
-        tooltip.innerHTML = text; // Use innerHTML for bolding
+        tooltip.innerHTML = text;
         tooltip.style.opacity = '1';
 
-        setTimeout(() => {
+        // Positioning
+        let left = x - 125;
+        if (left < 10) left = 10;
+        if (left + 250 > window.innerWidth) left = window.innerWidth - 260;
+
+        let top = y - 100;
+        if (top < 50) top = y + 40; // Flip down if too close to top
+
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+
+        // Hide after delay
+        if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
+        this.tooltipTimeout = setTimeout(() => {
             tooltip.style.opacity = '0';
         }, 4000);
     }
@@ -518,9 +539,6 @@ export default class CharacterSheet {
         }
 
         overlay.style.display = 'flex';
-        // Auto clear pool? Maybe not, user might want to re-roll
-        // this.dicePool = [];
-        // this.updateDiceFab();
     }
 
     translateKey(key) {
