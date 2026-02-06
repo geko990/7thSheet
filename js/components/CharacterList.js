@@ -10,7 +10,7 @@ export default class CharacterList {
         const div = document.createElement('div');
         div.className = 'character-list-page';
 
-        // Additional CSS for Select Arrow removal and centered inputs
+        // CSS Styles
         const style = document.createElement('style');
         style.innerHTML = `
             .clean-select {
@@ -23,13 +23,25 @@ export default class CharacterList {
             .center-input {
                 text-align: center;
             }
+            .modal-grid {
+                display: grid;
+                grid-template-columns: 80px 1fr;
+                gap: 15px;
+                align-items: center;
+            }
+            .modal-grid label {
+                font-weight: bold;
+                color: var(--text-faded);
+                text-align: right;
+                font-size: 0.9rem;
+            }
         `;
         div.appendChild(style);
 
         div.innerHTML += `
             <!-- Search Bar -->
             <div style="padding: 20px 20px 0;">
-                <h2 class="page-title text-left" style="text-align: left; margin-bottom: 10px; border: none; font-size: 1.8rem;">Personaggi</h2>
+                <h2 class="page-title text-left" style="text-align: left; margin-bottom: 15px; border: none; font-size: 1.8rem;">Personaggi</h2>
                 <div class="search-bar" style="position: relative;">
                     <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5;">🔍</span>
                     <input type="text" id="char-search" placeholder="Cerca personaggio..." 
@@ -50,50 +62,40 @@ export default class CharacterList {
             </div>
             
              <!-- Edit Modal -->
-            <div id="edit-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); z-index: 9999; background: rgba(0,0,0,0.4);">
-                <div class="modal-content" style="width: 85%; max-width: 320px; padding: 30px 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); text-align: center; border-radius: 16px; background: var(--bg-paper);">
-                    <h3 style="text-align: center; margin-bottom: 25px; font-family: var(--font-display); color: var(--accent-gold); font-size: 1.6rem; text-transform: uppercase; letter-spacing: 1px;">Modifica Profilo</h3>
+            <div id="edit-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 9999; background: rgba(0,0,0,0.5);">
+                <div class="modal-content" style="width: 90%; max-width: 350px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); border-radius: 16px; background: var(--bg-paper);">
+                    <h3 style="text-align: center; margin-bottom: 25px; font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Modifica Profilo</h3>
                     
-                    <form id="edit-form" style="display: flex; flex-direction: column; gap: 15px;">
+                    <form id="edit-form" class="modal-grid">
                         <input type="hidden" id="edit-id">
                         
-                        <div class="form-group" style="text-align: center;">
-                            <label style="font-weight: bold; color: var(--text-faded); display: block; margin-bottom: 6px; font-size: 0.9rem;">Nome</label>
-                            <input type="text" id="edit-name" class="input-field center-input" required style="width: 100%;">
-                        </div>
+                        <label>Nome</label>
+                        <input type="text" id="edit-name" class="input-field center-input" required>
 
-                        <div class="form-group" style="text-align: center;">
-                            <label style="font-weight: bold; color: var(--text-faded); display: block; margin-bottom: 6px; font-size: 0.9rem;">Concetto</label>
-                            <input type="text" id="edit-concept" class="input-field center-input" style="width: 100%;">
-                        </div>
+                        <label>Concetto</label>
+                        <input type="text" id="edit-concept" class="input-field center-input">
 
-                        <div class="form-group" style="text-align: center;">
-                            <label style="font-weight: bold; color: var(--text-faded); display: block; margin-bottom: 6px; font-size: 0.9rem;">Nazione</label>
-                            <select id="edit-nation" class="input-field clean-select" style="width: 100%;">
-                                <option value="Avalon">Avalon</option>
-                                <option value="Castille">Castille</option>
-                                <option value="Eisen">Eisen</option>
-                                <option value="Montaigne">Montaigne</option>
-                                <option value="Sarmatia">Sarmatia</option>
-                                <option value="Ussura">Ussura</option>
-                                <option value="Vestenmennavenjar">Vestenmennavenjar</option>
-                                <option value="Vodacce">Vodacce</option>
-                                <option value="La Bucca">La Bucca</option>
-                            </select>
-                        </div>
+                        <label>Nazione</label>
+                        <select id="edit-nation" class="input-field clean-select">
+                            <option value="Avalon">Avalon</option>
+                            <option value="Castille">Castille</option>
+                            <option value="Eisen">Eisen</option>
+                            <option value="Montaigne">Montaigne</option>
+                            <option value="Sarmatia">Sarmatia</option>
+                            <option value="Ussura">Ussura</option>
+                            <option value="Vestenmennavenjar">Vestenmennavenjar</option>
+                            <option value="Vodacce">Vodacce</option>
+                            <option value="La Bucca">La Bucca</option>
+                        </select>
 
-                        <div class="form-group" style="text-align: center;">
-                            <label style="font-weight: bold; color: var(--text-faded); display: block; margin-bottom: 6px; font-size: 0.9rem;">Religione</label>
-                            <input type="text" id="edit-religion" class="input-field center-input" style="width: 100%;">
-                        </div>
+                        <label>Religione</label>
+                        <input type="text" id="edit-religion" class="input-field center-input">
 
-                        <div class="form-group" style="text-align: center;">
-                            <label style="font-weight: bold; color: var(--text-faded); display: block; margin-bottom: 6px; font-size: 0.9rem;">Arcano</label>
-                            <input type="text" id="edit-arcana" class="input-field center-input" placeholder="Es: Il Folle" style="width: 100%;">
-                        </div>
+                        <label>Arcano</label>
+                        <input type="text" id="edit-arcana" class="input-field center-input" placeholder="Es: Il Folle">
                     
-                        <div style="margin-top: 25px; text-align: center;">
-                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; letter-spacing: 1px;">SALVA</button>
+                        <div style="grid-column: 1 / -1; margin-top: 20px; text-align: center;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Salva</button>
                         </div>
                     </form>
                 </div>
@@ -127,26 +129,22 @@ export default class CharacterList {
 
         const content = char.image ? '' : nationEmoji;
 
-        // FIXED SWIPE CONTAINER (v0.6.4):
-        // 1. overflow: hidden + border-radius ensures child elements (like red stripe) don't bleed out.
-        // 2. transform: translate3d(0,0,0) helps with masking on some browsers.
-        // 3. Card has solid white background to prevent see-through.
-        // 4. height: 86px forced to match card size.
+        // FIXED SWIPE COLORS: Split 50/50 to avoid overlap
         return `
-            <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; background: transparent; overflow: hidden; height: 86px; transform: translate3d(0,0,0);"> 
+            <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; background: #e0e0e0; overflow: hidden; height: 86px;"> 
                 
-                <!-- Background Actions (z-index: 1, behind card) -->
-                <!-- Edit (Left) -->
-                <div class="swipe-action action-left" style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; background: var(--accent-green); display: flex; align-items: center; justify-content: flex-start; padding-left: 25px; color: white; font-size: 1.6rem; z-index: 1;">
+                <!-- Edit Action (Left Half, Green) -->
+                <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50%; background: var(--accent-green); display: flex; align-items: center; justify-content: flex-start; padding-left: 25px; color: white; font-size: 1.6rem; z-index: 1;">
                     ✏️
                 </div>
-                <!-- Delete (Right) -->
-                <div class="swipe-action action-right" style="position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 25px; color: white; font-size: 1.6rem; z-index: 1;">
+
+                <!-- Delete Action (Right Half, Red) -->
+                <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 50%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 25px; color: white; font-size: 1.6rem; z-index: 1;">
                     🗑️
                 </div>
 
-                <!-- Card Content (z-index: 10, solid background) -->
-                <div class="card character-card" data-id="${char.id}" style="position: relative; z-index: 10; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: #fdfaf5; height: 100%; box-sizing: border-box; transition: transform 0.15s ease-out; transform: translate3d(0,0,0);">
+                <!-- Card Content -->
+                <div class="card character-card" data-id="${char.id}" style="position: relative; z-index: 10; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: #fdfaf5; height: 100%; box-sizing: border-box; transform: translate3d(0,0,0);">
                     <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
                         ${content}
                     </div>
@@ -218,15 +216,14 @@ export default class CharacterList {
             let isDragging = false;
             let isScrolling = false;
 
-            // Click Logic (Fallback if Swipe fails, but Swipe logic should handle clear separation)
+            // Click Logic handled via Touchend to avoid conflicts, or native click
+            // If we don't preventDefault on touchmove, click should fire.
+            // But we do preventDefault on swipe... so we need robustness.
+
             card.addEventListener('click', (e) => {
-                // If we are not in a swiped state and not dragging, navigate
-                if (currentTranslate === 0 && !isDragging) {
+                // Native click should work if no swipe happened
+                if (!isDragging && Math.abs(currentTranslate) < 5) {
                     this.app.router.navigate(`character/${card.dataset.id}`);
-                } else if (currentTranslate !== 0) {
-                    // If swiped, a click should just close/reset the swipe
-                    card.style.transform = 'translate3d(0,0,0)';
-                    currentTranslate = 0;
                 }
             });
 
@@ -248,7 +245,8 @@ export default class CharacterList {
                 if (!isDragging && !isScrolling) {
                     if (Math.abs(diffY) > Math.abs(diffX)) {
                         isScrolling = true;
-                        return; // Let native scroll happen
+                        // Let native scroll happen (do not preventDefault)
+                        return;
                     } else if (Math.abs(diffX) > 10) { // Threshold for swipe start
                         isDragging = true;
                     }
@@ -284,7 +282,11 @@ export default class CharacterList {
                         card.style.transform = 'translate3d(0, 0, 0)';
                     }
                 } else if (!isScrolling) {
-                    // It was a tap! logic handled by click event primarily
+                    // Tap detected!
+                    // If native click doesn't fire (sometimes happens on weak taps), forcing it here is an option
+                    // But usually, if we didn't call preventDefault, click fires.
+                    // We only called preventDefault inside 'if(isDragging)'.
+                    // So Tap should be safe.
                 }
 
                 currentTranslate = 0;
