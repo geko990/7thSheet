@@ -6,8 +6,28 @@ export default class CharacterSheet {
         this.app = app;
         this.character = null;
         this.dicePool = [];
-        this.activeTab = 'sheet';
+        this.activeTab = 'sheet'; // sheet, inventory, journal
         this.advantagesData = [];
+
+        // Italian Skills Map
+        this.skillMap = {
+            'aim': 'Mira',
+            'athletics': 'Atletica',
+            'brawl': 'Rissa',
+            'convince': 'Convincere',
+            'empathy': 'Empatia',
+            'hide': 'Furtività',
+            'intimidate': 'Intimidire',
+            'notice': 'Notare',
+            'perform': 'Esibirsi',
+            'ride': 'Cavalcare',
+            'sailing': 'Navigare',
+            'scholarship': 'Istruzione',
+            'tempt': 'Allettare',
+            'theft': 'Furto',
+            'warfare': 'Arte della Guerra',
+            'weaponry': 'Mischia'
+        };
 
         this.descriptions = {
             'brawn': 'Muscoli: Forza pura, resistenza fisica e capacità di incassare colpi.',
@@ -15,6 +35,7 @@ export default class CharacterSheet {
             'resolve': 'Risolutezza: Volontà, determinazione e resistenza mentale.',
             'wits': 'Acume: Intelligenza, prontezza di spirito e capacità deduttiva.',
             'panache': 'Panache: Carisma, stile, fascino e capacità di ispirare.',
+            // Updated Italian Descriptions
             'aim': 'Mira: Colpire bersagli a distanza con armi da fuoco o da lancio.',
             'athletics': 'Atletica: Correre, saltare, arrampicarsi e nuotare.',
             'brawl': 'Rissa: Combattimento a mani nude o con armi improvvisate.',
@@ -25,12 +46,12 @@ export default class CharacterSheet {
             'notice': 'Notare: Percepire dettagli, indizi o pericoli nascosti.',
             'perform': 'Esibirsi: Intrattenere un pubblico con arte o oratoria.',
             'ride': 'Cavalcare: Controllare cavalli o altri animali da sella.',
-            'sailing': 'Navigazione: Manovrare navi, conoscere il mare e le rotte.',
+            'sailing': 'Navigare: Manovrare navi, conoscere il mare e le rotte.',
             'scholarship': 'Istruzione: Conoscenza accademica, storia, scienze.',
-            'tempt': 'Sedurre: Manipolare gli altri facendo leva sui loro desideri.',
+            'tempt': 'Allettare: Manipolare gli altri facendo leva sui loro desideri.',
             'theft': 'Furto: Borseggiare, scassinare serrature, giochi di prestigio.',
-            'warfare': 'Tattica: Strategia militare, comando e logistica.',
-            'weaponry': 'Armi Bianche: Combattimento con spade, pugnali o armi in asta.'
+            'warfare': 'Arte della Guerra: Tattica militare, comando e logistica.',
+            'weaponry': 'Mischia: Combattimento con spade, pugnali o armi in asta.'
         };
     }
 
@@ -69,7 +90,10 @@ export default class CharacterSheet {
         // Data Migration
         if (!this.character.inventory) this.character.inventory = [];
         if (!this.character.journal) this.character.journal = [];
-        if (!this.character.wealth) this.character.wealth = 0;
+        // Wealth Migration: Number -> Object
+        if (typeof this.character.wealth !== 'object') {
+            this.character.wealth = { gold: 0, silver: 0, copper: this.character.wealth || 0 };
+        }
 
         // Load Data for Tooltips
         await this.loadAdvantagesData(this.character.edition);
@@ -79,32 +103,39 @@ export default class CharacterSheet {
     }
 
     renderTabs(container) {
-        container.innerHTML = `
-            <div class="card" style="position: relative; padding-top: 10px; min-height: 80vh; display: flex; flex-direction: column;">
-                <button class="btn btn-secondary" id="btn-close" style="position: absolute; top: 10px; right: 10px; border: none; z-index: 10;">✖</button>
-
-                <div class="char-header text-center" style="margin-top: 20px;">
-                    ${this.character.image ? `
-                    <div class="char-sheet-avatar" style="width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
-                        <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    ` : ''}
-                    <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
-                    <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
-                        ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
-                    </div>
+        const charHeaderHTML = `
+            <div class="char-header text-center" id="char-header-block" style="margin-top: 20px; transition: all 0.3s;">
+                ${this.character.image ? `
+                <div class="char-sheet-avatar" style="width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
+                    <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
+                ` : ''}
+                <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
+                <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
+                    ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
+                </div>
+            </div>
+        `;
 
-                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 15px;">
+        container.innerHTML = `
+            <div class="card" style="position: relative; padding-top: 10px; min-height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
+                <button class="btn btn-secondary" id="btn-close" style="position: absolute; top: 10px; right: 10px; border: none; z-index: 100;">✖</button>
+
+                <!-- Header Block -->
+                ${charHeaderHTML}
+
+                <!-- Tabs Nav -->
+                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 15px; flex-shrink: 0;">
                     <button class="tab-btn active" data-tab="sheet" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Scheda</button>
-                    <button class="tab-btn" data-tab="inventory" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Tasca</button>
+                    <button class="tab-btn" data-tab="inventory" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Borsa</button>
                     <button class="tab-btn" data-tab="journal" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Diario</button>
                 </div>
 
-                <div id="tab-content" style="flex: 1;"></div>
+                <!-- Content Area (Swipeable) -->
+                <div id="tab-content" style="flex: 1; overflow-y: auto; padding-bottom: 80px; touch-action: pan-y pinch-zoom;"></div>
             
-                <!-- Dice Overlay -->
-                <div id="dice-overlay" class="modal-overlay" style="display: none;">
+                <!-- Dice Overlay & FAB & Tooltip (Same as before) -->
+                 <div id="dice-overlay" class="modal-overlay" style="display: none;">
                     <div class="modal-content" style="text-align: center;">
                         <h3 class="mb-20">Risultato Lancio</h3>
                         <div id="dice-results" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;"></div>
@@ -113,9 +144,8 @@ export default class CharacterSheet {
                     </div>
                 </div>
 
-                <!-- Dice FAB -->
                 <div id="dice-fab" style="position: fixed; bottom: 80px; right: 20px; display: none; flex-direction: column; align-items: end; gap: 10px; z-index: 100;">
-                     <div class="dice-pool-bubble" style="background: var(--bg-paper); border: 2px solid var(--accent-gold); padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px var(--shadow); margin-bottom: 5px; max-width: 200px; text-align: right;">
+                     <div class="dice-pool-bubble" style="background: var(--bg-paper); border: 2px solid var(--accent-gold); padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px var(--shadow-strong); margin-bottom: 5px; max-width: 200px; text-align: right;">
                         <div id="dice-pool-list" style="font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;"></div>
                         <div style="font-weight: bold;">Totale: <span id="dice-pool-total">0</span> Dadi</div>
                     </div>
@@ -128,13 +158,23 @@ export default class CharacterSheet {
                     </div>
                 </div>
 
-                <!-- Tooltip -->
-                <div id="sheet-tooltip" style="position: fixed; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.6); backdrop-filter: blur(10px); background: rgba(44, 24, 16, 0.95); border: 1px solid var(--accent-gold); padding: 15px; border-radius: 10px; max-width: 250px; text-align: left; font-size: 0.9rem;"></div>
+                <div id="sheet-tooltip" style="position: fixed; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; padding: 15px; border-radius: 10px; max-width: 250px; text-align: left; font-size: 0.9rem;"></div>
             </div>
         `;
 
         this.renderTabContent(container.querySelector('#tab-content'), this.activeTab);
+        this.updateHeaderVisibility();
         this.attachGlobalListeners(container);
+    }
+
+    updateHeaderVisibility() {
+        const header = document.querySelector('#char-header-block');
+        if (!header) return;
+        if (this.activeTab === 'sheet') {
+            header.style.display = 'block';
+        } else {
+            header.style.display = 'none';
+        }
     }
 
     renderTabContent(container, tabName) {
@@ -142,6 +182,11 @@ export default class CharacterSheet {
         if (tabName === 'sheet') this.renderSheetTab(container);
         if (tabName === 'inventory') this.renderInventoryTab(container);
         if (tabName === 'journal') this.renderJournalTab(container);
+
+        // Re-attach listeners for the new content
+        if (tabName === 'sheet') this.attachSheetListeners(container);
+        if (tabName === 'inventory') this.attachInventoryListeners(container);
+        if (tabName === 'journal') this.attachJournalListeners(container);
     }
 
     renderSheetTab(container) {
@@ -153,9 +198,20 @@ export default class CharacterSheet {
                     </div>
                      <div class="info-block" style="text-align: center;">
                         <span class="info-label">Ricchezza</span>
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                            <span class="info-val" id="wealth-display">${this.character.wealth}</span>
-                            <button class="btn-xs btn-secondary" id="btn-edit-wealth">✏️</button>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <div class="coin-stack" style="text-align:center;">
+                                <span style="font-size:1.2rem;">🪙</span>
+                                <div style="font-weight:bold;">${this.character.wealth.gold || 0}</div>
+                            </div>
+                            <div class="coin-stack" style="text-align:center;">
+                                <span style="font-size:1.2rem;">🥈</span>
+                                <div style="font-weight:bold;">${this.character.wealth.silver || 0}</div>
+                            </div>
+                            <div class="coin-stack" style="text-align:center;">
+                                <span style="font-size:1.2rem;">🥉</span>
+                                <div style="font-weight:bold;">${this.character.wealth.copper || 0}</div>
+                            </div>
+                            <button class="btn-xs btn-secondary" id="btn-edit-wealth" style="margin-left:5px;">✏️</button>
                         </div>
                     </div>
                 </div>
@@ -222,10 +278,11 @@ export default class CharacterSheet {
                 </div>
                 
                 <div class="text-center mt-20">
-                     <button class="btn-xs btn-secondary" id="btn-lvl-up" style="opacity: 0.7;">+ Livello</button>
+                     <button id="btn-lvl-up" style="background: linear-gradient(135deg, var(--accent-gold), #8a6d3b); color: white; border: none; padding: 12px 24px; font-family: var(--font-display); font-size: 1.1rem; border-radius: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        ⚡ Level Up
+                     </button>
                 </div>
         `;
-        this.attachSheetListeners(container);
     }
 
     renderTraitSpot(trait) {
@@ -254,116 +311,105 @@ export default class CharacterSheet {
     renderInventoryTab(container) {
         container.innerHTML = `
             <div class="sheet-section">
-                <div class="sheet-section-title">Tasca & Equipaggiamento</div>
+                <!-- Swipe Actions handled via JS -->
                 <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
                     ${this.character.inventory.length === 0 ? '<p style="font-style:italic; color:var(--text-faded);">Nessun oggetto.</p>' : ''}
                     ${this.character.inventory.map((item, idx) => `
-                        <div class="inv-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 5px; border: 1px dashed var(--border-color);">
-                            <div>
-                                <strong style="font-size: 1.1rem;">${item.name}</strong>
-                                ${item.qty > 1 ? `<span style="background: var(--accent-gold); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px;">x${item.qty}</span>` : ''}
-                                <div style="font-size: 0.9rem; color: var(--text-faded); white-space: pre-wrap;">${item.notes || ''}</div>
+                        <div class="swipe-item-container" data-idx="${idx}" style="position: relative; border-radius: 5px; overflow: hidden; height: 50px;">
+                            <!-- Delete Background (Right) -->
+                            <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 100%; background: var(--accent-red); display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white;">
+                                🗑️
                             </div>
-                            <button class="btn-xs btn-danger btn-del-item" data-idx="${idx}">🗑️</button>
+                            <!-- Content -->
+                            <div class="inv-item-content" style="position: relative; z-index: 10; background: #fdfaf5; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px dashed var(--border-color); transform: translate3d(0,0,0); transition: transform 0.2s;">
+                                <div>
+                                    <strong style="font-size: 1.1rem;">${item.name}</strong>
+                                    ${item.qty > 1 ? `<span style="background: var(--accent-gold); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px;">x${item.qty}</span>` : ''}
+                                </div>
+                                <div style="color: #ccc;">‹</div>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
                 <button class="btn btn-primary w-100" id="btn-add-item">➕ Aggiungi Oggetto</button>
             </div>
         `;
-        container.querySelectorAll('.btn-del-item').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (confirm('Rimuovere oggetto?')) {
-                    this.character.inventory.splice(e.target.closest('button').dataset.idx, 1);
-                    Storage.saveCharacter(this.character);
-                    this.renderInventoryTab(container);
-                }
-            });
-        });
-        container.querySelector('#btn-add-item').addEventListener('click', () => {
-            const name = prompt("Nome oggetto:");
-            if (name) {
-                const qty = prompt("Quantità:", "1");
-                const notes = prompt("Note/Descrizione:");
-                this.character.inventory.push({ name, qty: qty || 1, notes: notes || '' });
-                Storage.saveCharacter(this.character);
-                this.renderInventoryTab(container);
-            }
-        });
     }
 
     renderJournalTab(container) {
         container.innerHTML = `
             <div class="sheet-section">
-                <div class="sheet-section-title">Diario di Bordo</div>
-                 <button class="btn btn-primary w-100 mb-20" id="btn-add-entry">✍️ Nuova Pagina</button>
+                
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 15px;">
+                     <!-- No redundant title -->
+                     <button class="btn btn-primary" id="btn-add-entry" style="margin-left: auto;">✍️ Scrivi</button>
+                </div>
+
                 <div id="journal-list" style="display: flex; flex-direction: column; gap: 15px;">
                      ${this.character.journal.length === 0 ? '<p style="font-style:italic; color:var(--text-faded);">Il diario è vuoto.</p>' : ''}
                      ${this.character.journal.map((entry, idx) => `
-                        <div class="journal-entry" style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 5px; border: 1px solid var(--border-worn); position: relative;">
-                            <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: bold; margin-bottom: 5px;">${entry.date || 'Data Sconosciuta'}</div>
-                            ${entry.title ? `<h4 style="margin: 0 0 5px 0;">${entry.title}</h4>` : ''}
-                             <div style="font-family: var(--font-hand); font-size: 1.1rem; line-height: 1.4; white-space: pre-wrap;">${entry.content}</div>
-                             <div style="margin-top: 10px; text-align: right;">
-                                <button class="btn-xs btn-secondary btn-edit-entry" data-idx="${idx}">Modifica</button>
-                                <button class="btn-xs btn-danger btn-del-entry" data-idx="${idx}">Elimina</button>
-                             </div>
+                        <div class="swipe-item-container journal" data-idx="${idx}" style="position: relative; border-radius: 5px; overflow: hidden; min-height: 80px;">
+                            <!-- Actions: Edit (Left Green), Delete (Right Red) -->
+                            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 50%; background: var(--accent-green); display: flex; align-items: center; padding-left: 20px; color: white;">✏️</div>
+                            <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 50%; background: var(--accent-red); display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white;">🗑️</div>
+                            
+                            <!-- Content -->
+                            <div class="journal-content" style="position: relative; z-index: 10; background: #fdfaf5; padding: 15px; border: 1px solid var(--border-worn); transform: translate3d(0,0,0); transition: transform 0.2s;">
+                                <div style="font-size: 0.8rem; color: var(--accent-gold); font-weight: bold; margin-bottom: 5px;">${entry.date || ''}</div>
+                                ${entry.title ? `<h4 style="margin: 0 0 5px 0;">${entry.title}</h4>` : ''}
+                                <div style="font-family: var(--font-hand); font-size: 1.1rem; line-height: 1.4; white-space: pre-wrap;">${entry.content}</div>
+                            </div>
                         </div>
                      `).join('')}
                 </div>
             </div>
         `;
-        container.querySelector('#btn-add-entry').addEventListener('click', () => this.editJournalEntry(null, container));
-        container.querySelectorAll('.btn-del-entry').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (confirm('Strappare questa pagina?')) {
-                    this.character.journal.splice(e.target.closest('button').dataset.idx, 1);
-                    Storage.saveCharacter(this.character);
-                    this.renderJournalTab(container);
-                }
-            });
-        });
-        container.querySelectorAll('.btn-edit-entry').forEach(btn => {
-            btn.addEventListener('click', (e) => this.editJournalEntry(e.target.closest('button').dataset.idx, container));
-        });
     }
 
-    editJournalEntry(idx, container) {
-        const entry = idx !== null ? this.character.journal[idx] : { title: '', content: '' };
-        const date = new Date().toLocaleDateString();
-        const title = prompt("Titolo (opzionale):", entry.title || '');
-        const content = prompt("Contenuto:", entry.content || '');
-        if (content !== null) {
-            const newEntry = { date, title: title || '', content };
-            if (idx !== null) this.character.journal[idx] = newEntry;
-            else this.character.journal.unshift(newEntry);
-            Storage.saveCharacter(this.character);
-            this.renderJournalTab(container);
-        }
-    }
-
+    // LISTENER ATTACHMENT
     attachGlobalListeners(container) {
         container.querySelector('#btn-close').addEventListener('click', () => this.app.router.navigate('characters'));
 
-        container.querySelectorAll('.tab-btn').forEach(btn => {
+        const tabs = container.querySelectorAll('.tab-btn');
+        tabs.forEach(btn => {
             if (btn.dataset.tab === this.activeTab) {
                 btn.style.borderBottomColor = 'var(--accent-gold)';
                 btn.style.color = 'var(--text-ink)';
             }
             btn.addEventListener('click', () => {
-                this.activeTab = btn.dataset.tab;
-                container.querySelectorAll('.tab-btn').forEach(b => {
-                    b.style.borderBottomColor = 'transparent';
-                    b.style.color = 'var(--text-faded)';
-                });
-                btn.style.borderBottomColor = 'var(--accent-gold)';
-                btn.style.color = 'var(--text-ink)';
-                this.renderTabContent(container.querySelector('#tab-content'), this.activeTab);
+                this.switchTab(btn.dataset.tab);
             });
+        });
+
+        // Swipe Navigation for PAGE (Sheet <-> Borsa <-> Diario)
+        // Only trigger on the 'tab-content' area to avoid conflicts?
+        // Actually, conflicts are real. Let's try to detect if we are on a swipeable ITEM.
+        const contentArea = container.querySelector('#tab-content');
+        let pageStartX = 0;
+        let pageStartY = 0;
+
+        contentArea.addEventListener('touchstart', (e) => {
+            pageStartX = e.touches[0].clientX;
+            pageStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        contentArea.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const diffX = endX - pageStartX;
+            const diffY = endY - pageStartY;
+
+            // Only horizontal swipe
+            if (Math.abs(diffX) > 60 && Math.abs(diffY) < 50) {
+                // Determine direction
+                const direction = diffX > 0 ? 'prev' : 'next';
+                this.handlePageSwipe(direction);
+            }
         });
 
         const fab = container.querySelector('#dice-fab');
         if (fab) {
+            // ... Dice Listeners existing code ...
             container.querySelector('#btn-pool-reset').addEventListener('click', () => {
                 this.dicePool = [];
                 this.updateDiceFab();
@@ -378,18 +424,58 @@ export default class CharacterSheet {
         }
     }
 
-    attachSheetListeners(container) {
-        const wealthBtn = container.querySelector('#btn-edit-wealth');
-        if (wealthBtn) wealthBtn.addEventListener('click', () => {
-            const val = prompt("Modifica Ricchezza:", this.character.wealth);
-            if (val !== null) {
-                this.character.wealth = val;
-                container.querySelector('#wealth-display').textContent = val;
-                Storage.saveCharacter(this.character);
+    handlePageSwipe(dir) {
+        const tabs = ['sheet', 'inventory', 'journal'];
+        const currentIdx = tabs.indexOf(this.activeTab);
+        let newIdx = currentIdx;
+
+        if (dir === 'next' && currentIdx < tabs.length - 1) newIdx++;
+        if (dir === 'prev' && currentIdx > 0) newIdx--;
+
+        if (newIdx !== currentIdx) {
+            this.switchTab(tabs[newIdx]);
+        }
+    }
+
+    switchTab(tabName) {
+        this.activeTab = tabName;
+        const container = document.querySelector('.character-sheet-container');
+        if (!container) return;
+
+        // Update Nav UI
+        container.querySelectorAll('.tab-btn').forEach(b => {
+            b.style.borderBottomColor = 'transparent';
+            b.style.color = 'var(--text-faded)';
+            if (b.dataset.tab === tabName) {
+                b.style.borderBottomColor = 'var(--accent-gold)';
+                b.style.color = 'var(--text-ink)';
             }
         });
 
-        // Level Up Button Logic (Moved to bottom)
+        this.updateHeaderVisibility();
+        this.renderTabContent(container.querySelector('#tab-content'), tabName);
+    }
+
+    attachSheetListeners(container) {
+        const wealthBtn = container.querySelector('#btn-edit-wealth');
+        if (wealthBtn) wealthBtn.addEventListener('click', () => {
+            const gold = prompt("Monete d'Oro (Gold):", this.character.wealth.gold || 0);
+            const silver = prompt("Monete d'Argento (Silver):", this.character.wealth.silver || 0);
+            const copper = prompt("Monete di Bronzo (Copper):", this.character.wealth.copper || 0);
+
+            if (gold !== null || silver !== null || copper !== null) {
+                this.character.wealth = {
+                    gold: parseInt(gold) || 0,
+                    silver: parseInt(silver) || 0,
+                    copper: parseInt(copper) || 0
+                };
+                Storage.saveCharacter(this.character);
+                // Re-render sheet part or just update? Easiest to re-render tab.
+                this.renderTabContent(document.querySelector('#tab-content'), 'sheet');
+            }
+        });
+
+        // ... Existing HP/Wounds listeners ...
         const lvlBtn = container.querySelector('#btn-lvl-up');
         if (lvlBtn) {
             lvlBtn.addEventListener('click', () => {
@@ -439,82 +525,143 @@ export default class CharacterSheet {
             });
         }
 
-        // TOOLTIPS
+        // TOOLTIPS & DICE
         container.querySelectorAll('.interactive-label, .interactive-text').forEach(el => {
             el.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const key = e.target.dataset.key;
-                const type = e.target.dataset.type;
-                this.showTooltip(type, key, e.clientX, e.clientY);
+                e.preventDefault(); e.stopPropagation();
+                this.showTooltip(e.target.dataset.type, e.target.dataset.key, e.clientX, e.clientY);
             });
         });
 
-        // DICE POOL
         container.querySelectorAll('.interactive-stat').forEach(el => {
             el.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const key = e.target.dataset.key;
-                const val = parseInt(e.target.dataset.val);
-                this.addToPool(val, this.translateKey(key));
+                e.preventDefault(); e.stopPropagation();
+                this.addToPool(parseInt(e.target.dataset.val), this.translateKey(e.target.dataset.key));
             });
         });
     }
 
+    // GENERIC SWIPE LOGIC FOR ITEMS
+    attachItemSwipe(container, selector, onSwipeLeft, onSwipeRight) {
+        const items = container.querySelectorAll(selector);
+        items.forEach(item => {
+            const content = item.querySelector('div[style*="z-index: 10"]'); // The front face
+            let startX = 0;
+            let currentTranslate = 0;
+            let isDragging = false;
+
+            content.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = false;
+                content.style.transition = 'none';
+                e.stopPropagation(); // Try to prevent page swipe?
+            }, { passive: false });
+
+            content.addEventListener('touchmove', (e) => {
+                const x = e.touches[0].clientX;
+                const diff = x - startX;
+                if (Math.abs(diff) > 10) {
+                    isDragging = true;
+                    e.stopPropagation(); // Stop page swipe bubble up
+                    // Cap drag
+                    let translate = diff;
+                    if (translate < -100) translate = -100;
+                    if (translate > 100) translate = 100;
+
+                    // Logic: Inventory only swipe Left? No, allow both but visual implies.
+                    content.style.transform = `translate3d(${translate}px, 0, 0)`;
+                    currentTranslate = translate;
+                }
+            }, { passive: true });
+
+            content.addEventListener('touchend', (e) => {
+                content.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                if (isDragging) {
+                    e.stopPropagation();
+                    if (currentTranslate < -60 && onSwipeLeft) { // Left Swipe (e.g. Delete)
+                        content.style.transform = 'translate3d(0,0,0)';
+                        onSwipeLeft(item.dataset.idx);
+                    } else if (currentTranslate > 60 && onSwipeRight) { // Right Swipe (e.g. Edit)
+                        content.style.transform = 'translate3d(0,0,0)';
+                        onSwipeRight(item.dataset.idx);
+                    } else {
+                        content.style.transform = 'translate3d(0,0,0)';
+                    }
+                }
+                isDragging = false;
+            });
+        });
+    }
+
+    attachInventoryListeners(container) {
+        container.querySelector('#btn-add-item').addEventListener('click', () => {
+            const name = prompt("Nome oggetto:");
+            if (name) {
+                const qty = prompt("Quantità:", "1");
+                const notes = prompt("Note/Descrizione:");
+                this.character.inventory.push({ name, qty: qty || 1, notes: notes || '' });
+                Storage.saveCharacter(this.character);
+                this.renderTabContent(document.querySelector('#tab-content'), 'inventory');
+            }
+        });
+
+        // Swipe Left to DELETE
+        this.attachItemSwipe(container, '.swipe-item-container', (idx) => {
+            if (confirm('Rimuovere oggetto?')) {
+                this.character.inventory.splice(idx, 1);
+                Storage.saveCharacter(this.character);
+                this.renderTabContent(document.querySelector('#tab-content'), 'inventory');
+            }
+        }, null);
+    }
+
+    attachJournalListeners(container) {
+        container.querySelector('#btn-add-entry').addEventListener('click', () => this.editJournalEntry(null));
+
+        // Swipe Left (Delete), Swipe Right (Edit)
+        this.attachItemSwipe(container, '.swipe-item-container.journal',
+            (idx) => { // Left: Delete
+                if (confirm('Strappare questa pagina?')) {
+                    this.character.journal.splice(idx, 1);
+                    Storage.saveCharacter(this.character);
+                    this.renderTabContent(document.querySelector('#tab-content'), 'journal');
+                }
+            },
+            (idx) => { // Right: Edit
+                this.editJournalEntry(idx);
+            }
+        );
+    }
+
+    editJournalEntry(idx) {
+        const entry = idx !== null ? this.character.journal[idx] : { title: '', content: '' };
+        const date = new Date().toLocaleDateString();
+        const title = prompt("Titolo (opzionale):", entry.title || '');
+        const content = prompt("Contenuto:", entry.content || '');
+        if (content !== null) {
+            const newEntry = { date, title: title || '', content };
+            if (idx !== null) this.character.journal[idx] = newEntry;
+            else this.character.journal.unshift(newEntry);
+            Storage.saveCharacter(this.character);
+            this.renderTabContent(document.querySelector('#tab-content'), 'journal');
+        }
+    }
+
+    // Shared Methods
     addToPool(val, sourceName) {
         this.dicePool.push({ val, source: sourceName });
         this.updateDiceFab();
     }
-
-    updateDiceFab() {
+    updateDiceFab() { /* Same as before */
         const fab = document.querySelector('#dice-fab');
         if (!fab) return;
-
-        if (this.dicePool.length === 0) {
-            fab.style.display = 'none';
-            return;
-        }
+        if (this.dicePool.length === 0) { fab.style.display = 'none'; return; }
         fab.style.display = 'flex';
-
         const list = document.querySelector('#dice-pool-list');
         list.innerHTML = this.dicePool.map(d => `<div>${d.source}: <strong style="color:var(--accent-gold);">+${d.val}</strong></div>`).join('');
-
         const total = this.dicePool.reduce((sum, d) => sum + d.val, 0);
         document.querySelector('#dice-pool-total').textContent = total;
     }
-
-    showTooltip(type, key, x, y) {
-        let text = '';
-        if (type === 'trait' || type === 'skill') {
-            text = this.descriptions[key] || key;
-        } else if (type === 'advantage') {
-            const adv = this.advantagesData.find(a => a.name === key);
-            text = adv ? `<strong>${adv.name}</strong> (${adv.cost} PE)<br>${adv.description}` : key;
-        }
-
-        const tooltip = document.querySelector('#sheet-tooltip');
-        tooltip.innerHTML = text;
-        tooltip.style.opacity = '1';
-
-        // Positioning
-        let left = x - 125;
-        if (left < 10) left = 10;
-        if (left + 250 > window.innerWidth) left = window.innerWidth - 260;
-
-        let top = y - 100;
-        if (top < 50) top = y + 40; // Flip down if too close to top
-
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = top + 'px';
-
-        // Hide after delay
-        if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
-        this.tooltipTimeout = setTimeout(() => {
-            tooltip.style.opacity = '0';
-        }, 4000);
-    }
-
     rollDicePool() {
         const total = this.dicePool.reduce((sum, d) => sum + d.val, 0);
         if (total === 0) return;
@@ -541,17 +688,45 @@ export default class CharacterSheet {
         overlay.style.display = 'flex';
     }
 
+    showTooltip(type, key, x, y) {
+        let text = '';
+        if (type === 'trait' || type === 'skill') {
+            text = this.descriptions[key] || key;
+        } else if (type === 'advantage') {
+            const adv = this.advantagesData.find(a => a.name === key);
+            text = adv ? `<strong>${adv.name}</strong> (${adv.cost} PE)<br>${adv.description}` : key;
+        }
+
+        const tooltip = document.querySelector('#sheet-tooltip');
+        tooltip.innerHTML = text;
+        tooltip.style.opacity = '1';
+
+        // Positioning
+        let left = x - 125;
+        if (left < 10) left = 10;
+        if (left + 250 > window.innerWidth) left = window.innerWidth - 260;
+
+        let top = y - 100;
+        if (top < 50) top = y + 40;
+
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+
+        if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
+        this.tooltipTimeout = setTimeout(() => {
+            tooltip.style.opacity = '0';
+        }, 4000);
+    }
+
     translateKey(key) {
         if (this.descriptions[key]) return this.descriptions[key].split(':')[0];
         return this.translateSkill(key) || this.translateTrait(key) || key;
     }
-
     translateTrait(trait) {
         const map = { 'brawn': 'Muscoli', 'finesse': 'Finezza', 'resolve': 'Risoluz.', 'wits': 'Acume', 'panache': 'Panache' };
         return map[trait] || trait;
     }
-
     translateSkill(skillId) {
-        return skillId.charAt(0).toUpperCase() + skillId.slice(1);
+        return this.skillMap[skillId] || (skillId.charAt(0).toUpperCase() + skillId.slice(1));
     }
 }
