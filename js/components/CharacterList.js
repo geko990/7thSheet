@@ -3,7 +3,6 @@ import { Storage } from '../storage.js';
 export default class CharacterList {
     constructor(app) {
         this.app = app;
-        this.swipeState = { startX: 0, currentX: 0, activeCard: null };
     }
 
     async render() {
@@ -35,43 +34,39 @@ export default class CharacterList {
             </div>
             
              <!-- Edit Modal -->
-            <div id="edit-modal" class="modal-overlay" style="display: none;">
-                <div class="modal-content">
-                    <h3>Modifica Profilo</h3>
-                    <form id="edit-form">
-                        <input type="hidden" id="edit-id">
-                        <div class="form-group">
-                            <label>Nome</label>
-                            <input type="text" id="edit-name" class="input-field" required>
-                        </div>
-                         <div class="form-group">
-                            <label>Concetto</label>
-                            <input type="text" id="edit-concept" class="input-field">
-                        </div>
-                        <div class="form-group">
-                            <label>Nazione</label>
-                             <select id="edit-nation" class="input-field">
-                                <option value="Avalon">Avalon</option>
-                                <option value="Castille">Castille</option>
-                                <option value="Eisen">Eisen</option>
-                                <option value="Montaigne">Montaigne</option>
-                                <option value="Sarmatia">Sarmatia</option>
-                                <option value="Ussura">Ussura</option>
-                                <option value="Vestenmennavenjar">Vestenmennavenjar</option>
-                                <option value="Vodacce">Vodacce</option>
-                                <option value="La Bucca">La Bucca</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Religione</label>
-                            <input type="text" id="edit-religion" class="input-field">
-                        </div>
-                        <div class="form-group">
-                           <label>Arcano (Virtù/Hubris)</label>
-                           <input type="text" id="edit-arcana" class="input-field" placeholder="Es: Il Folle">
-                       </div>
+            <div id="edit-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+                <div class="modal-content" style="width: 90%; max-width: 400px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h3 style="text-align: center; margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-gold); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Modifica Profilo</h3>
                     
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <form id="edit-form" style="display: grid; grid-template-columns: 80px 1fr; gap: 15px; align-items: center;">
+                        <input type="hidden" id="edit-id">
+                        
+                        <label style="font-weight: bold; color: var(--text-faded); text-align: right;">Nome</label>
+                        <input type="text" id="edit-name" class="input-field" required style="width: 100%;">
+
+                        <label style="font-weight: bold; color: var(--text-faded); text-align: right;">Concetto</label>
+                        <input type="text" id="edit-concept" class="input-field" style="width: 100%;">
+
+                        <label style="font-weight: bold; color: var(--text-faded); text-align: right;">Nazione</label>
+                        <select id="edit-nation" class="input-field" style="width: 100%;">
+                            <option value="Avalon">Avalon</option>
+                            <option value="Castille">Castille</option>
+                            <option value="Eisen">Eisen</option>
+                            <option value="Montaigne">Montaigne</option>
+                            <option value="Sarmatia">Sarmatia</option>
+                            <option value="Ussura">Ussura</option>
+                            <option value="Vestenmennavenjar">Vestenmennavenjar</option>
+                            <option value="Vodacce">Vodacce</option>
+                            <option value="La Bucca">La Bucca</option>
+                        </select>
+
+                        <label style="font-weight: bold; color: var(--text-faded); text-align: right;">Religione</label>
+                        <input type="text" id="edit-religion" class="input-field" style="width: 100%;">
+
+                        <label style="font-weight: bold; color: var(--text-faded); text-align: right;">Arcano</label>
+                        <input type="text" id="edit-arcana" class="input-field" placeholder="Es: Il Folle" style="width: 100%;">
+                    
+                        <div style="grid-column: 1 / -1; display: flex; gap: 10px; margin-top: 15px;">
                             <button type="button" class="btn btn-secondary" id="btn-cancel-edit" style="flex: 1;">Annulla</button>
                             <button type="submit" class="btn btn-primary" style="flex: 1;">Salva</button>
                         </div>
@@ -107,19 +102,19 @@ export default class CharacterList {
 
         const content = char.image ? '' : nationEmoji;
 
-        // Swipe container structure
+        // Icons only for swipe actions
         return `
-            <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; overflow: hidden;">
+            <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; overflow: hidden; background: #e0e0e0;">
                 <!-- Background Actions -->
-                <div class="swipe-action action-left" style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; background: var(--accent-blue); display: flex; align-items: center; padding-left: 20px; color: white; font-weight: bold; z-index: 1;">
-                    ✏️ Modifica
+                <div class="swipe-action action-left" style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; background: var(--accent-green); display: flex; align-items: center; padding-left: 25px; color: white; font-size: 1.5rem; z-index: 1;">
+                    ✏️
                 </div>
-                <div class="swipe-action action-right" style="position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; color: white; font-weight: bold; z-index: 1;">
-                    🗑️ Elimina
+                <div class="swipe-action action-right" style="position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 25px; color: white; font-size: 1.5rem; z-index: 1;">
+                    🗑️
                 </div>
 
                 <!-- Card Content -->
-                <div class="card character-card" data-id="${char.id}" style="position: relative; z-index: 2; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255, 255, 255, 0.95); transition: transform 0.2s ease-out;">
+                <div class="card character-card" data-id="${char.id}" style="position: relative; z-index: 2; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255, 255, 255, 0.95); transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); transform: translate3d(0,0,0);">
                     <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
                         ${content}
                     </div>
@@ -160,10 +155,6 @@ export default class CharacterList {
                 const term = e.target.value.toLowerCase();
                 const filtered = allCharacters.filter(c => c.name.toLowerCase().includes(term));
                 container.querySelector('#character-list-container').innerHTML = this.renderList(filtered);
-                // Re-attach listeners for filtered items?
-                // For simplicity, we just won't attach swipe listeners to filtered results yet,
-                // or we'd need to extract attachCardListeners. 
-                // Let's extract it.
                 this.attachCardListeners(container.querySelector('#character-list-container'));
             });
         }
@@ -186,55 +177,85 @@ export default class CharacterList {
         const cards = listContainer.querySelectorAll('.character-card');
 
         cards.forEach(card => {
-            // Click to Navigate (if not swiping)
-            card.addEventListener('click', () => {
-                if (!card.classList.contains('swiped')) {
+            let startX = 0;
+            let startY = 0;
+            let currentTranslate = 0;
+            let isDragging = false;
+            let isScrolling = false;
+
+            // Click Logic (Fallback if Swipe fails, but Swipe logic should handle clear separation)
+            card.addEventListener('click', (e) => {
+                // If we are not in a swiped state and not dragging, navigate
+                if (currentTranslate === 0 && !isDragging) {
                     this.app.router.navigate(`character/${card.dataset.id}`);
                 }
             });
 
-            // Swipe Logic
-            let startX = 0;
-            let currentTranslate = 0;
-            let isDragging = false;
-
             card.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
-                isDragging = true;
+                startY = e.touches[0].clientY;
+                isDragging = false;
+                isScrolling = false;
                 card.style.transition = 'none';
             });
 
             card.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
                 const currentX = e.touches[0].clientX;
-                const diff = currentX - startX;
+                const currentY = e.touches[0].clientY;
+                const diffX = currentX - startX;
+                const diffY = currentY - startY;
 
-                // Limit swipe range
-                if (diff > 100) currentTranslate = 100; // Right (Edit)
-                else if (diff < -100) currentTranslate = -100; // Left (Delete)
-                else currentTranslate = diff;
+                // Determine if scrolling or swiping
+                if (!isDragging && !isScrolling) {
+                    if (Math.abs(diffY) > Math.abs(diffX)) {
+                        isScrolling = true;
+                        return; // Let native scroll happen
+                    } else if (Math.abs(diffX) > 10) { // Threshold for swipe start
+                        isDragging = true;
+                    }
+                }
 
-                card.style.transform = `translateX(${currentTranslate}px)`;
+                if (isScrolling) return;
+
+                if (isDragging) {
+                    e.preventDefault(); // Prevent scroll while swiping
+                    // Limit swipe range
+                    if (diffX > 100) currentTranslate = 100; // Right (Edit) limit
+                    else if (diffX < -100) currentTranslate = -100; // Left (Delete) limit
+                    else currentTranslate = diffX;
+
+                    card.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
+                }
             });
 
             card.addEventListener('touchend', (e) => {
-                isDragging = false;
                 card.style.transition = 'transform 0.2s ease-out';
 
-                if (currentTranslate > 80) {
-                    // Swipe Right -> Edit
-                    // Reset position first
-                    card.style.transform = 'translateX(0)';
-                    this.openEditModal(card.dataset.id);
-                } else if (currentTranslate < -80) {
-                    // Swipe Left -> Delete
-                    card.style.transform = 'translateX(0)';
-                    this.confirmDelete(card.dataset.id);
-                } else {
-                    // Reset
-                    card.style.transform = 'translateX(0)';
+                if (isDragging) {
+                    if (currentTranslate > 80) {
+                        // Swipe Right -> Edit
+                        card.style.transform = 'translate3d(0, 0, 0)';
+                        this.openEditModal(card.dataset.id);
+                    } else if (currentTranslate < -80) {
+                        // Swipe Left -> Delete
+                        card.style.transform = 'translate3d(0, 0, 0)';
+                        this.confirmDelete(card.dataset.id);
+                    } else {
+                        // Snap back
+                        card.style.transform = 'translate3d(0, 0, 0)';
+                    }
+                } else if (!isScrolling) {
+                    // It was a tap!
+                    // Trigger click manually if needed, or let the click event fire naturally.
+                    // Usually click fires after touchend if not prevented.
+                    // But if we preventedDefault in touchmove (which we didn't for tap), it should fire.
+                    // Just to be safe, we explicitly navigate if click doesn't fire for some reason? 
+                    // No, double firing is bad. The click listener above handles it.
                 }
+
                 currentTranslate = 0;
+                isDragging = false;
+                isScrolling = false;
             });
         });
     }
@@ -262,11 +283,10 @@ export default class CharacterList {
             char.concept = modal.querySelector('#edit-concept').value;
             char.nation = modal.querySelector('#edit-nation').value;
             char.religion = modal.querySelector('#edit-religion').value;
-            char.arcana = modal.querySelector('#edit-arcana').value; // if we had this field
+            char.arcana = modal.querySelector('#edit-arcana').value;
 
             Storage.saveCharacter(char);
             this.render().then(newDiv => {
-                // Re-render whole page to refresh list
                 const main = document.getElementById('main-content');
                 main.innerHTML = '';
                 main.appendChild(newDiv);
