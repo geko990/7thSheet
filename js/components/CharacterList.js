@@ -174,8 +174,15 @@ export default class CharacterList {
         // Create Button
         const btnCreate = container.querySelector('#btn-create-new');
         if (btnCreate) btnCreate.addEventListener('click', () => {
+            // Fixed: Use startCharacterCreation() instead of createNewCharacter()
             if (confirm("Creare un nuovo personaggio?")) {
-                this.app.createNewCharacter();
+                if (this.app.startCharacterCreation) {
+                    this.app.startCharacterCreation();
+                } else if (this.app.createNewCharacter) {
+                    this.app.createNewCharacter();
+                } else {
+                    console.error("No create method found on App");
+                }
             }
         });
 
@@ -216,7 +223,6 @@ export default class CharacterList {
             let currentTranslate = 0;
             let isDragging = false;
             let isScrolling = false;
-            // Prevent fast taps from trigger double logic
             let tapStartTime = 0;
 
             card.addEventListener('touchstart', (e) => {
@@ -276,11 +282,14 @@ export default class CharacterList {
                         card.style.transform = 'translate3d(0, 0, 0)';
                     }
                 } else if (!isScrolling) {
-                    // Tap Detection - robust
-                    // If movement was minimal and time was short, it's a tap.
-                    // Even if dragged slightly (<10px), it's a tap.
+                    // Fixed: Use correct routing call
                     if (Math.abs(currentTranslate) < 5) {
-                        this.app.router.navigate(`character/${card.dataset.id}`);
+                        // If App has viewCharacter helper, use it. Otherwise use router navigate safely.
+                        if (this.app.viewCharacter) {
+                            this.app.viewCharacter(card.dataset.id);
+                        } else {
+                            this.app.router.navigate('character-sheet', { id: card.dataset.id });
+                        }
                     }
                 }
 
