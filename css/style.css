@@ -189,6 +189,10 @@ select {
     width: 100%;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* Buttons */
 .btn {
     padding: 10px 20px;
