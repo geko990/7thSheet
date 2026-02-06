@@ -58,8 +58,10 @@
     - [ ] UI: Editable Wealth & XP <!-- id: 133 -->
     - [ ] Logic: Level Up / Advancement Mode <!-- id: 134 -->
 
-- [ ] Campaign Mode (Future) <!-- id: 140 -->
-    - [ ] Feasibility Study: Firebase Integration <!-- id: 141 -->
+- [ ] Interactive Character Sheet (v0.5) <!-- id: 150 -->
+    - [ ] Tooltip System (Descriptions on tap) <!-- id: 151 -->
+    - [ ] Dynamic Dice Rolling UI (Clickable Stats) <!-- id: 152 -->
+    - [ ] Dice Result Overlay <!-- id: 153 -->
 
 ## Completed Tasks
 

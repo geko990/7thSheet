@@ -1,0 +1,53 @@
+/* Interactive Stats */
+.interactive-stat {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.interactive-stat:active {
+    transform: scale(0.9);
+    background: var(--accent-gold) !important;
+    color: var(--bg-paper) !important;
+}
+
+.interactive-label {
+    cursor: help;
+    text-decoration: underline dotted var(--text-faded);
+}
+
+/* Tooltip */
+#sheet-tooltip {
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+/* Dice FAB */
+#dice-fab {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-pool-bubble {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dice Overlay */
+.die.crit {
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 10px var(--accent-gold);
+    color: var(--text-ink);
+}
