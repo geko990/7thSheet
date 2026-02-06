@@ -62,8 +62,9 @@ export default class CharacterList {
             </div>
             
              <!-- Edit Modal -->
-            <div id="edit-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 9999; background: rgba(0,0,0,0.5);">
-                <div class="modal-content" style="width: 90%; max-width: 350px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); border-radius: 16px; background: var(--bg-paper);">
+            <div id="edit-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); z-index: 9999; background: rgba(0,0,0,0.4);">
+                <!-- Modal Content: Solid Background (Parchment/Card Color) -->
+                <div class="modal-content" style="width: 90%; max-width: 350px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); border-radius: 16px; background: #fdfaf5; opacity: 1;">
                     <h3 style="text-align: center; margin-bottom: 25px; font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Modifica Profilo</h3>
                     
                     <form id="edit-form" class="modal-grid">
@@ -129,7 +130,7 @@ export default class CharacterList {
 
         const content = char.image ? '' : nationEmoji;
 
-        // FIXED SWIPE COLORS: Split 50/50 to avoid overlap
+        // FIXED SWIPE COLORS: Split 50/50
         return `
             <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; background: #e0e0e0; overflow: hidden; height: 86px;"> 
                 
@@ -215,23 +216,15 @@ export default class CharacterList {
             let currentTranslate = 0;
             let isDragging = false;
             let isScrolling = false;
-
-            // Click Logic handled via Touchend to avoid conflicts, or native click
-            // If we don't preventDefault on touchmove, click should fire.
-            // But we do preventDefault on swipe... so we need robustness.
-
-            card.addEventListener('click', (e) => {
-                // Native click should work if no swipe happened
-                if (!isDragging && Math.abs(currentTranslate) < 5) {
-                    this.app.router.navigate(`character/${card.dataset.id}`);
-                }
-            });
+            // Prevent fast taps from trigger double logic
+            let tapStartTime = 0;
 
             card.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isDragging = false;
                 isScrolling = false;
+                tapStartTime = Date.now();
                 card.style.transition = 'none';
             });
 
@@ -245,8 +238,7 @@ export default class CharacterList {
                 if (!isDragging && !isScrolling) {
                     if (Math.abs(diffY) > Math.abs(diffX)) {
                         isScrolling = true;
-                        // Let native scroll happen (do not preventDefault)
-                        return;
+                        return; // Let native scroll happen
                     } else if (Math.abs(diffX) > 10) { // Threshold for swipe start
                         isDragging = true;
                     }
@@ -267,6 +259,8 @@ export default class CharacterList {
 
             card.addEventListener('touchend', (e) => {
                 card.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);'; // Smooth snap
+                const tapEndTime = Date.now();
+                const tapDuration = tapEndTime - tapStartTime;
 
                 if (isDragging) {
                     if (currentTranslate > 80) {
@@ -282,11 +276,12 @@ export default class CharacterList {
                         card.style.transform = 'translate3d(0, 0, 0)';
                     }
                 } else if (!isScrolling) {
-                    // Tap detected!
-                    // If native click doesn't fire (sometimes happens on weak taps), forcing it here is an option
-                    // But usually, if we didn't call preventDefault, click fires.
-                    // We only called preventDefault inside 'if(isDragging)'.
-                    // So Tap should be safe.
+                    // Tap Detection - robust
+                    // If movement was minimal and time was short, it's a tap.
+                    // Even if dragged slightly (<10px), it's a tap.
+                    if (Math.abs(currentTranslate) < 5) {
+                        this.app.router.navigate(`character/${card.dataset.id}`);
+                    }
                 }
 
                 currentTranslate = 0;
