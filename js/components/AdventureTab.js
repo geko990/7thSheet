@@ -148,29 +148,88 @@ export class AdventureTab {
                     </div>
                 </div>
             </div>
+
+            <!-- Campaign Modal -->
+            <div id="campaign-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; backdrop-filter: blur(2px); background: rgba(0,0,0,0.4);">
+                <div class="modal-content" style="width: 90%; max-width: 350px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); border-radius: 16px; background: #fdfaf5;">
+                    <h3 id="modal-title" style="text-align: center; margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem;"></h3>
+                    <input type="text" id="modal-input" class="input-field mb-20" style="width: 100%; text-align: center;">
+                    <div style="display: flex; gap: 10px;">
+                        <button id="modal-cancel" class="btn btn-secondary w-50">Annulla</button>
+                        <button id="modal-confirm" class="btn btn-primary w-50">Conferma</button>
+                    </div>
+                </div>
+            </div>
         `;
 
+        this.attachDashboardListeners();
+    }
+
+    attachDashboardListeners() {
+        // Logout
         this.container.querySelector('#btn-logout').addEventListener('click', async () => {
             await AuthService.signOut();
         });
 
-        this.container.querySelector('#btn-create-campaign').addEventListener('click', () => {
-            const title = prompt("Nome della Campagna:");
-            if (title) {
-                CampaignService.createCampaign(title).then(({ error }) => {
-                    if (error) alert("Errore: " + error.message);
-                    else this.render();
-                });
+        const modal = this.container.querySelector('#campaign-modal');
+        const modalTitle = this.container.querySelector('#modal-title');
+        const modalInput = this.container.querySelector('#modal-input');
+        const btnConfirm = this.container.querySelector('#modal-confirm');
+        const btnCancel = this.container.querySelector('#modal-cancel');
+
+        let currentAction = null; // 'create' or 'join'
+
+        const openModal = (action) => {
+            currentAction = action;
+            modal.style.display = 'flex';
+            modalInput.value = '';
+            if (action === 'create') {
+                modalTitle.textContent = "Nuova Campagna";
+                modalInput.placeholder = "Nome della campagna";
+            } else {
+                modalTitle.textContent = "Unisciti";
+                modalInput.placeholder = "Codice invito";
             }
+            modalInput.focus();
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            currentAction = null;
+        };
+
+        // Modal triggers
+        this.container.querySelector('#btn-create-campaign').addEventListener('click', () => openModal('create'));
+        this.container.querySelector('#btn-join-campaign').addEventListener('click', () => openModal('join'));
+
+        // Modal Actions
+        btnCancel.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
         });
 
-        this.container.querySelector('#btn-join-campaign').addEventListener('click', () => {
-            const code = prompt("Inserisci codice invito:");
-            if (code) {
-                CampaignService.joinCampaign(code).then(({ error }) => {
-                    if (error) alert("Errore: " + error.message);
-                    else this.render();
-                });
+        btnConfirm.addEventListener('click', async () => {
+            const value = modalInput.value.trim();
+            if (!value) return;
+
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = "...";
+
+            let result;
+            if (currentAction === 'create') {
+                result = await CampaignService.createCampaign(value);
+            } else {
+                result = await CampaignService.joinCampaign(value);
+            }
+
+            btnConfirm.disabled = false;
+            btnConfirm.textContent = "Conferma";
+
+            if (result.error) {
+                alert("Errore: " + result.error.message);
+            } else {
+                closeModal();
+                this.render(); // Refresh list
             }
         });
     }
