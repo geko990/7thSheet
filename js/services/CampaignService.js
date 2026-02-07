@@ -166,5 +166,19 @@ export const CampaignService = {
             .select()
             .single();
         return { data, error };
+    },
+
+    // MEMBERS
+    async linkCharacter(campaignId, characterData) {
+        const user = AuthService.getUser();
+        if (!user) return { error: { message: "Not logged in" } };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_members')
+            .update({ character_data: characterData })
+            .match({ campaign_id: campaignId, user_id: user.id })
+            .select();
+
+        return { data, error };
     }
 };

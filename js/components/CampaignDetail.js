@@ -183,6 +183,18 @@ export class CampaignDetail {
 
         // PLAYERS Section
         html += '<h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px;">Protagonisti</h3>';
+
+        // Check if I need to link my character
+        const myMember = members.find(m => m.user_id === AuthService.user.id);
+        if (myMember && !myMember.character_data && this.myRole !== 'gm') {
+            html += `
+                <div class="alert alert-info text-center mb-20" style="background: rgba(var(--accent-navy-rgb), 0.1); border: 1px solid var(--accent-navy); padding: 15px; border-radius: 8px;">
+                    <div>Non hai ancora scelto chi interpretare!</div>
+                    <button id="btn-link-char" class="btn btn-sm btn-primary mt-10">Scegli il tuo Personaggio</button>
+                </div>
+             `;
+        }
+
         html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px;">';
         members.forEach(m => {
             if (m.role === 'gm') return; // Skip GM in players list logic or show separately?
@@ -191,7 +203,7 @@ export class CampaignDetail {
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden;">
                         ${m.profile.avatar_url ? `<img src="${m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
-                     <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'Senza Nome'}</div>
+                     <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'In attesa...'}</div>
                      <div style="font-size: 0.8rem; color: var(--text-faded);">${m.profile.username}</div>
                 </div>
             `;
@@ -235,7 +247,10 @@ export class CampaignDetail {
 
         container.innerHTML = html;
 
-        // NPC Listeners
+        // Listeners
+        container.querySelector('#btn-link-char')?.addEventListener('click', () => this.openLinkCharacterModal());
+
+        // NPC Listeners (Existing)
         if (this.myRole === 'gm') {
             container.querySelector('#btn-add-npc')?.addEventListener('click', () => this.openAddNPCModal());
 
@@ -267,6 +282,63 @@ export class CampaignDetail {
                 });
             });
         }
+    }
+
+    // MODALS (Add Link)
+    openLinkCharacterModal() {
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+
+        // Logic to get local characters
+        const localChars = JSON.parse(localStorage.getItem('characters') || '[]');
+
+        body.innerHTML = `
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-navy);">Scegli il tuo Eroe</h3>
+            <div id="char-selection-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+                ${localChars.length > 0 ? localChars.map(c => `
+                    <div class="card char-option" data-id="${c.id}" style="padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 2px solid transparent;">
+                        <div class="avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #ddd;">
+                            ${c.image ? `<img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover;">` : '👤'}
+                        </div>
+                        <div style="font-weight: bold;">${c.name}</div>
+                    </div>
+                `).join('') : '<div class="text-center">Non hai creato nessun personaggio sul dispositivo!</div>'}
+            </div>
+        `;
+
+        let selectedChar = null;
+
+        body.querySelectorAll('.char-option').forEach(el => {
+            el.addEventListener('click', () => {
+                // Deselect others
+                body.querySelectorAll('.char-option').forEach(opt => opt.style.borderColor = 'transparent');
+                // Select this
+                el.style.borderColor = 'var(--accent-gold)';
+                selectedChar = localChars.find(c => c.id === el.dataset.id);
+            });
+        });
+
+        btnAction.style.display = 'block';
+        btnAction.textContent = "Collega";
+        btnAction.onclick = async () => {
+            if (!selectedChar) return alert("Seleziona un personaggio!");
+
+            // Prepare minimal data to store
+            const charData = {
+                id: selectedChar.id,
+                name: selectedChar.name,
+                concept: selectedChar.concept,
+                nation: selectedChar.nation
+                // We don't store full sheet yet, just identity
+            };
+
+            await CampaignService.linkCharacter(this.campaignId, charData);
+            modal.style.display = 'none';
+            this.loadTabContent();
+        };
+
+        modal.style.display = 'flex';
     }
 
     // MODALS

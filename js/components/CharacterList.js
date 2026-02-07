@@ -55,8 +55,8 @@ export default class CharacterList {
             </div>
 
             <!-- FAB Create Button -->
-            <div class="fab-container" style="justify-content: center; left: 0; width: 100%;">
-                <button class="btn-fab" id="btn-create-new">
+            <div class="fab-container" style="position: fixed; bottom: 80px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 90; pointer-events: none;">
+                <button class="btn-fab" id="btn-create-new" style="pointer-events: auto;">
                     <span>✨</span> Nuovo Personaggio
                 </button>
             </div>
