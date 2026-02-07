@@ -19,7 +19,11 @@ class App {
         this.router.register('characters', () => new CharacterList(this).render());
         this.router.register('dice', () => new DiceRoller(this).render());
         this.router.register('settings', () => new Settings(this).render());
-        this.router.register('adventures', () => this.adventureTab.render(document.getElementById('main-content')));
+        this.router.register('adventures', async () => {
+            const div = document.createElement('div');
+            await this.adventureTab.render(div);
+            return div;
+        });
         this.router.register('create-wizard', () => new CreateWizard(this).render());
         this.router.register('character-sheet', (params) => new CharacterSheet(this).renderCharacter(params.id));
 
