@@ -1,4 +1,4 @@
-const CACHE_NAME = '7thsea-v0.6.9';
+const CACHE_NAME = '7thsea-v0.9.0';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -8,6 +8,9 @@ const ASSETS_TO_CACHE = [
     './js/router.js',
     './js/storage.js',
     './js/dice.js',
+    './js/services/SupabaseClient.js',
+    './js/services/AuthService.js',
+    './js/components/AdventureTab.js',
     './manifest.json',
     './js/components/CreateWizard.js',
     './js/components/CharacterList.js',
