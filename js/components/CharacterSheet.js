@@ -1,6 +1,5 @@
 import { Storage } from '../storage.js';
 import { Dice } from '../dice.js';
-import { AdventureTab } from './AdventureTab.js';
 import { AuthService } from '../services/AuthService.js';
 
 export default class CharacterSheet {
@@ -57,7 +56,6 @@ export default class CharacterSheet {
             'weaponry': 'Combattimento con spade, pugnali o armi in asta.'
         };
 
-        this.adventureTab = new AdventureTab();
         AuthService.init();
     }
 
@@ -131,7 +129,6 @@ export default class CharacterSheet {
                     <button class="tab-btn active" data-tab="sheet" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Scheda</button>
                     <button class="tab-btn" data-tab="inventory" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Borsa</button>
                     <button class="tab-btn" data-tab="journal" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Diario</button>
-                    <button class="tab-btn" data-tab="adventure" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Avventure</button>
                 </div>
 
                 <!-- Content Area (Swipeable) -->
@@ -180,13 +177,11 @@ export default class CharacterSheet {
         if (tabName === 'sheet') this.renderSheetTab(container);
         if (tabName === 'inventory') this.renderInventoryTab(container);
         if (tabName === 'journal') this.renderJournalTab(container);
-        if (tabName === 'adventure') this.adventureTab.render(container);
 
         // Re-attach listeners for the new content
         if (tabName === 'sheet') this.attachSheetListeners(container);
         if (tabName === 'inventory') this.attachInventoryListeners(container);
         if (tabName === 'journal') this.attachJournalListeners(container);
-        // AdventureTab handles its own listeners
     }
 
     renderSheetTab(container) {

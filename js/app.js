@@ -5,10 +5,12 @@ import DiceRoller from './components/DiceRoller.js';
 import Settings from './components/Settings.js';
 import CharacterSheet from './components/CharacterSheet.js';
 import CreateWizard from './components/CreateWizard.js';
+import { AdventureTab } from './components/AdventureTab.js';
 
 class App {
     constructor() {
         this.router = new Router(this);
+        this.adventureTab = new AdventureTab();
         this.init();
     }
 
@@ -17,6 +19,7 @@ class App {
         this.router.register('characters', () => new CharacterList(this).render());
         this.router.register('dice', () => new DiceRoller(this).render());
         this.router.register('settings', () => new Settings(this).render());
+        this.router.register('adventures', () => this.adventureTab.render(document.getElementById('main-content')));
         this.router.register('create-wizard', () => new CreateWizard(this).render());
         this.router.register('character-sheet', (params) => new CharacterSheet(this).renderCharacter(params.id));
 
