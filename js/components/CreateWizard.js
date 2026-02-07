@@ -267,6 +267,24 @@ export default class CreateWizard {
                 </div>
                 
                 <div id="nation-desc" class="mt-20" style="font-style: italic; color: var(--text-faded);"></div>
+                
+                <!-- Cropper Overlay -->
+                <div id="cropper-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; flex-direction: column; align-items: center; justify-content: center;">
+                    <h3 style="color: white; margin-bottom: 20px;">Ritaglia Immagine</h3>
+                    <div style="position: relative; width: 300px; height: 300px; background: #333; overflow: hidden; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+                        <img id="cropper-img" style="position: absolute; pointer-events: none; opacity: 0.6; min-width: 100%; min-height: 100%; object-fit: cover;">
+                        <div id="cropper-mask" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: all; cursor: move;">
+                             <div style="width: 200px; height: 200px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.5); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <input type="range" id="cropper-zoom" min="0.5" max="3" step="0.1" value="1" style="width: 200px;">
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 15px;">
+                        <button class="btn btn-secondary" id="btn-cancel-crop">Annulla</button>
+                        <button class="btn btn-primary" id="btn-confirm-crop">Salva</button>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -281,6 +299,23 @@ export default class CreateWizard {
         const imageUrl = container.querySelector('#char-image-url');
         const imagePreview = container.querySelector('#image-preview');
 
+        const cropperOverlay = container.querySelector('#cropper-overlay');
+        const cropperImg = container.querySelector('#cropper-img');
+        const cropperMask = container.querySelector('#cropper-mask');
+        const zoomSlider = container.querySelector('#cropper-zoom');
+        const cancelCropBtn = container.querySelector('#btn-cancel-crop');
+        const confirmCropBtn = container.querySelector('#btn-confirm-crop');
+
+        let cropState = {
+            img: null,
+            scale: 1,
+            posX: 0,
+            posY: 0,
+            isDragging: false,
+            lastX: 0,
+            lastY: 0
+        };
+
         const updatePreview = (src) => {
             if (src) {
                 imagePreview.style.backgroundImage = `url('${src}')`;
@@ -288,56 +323,118 @@ export default class CreateWizard {
             }
         };
 
-        if (this.character.image) updatePreview(this.character.image);
-
-        // Image compression function
-        const compressImage = (file, maxSize = 200, quality = 0.7) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    img.onload = () => {
-                        // Create canvas
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-
-                        // Calculate new dimensions (fit in maxSize square)
-                        if (width > height) {
-                            if (width > maxSize) {
-                                height = Math.round((height * maxSize) / width);
-                                width = maxSize;
-                            }
-                        } else {
-                            if (height > maxSize) {
-                                width = Math.round((width * maxSize) / height);
-                                height = maxSize;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-
-                        // Draw and compress
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Export as JPEG with compression
-                        resolve(canvas.toDataURL('image/jpeg', quality));
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
+        const resetCropper = () => {
+            cropperOverlay.style.display = 'none';
+            cropState = { img: null, scale: 1, posX: 0, posY: 0, isDragging: false, lastX: 0, lastY: 0 };
+            imageUpload.value = ''; // Reset file input
         };
 
-        imageUpload.addEventListener('change', async (e) => {
+        const updateCropperTransform = () => {
+            if (!cropperImg) return;
+            // Center the image first
+            // We want (posX, posY) to be relative to the center
+            cropperImg.style.transform = `translate(-50%, -50%) translate(${cropState.posX}px, ${cropState.posY}px) scale(${cropState.scale})`;
+            cropperImg.style.top = '50%';
+            cropperImg.style.left = '50%';
+        };
+
+        if (this.character.image) updatePreview(this.character.image);
+
+        imageUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                // Compress the image before storing
-                const compressed = await compressImage(file, 200, 0.7);
-                updatePreview(compressed);
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    cropperImg.src = evt.target.result;
+                    cropState.img = new Image();
+                    cropState.img.src = evt.target.result;
+                    cropState.img.onload = () => {
+                        // Initial setup
+                        cropState.scale = 1;
+                        cropState.posX = 0;
+                        cropState.posY = 0;
+                        zoomSlider.value = 1;
+                        updateCropperTransform();
+                        cropperOverlay.style.display = 'flex';
+                    };
+                };
+                reader.readAsDataURL(file);
             }
+        });
+
+        // Drag Logic for Cropper
+        cropperMask.addEventListener('mousedown', (e) => {
+            cropState.isDragging = true;
+            cropState.lastX = e.clientX;
+            cropState.lastY = e.clientY;
+        });
+
+        cropperMask.addEventListener('touchstart', (e) => {
+            cropState.isDragging = true;
+            cropState.lastX = e.touches[0].clientX;
+            cropState.lastY = e.touches[0].clientY;
+        }, { passive: false });
+
+        const handleMove = (clientX, clientY) => {
+            if (!cropState.isDragging) return;
+            const deltaX = clientX - cropState.lastX;
+            const deltaY = clientY - cropState.lastY;
+            cropState.posX += deltaX;
+            cropState.posY += deltaY;
+            cropState.lastX = clientX;
+            cropState.lastY = clientY;
+            updateCropperTransform();
+        };
+
+        window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if (cropState.isDragging) {
+                e.preventDefault(); // Prevent scroll while cropping
+                handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: false });
+
+        const stopDrag = () => cropState.isDragging = false;
+        window.addEventListener('mouseup', stopDrag);
+        window.addEventListener('touchend', stopDrag);
+
+        zoomSlider.addEventListener('input', (e) => {
+            cropState.scale = parseFloat(e.target.value);
+            updateCropperTransform();
+        });
+
+        cancelCropBtn.addEventListener('click', resetCropper);
+
+        confirmCropBtn.addEventListener('click', () => {
+            if (!cropState.img) return;
+            const canvas = document.createElement('canvas');
+            const size = 200; // Output size
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // The visible area in the cropper is a 200x200 circle centered in a 300x300 box.
+            // But we simplify: We assume the user centers what they want.
+            // The logic:
+            // We draw the image onto the canvas such that the transformation matches what the user sees in the 200px circle.
+
+            // In the DOM: center of 300x300 box is (150, 150).
+            // The circle diameter is 200px.
+            // The image is transformed by (posX, posY) relative to the center and scaled.
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.save();
+            ctx.translate(size / 2, size / 2); // Center of canvas
+            ctx.translate(cropState.posX, cropState.posY); // User pan
+            ctx.scale(cropState.scale, cropState.scale); // User zoom
+            ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2); // Draw centered
+            ctx.restore();
+
+            const resultDetails = canvas.toDataURL('image/jpeg', 0.7);
+            updatePreview(resultDetails);
+            resetCropper();
         });
 
         imageUrl.addEventListener('input', (e) => updatePreview(e.target.value));

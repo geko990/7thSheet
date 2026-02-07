@@ -197,8 +197,8 @@ export default class CharacterSheet {
                 </div>
 
                 <div class="sheet-header-grid">
-                    <div class="info-block">
-                        <span class="info-label">Concetto</span>
+                    <div class="info-block details-trigger" id="details-trigger" style="cursor: pointer; position: relative;">
+                        <span class="info-label">Concetto <span style="font-size: 0.7rem; opacity: 0.6;">ⓘ</span></span>
                         <span class="info-val" style="font-size: 0.9rem;">${this.character.concept || '-'}</span>
                     </div>
                      <div class="info-block wealth-block" id="wealth-block" style="text-align: center; cursor: pointer;">
@@ -492,6 +492,12 @@ export default class CharacterSheet {
             this.renderTabContent(document.querySelector('#tab-content'), 'sheet');
         });
 
+        // Details popup trigger
+        const detailsTrigger = container.querySelector('#details-trigger');
+        if (detailsTrigger) {
+            detailsTrigger.addEventListener('click', () => this.showDetailsPopup());
+        }
+
         // ... Existing HP/Wounds listeners ...
         const lvlBtn = container.querySelector('#btn-lvl-up');
         if (lvlBtn) {
@@ -759,5 +765,101 @@ export default class CharacterSheet {
     }
     translateSkill(skillId) {
         return this.skillMap[skillId] || (skillId.charAt(0).toUpperCase() + skillId.slice(1));
+    }
+
+    showDetailsPopup() {
+        // Create popup container
+        const popup = document.createElement('div');
+        popup.className = 'details-popup-overlay';
+
+        let arcanaContent = '';
+        if (this.character.edition === '2e') {
+            arcanaContent = `
+                <div class="popup-section">
+                    <h3 class="popup-subtitle">Arcano</h3>
+                    <div class="popup-row">
+                        <span class="popup-label">Virtù:</span>
+                        <span class="popup-value">${this.character.virtue || '-'}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">Hubris:</span>
+                        <span class="popup-value">${this.character.hubris || '-'}</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            arcanaContent = `
+                <div class="popup-section">
+                    <h3 class="popup-subtitle">Arcano</h3>
+                     <div class="popup-row">
+                        <span class="popup-value">${this.character.arcana || '-'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        let storiesContent = '';
+        if (this.character.stories && this.character.stories.length > 0) {
+            storiesContent = `
+                <div class="popup-section">
+                    <h3 class="popup-subtitle">Storia Personale</h3>
+                    ${this.character.stories.map(s => `
+                        <div class="story-block">
+                            <div class="popup-row">
+                                <span class="popup-label">Nome:</span>
+                                <span class="popup-value bold">${s.name || '-'}</span>
+                            </div>
+                            <div class="popup-row">
+                                <span class="popup-label">Obiettivo:</span>
+                                <span class="popup-value">${s.goal || '-'}</span>
+                            </div>
+                            <div class="popup-row">
+                                <span class="popup-label">Ricompensa:</span>
+                                <span class="popup-value">${s.reward || '-'}</span>
+                            </div>
+                            <div class="popup-row">
+                                <span class="popup-label">Passi:</span>
+                                <ul class="popup-list">
+                                    ${s.steps ? s.steps.map(step => `<li>${step}</li>`).join('') : ''}
+                                </ul>
+                            </div>
+                        </div>
+                    `).join('<hr class="popup-divider">')}
+                </div>
+            `;
+        }
+
+        popup.innerHTML = `
+            <div class="details-popup-card">
+                <button class="btn-close-popup">×</button>
+                <h2 class="popup-title">Dettagli Eroe</h2>
+                
+                <div class="popup-content">
+                    <div class="popup-section">
+                        <h3 class="popup-subtitle">Identità</h3>
+                        <div class="popup-row">
+                            <span class="popup-label">Religione:</span>
+                            <span class="popup-value">${this.character.religion || '-'}</span>
+                        </div>
+                         <div class="popup-row">
+                            <span class="popup-label">Concetto:</span>
+                            <span class="popup-value">${this.character.concept || '-'}</span>
+                        </div>
+                    </div>
+
+                    ${arcanaContent}
+                    ${storiesContent}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(popup);
+
+        // Close logic
+        const closeBtn = popup.querySelector('.btn-close-popup');
+        closeBtn.addEventListener('click', () => popup.remove());
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) popup.remove();
+        });
     }
 }
