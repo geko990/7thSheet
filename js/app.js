@@ -7,6 +7,7 @@ import CharacterSheet from './components/CharacterSheet.js';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
 import { AuthService } from './services/AuthService.js';
+import { CampaignDetail } from './components/CampaignDetail.js';
 
 class App {
     constructor() {
@@ -25,11 +26,16 @@ class App {
         this.router.register('settings', () => new Settings(this).render());
         this.router.register('adventures', async () => {
             const div = document.createElement('div');
-            await this.adventureTab.render(div);
+            await this.adventureTab.render(div, (route, params) => this.router.navigate(route, params));
             return div;
         });
         this.router.register('create-wizard', () => new CreateWizard(this).render());
         this.router.register('character-sheet', (params) => new CharacterSheet(this).renderCharacter(params.id));
+        this.router.register('campaign-detail', (params) => {
+            const div = document.createElement('div');
+            new CampaignDetail(this).render(div, params.id);
+            return div;
+        });
 
         // Initial navigation
         this.router.initNavigation();

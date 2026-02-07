@@ -181,6 +181,7 @@ select {
     font-family: var(--font-display);
     box-shadow: 0 4px 15px var(--shadow-strong);
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 10px;
     cursor: pointer;

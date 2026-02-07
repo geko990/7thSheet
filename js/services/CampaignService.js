@@ -90,5 +90,81 @@ export const CampaignService = {
                 my_role: item.role
             }))
         };
+    },
+
+    // Get Campaign Details (including members)
+    async getCampaignDetails(campaignId) {
+        const { data, error } = await supabaseClient
+            .from('campaigns')
+            .select(`
+                *,
+                members:campaign_members (
+                    user_id, role, character_data,
+                    profile:profiles (username, avatar_url)
+                )
+            `)
+            .eq('id', campaignId)
+            .single();
+
+        if (error) return { error };
+        return { data };
+    },
+
+    // STORIES
+    async getStories(campaignId) {
+        const { data, error } = await supabaseClient
+            .from('campaign_stories')
+            .select('*')
+            .eq('campaign_id', campaignId)
+            .order('created_at', { ascending: false });
+        return { data, error };
+    },
+
+    async addStory(campaignId, title, content, isVisible = false) {
+        const { data, error } = await supabaseClient
+            .from('campaign_stories')
+            .insert([{ campaign_id: campaignId, title, content, is_visible: isVisible }])
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    async updateStoryVisibility(storyId, isVisible) {
+        const { data, error } = await supabaseClient
+            .from('campaign_stories')
+            .update({ is_visible: isVisible })
+            .eq('id', storyId)
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    // NPCS
+    async getNPCs(campaignId) {
+        const { data, error } = await supabaseClient
+            .from('campaign_npcs')
+            .select('*')
+            .eq('campaign_id', campaignId)
+            .order('name', { ascending: true });
+        return { data, error };
+    },
+
+    async addNPC(campaignId, name, description, isVisible = false) {
+        const { data, error } = await supabaseClient
+            .from('campaign_npcs')
+            .insert([{ campaign_id: campaignId, name, description, is_visible: isVisible }])
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    async updateNPCVisibility(npcId, isVisible) {
+        const { data, error } = await supabaseClient
+            .from('campaign_npcs')
+            .update({ is_visible: isVisible })
+            .eq('id', npcId)
+            .select()
+            .single();
+        return { data, error };
     }
 };
