@@ -232,7 +232,7 @@ export default class CreateWizard {
     // STEP 1: Concept & Nation
     renderStep1(container) {
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Identità (${this.edition === '1e' ? '1ª Ed' : '2ª Ed'})</h3>
                 
                 <div class="form-group" style="text-align: center; margin-bottom: 20px;">
@@ -345,7 +345,7 @@ export default class CreateWizard {
         // We track "spent" points against the pool of 2.
 
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Tratti (2ª Ed)</h3>
                 <p class="mb-20">Hai <strong>2 punti</strong> da distribuire sui Tratti.</p>
                 
@@ -366,7 +366,7 @@ export default class CreateWizard {
                     <p>Punti disponibili: <span id="points-remaining" style="font-weight: bold; font-size: 1.2rem; color: var(--accent-gold);">2</span></p>
                     <p id="error-msg" style="color: var(--accent-red); font-size: 0.9rem; margin-top: 5px;"></p>
                 </div>
-            </div >
+            </div>
             `;
 
         // Calculate initial spent points (delta from base)
@@ -415,7 +415,7 @@ export default class CreateWizard {
             if (newVal > 5) return; // Hard cap 5
 
             this.character.traits[trait] = newVal;
-            document.getElementById(`val - ${trait} `).textContent = newVal;
+            document.getElementById(`val-${trait}`).textContent = newVal;
             updateUI();
         };
     }
@@ -425,7 +425,7 @@ export default class CreateWizard {
         // Starts at 2. Nation bonus +1 (free?). Usually yes.
 
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Tratti (1ª Ed)</h3>
                 <p class="mb-20">Usa i Punti Eroe (100 totali) per i Tratti.<br>Costo: <strong>8 PE</strong> per punto.</p>
                 
@@ -446,7 +446,7 @@ export default class CreateWizard {
                     <p>Costo Totale Tratti: <span id="traits-cost" style="font-weight: bold; color: var(--accent-gold);">0</span> PE</p>
                     <p style="font-size: 0.9rem; color: var(--text-faded);">PE residui per Skill/Vantaggi: <span id="hp-remaining">100</span></p>
                 </div>
-            </div >
+            </div>
             `;
 
         const getBaseTrait = (trait) => {
@@ -498,7 +498,7 @@ export default class CreateWizard {
 
     renderStep3V2(container) {
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Background (2ª Ed)</h3>
                 <p class="mb-20">Seleziona 2 Background.</p>
                 
@@ -517,7 +517,7 @@ export default class CreateWizard {
                         </div>
                     `).join('')}
                 </div>
-            </div >
+            </div>
             `;
 
         container.querySelectorAll('.background-item').forEach(item => {
@@ -544,7 +544,7 @@ export default class CreateWizard {
         }
 
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Abilità & Knacks (1ª Ed)</h3>
                 <p>Costo Skill: <strong>2 PE</strong>. Costo Knack: <strong>1 PE</strong>/grado.</p>
                 <div class="text-center mb-20">
@@ -588,7 +588,7 @@ export default class CreateWizard {
                         `;
         }).join('')}
                 </div>
-            </div >
+            </div>
             `;
 
         // Calculate Cost Shared logic
@@ -666,7 +666,7 @@ export default class CreateWizard {
             }
 
             // Update UI specific element
-            const id = `val - knack - ${knack.replace(/\s+/g, '-')} `;
+            const id = `val-knack-${knack.replace(/\s+/g, '-')}`;
             const el = document.getElementById(id);
             if (el) el.textContent = newVal;
 
@@ -687,7 +687,7 @@ export default class CreateWizard {
 
     renderStep4V2(container) {
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Abilità & Vantaggi (2ª Ed)</h3>
                 <p>Hai <strong>10 punti</strong> da distribuire.</p>
                 <div class="text-center mb-20">
@@ -728,7 +728,7 @@ export default class CreateWizard {
                         `).join('')}
                     </div>
                 </div>
-            </div >
+            </div>
             `;
 
         // V2 Point Logic
@@ -802,7 +802,7 @@ export default class CreateWizard {
             }
 
             this.character.skills[skillId] = newVal;
-            document.getElementById(`val - skill - ${skillId} `).textContent = newVal;
+            document.getElementById(`val-skill-${skillId}`).textContent = newVal;
             updateUI();
         };
 
@@ -868,7 +868,7 @@ export default class CreateWizard {
     renderStep4V1(container) {
         // V1 Advantages
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Vantaggi (1ª Ed)</h3>
                 <p>Acquista Vantaggi usando i Punti Eroe residui.</p>
                 <div class="text-center mb-20">
@@ -890,7 +890,7 @@ export default class CreateWizard {
                         </div>
                     `).join('')}
                 </div>
-            </div >
+            </div>
             `;
 
         // Need access to total HP calculation from Step 2/3
@@ -1008,7 +1008,7 @@ export default class CreateWizard {
 
     renderStep5V2(container) {
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Storie & Arcani (2ª Ed)</h3>
                 
                 <div class="sheet-section">
@@ -1043,7 +1043,7 @@ export default class CreateWizard {
                         <input type="text" class="form-input" id="story-step1" placeholder="Trovare dove si nasconde">
                     </div>
                 </div>
-            </div >
+            </div>
             `;
 
         // Bind inputs
@@ -1079,7 +1079,7 @@ export default class CreateWizard {
 
     renderStep5V1(container) {
         container.innerHTML = `
-            < div class="card" >
+            <div class="card">
                 <h3 class="card-title">Scuole & Stregoneria (1ª Ed)</h3>
                 <p>Costo elevato (20-30 PE). Solitamente uno solo.</p>
                 <div class="text-center mb-20">
@@ -1112,7 +1112,7 @@ export default class CreateWizard {
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
             `;
 
         const schoolSelect = container.querySelector('#char-school');
@@ -1169,7 +1169,7 @@ export default class CreateWizard {
     // STEP 6: Review & Finalize (Actually step 6 in UI)
     renderStep6(container) {
         container.innerHTML = `
-            < div class="card text-center" >
+            <div class="card text-center">
                 <h3 class="card-title">Riepilogo</h3>
                 <ul style="text-align: left; list-style: none; padding: 0; font-size: 0.9rem;">
                     <li><strong>${this.character.name}</strong>, ${this.character.nation}</li>
@@ -1188,7 +1188,7 @@ export default class CreateWizard {
             }
                 </ul>
                 <p class="mt-20">Se sei soddisfatto, clicca Completa per salvare!</p>
-            </div >
+            </div>
             `;
     }
 

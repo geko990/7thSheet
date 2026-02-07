@@ -32,28 +32,27 @@ export default class CharacterSheet {
         };
 
         this.descriptions = {
-            'brawn': 'Muscoli: Forza pura, resistenza fisica e capacità di incassare colpi.',
-            'finesse': 'Finezza: Coordinazione, agilità, precisione manuale.',
-            'resolve': 'Risolutezza: Volontà, determinazione e resistenza mentale.',
-            'wits': 'Acume: Intelligenza, prontezza di spirito e capacità deduttiva.',
-            'panache': 'Panache: Carisma, stile, fascino e capacità di ispirare.',
-            // Updated Italian Descriptions
-            'aim': 'Mira: Colpire bersagli a distanza con armi da fuoco o da lancio.',
-            'athletics': 'Atletica: Correre, saltare, arrampicarsi e nuotare.',
-            'brawl': 'Rissa: Combattimento a mani nude o con armi improvvisate.',
-            'convince': 'Convincere: Persuadere gli altri con la logica o il fascino.',
-            'empathy': 'Empatia: Capire le emozioni e le intenzioni altrui.',
-            'hide': 'Furtività: Muoversi senza essere visti o sentiti.',
-            'intimidate': 'Intimidire: Spaventare o costringere gli altri con la forza.',
-            'notice': 'Notare: Percepire dettagli, indizi o pericoli nascosti.',
-            'perform': 'Esibirsi: Intrattenere un pubblico con arte o oratoria.',
-            'ride': 'Cavalcare: Controllare cavalli o altri animali da sella.',
-            'sailing': 'Navigare: Manovrare navi, conoscere il mare e le rotte.',
-            'scholarship': 'Istruzione: Conoscenza accademica, storia, scienze.',
-            'tempt': 'Allettare: Manipolare gli altri facendo leva sui loro desideri.',
-            'theft': 'Furto: Borseggiare, scassinare serrature, giochi di prestigio.',
-            'warfare': 'Arte della Guerra: Tattica militare, comando e logistica.',
-            'weaponry': 'Mischia: Combattimento con spade, pugnali o armi in asta.'
+            'brawn': 'Forza pura, resistenza fisica e capacità di incassare colpi.',
+            'finesse': 'Coordinazione, agilità, precisione manuale.',
+            'resolve': 'Volontà, determinazione e resistenza mentale.',
+            'wits': 'Intelligenza, prontezza di spirito e capacità deduttiva.',
+            'panache': 'Carisma, stile, fascino e capacità di ispirare.',
+            'aim': 'Colpire bersagli a distanza con armi da fuoco o da lancio.',
+            'athletics': 'Correre, saltare, arrampicarsi e nuotare.',
+            'brawl': 'Combattimento a mani nude o con armi improvvisate.',
+            'convince': 'Persuadere gli altri con la logica o il fascino.',
+            'empathy': 'Capire le emozioni e le intenzioni altrui.',
+            'hide': 'Muoversi senza essere visti o sentiti.',
+            'intimidate': 'Spaventare o costringere gli altri con la forza.',
+            'notice': 'Percepire dettagli, indizi o pericoli nascosti.',
+            'perform': 'Intrattenere un pubblico con arte o oratoria.',
+            'ride': 'Controllare cavalli o altri animali da sella.',
+            'sailing': 'Manovrare navi, conoscere il mare e le rotte.',
+            'scholarship': 'Conoscenza accademica, storia, scienze.',
+            'tempt': 'Manipolare gli altri facendo leva sui loro desideri.',
+            'theft': 'Borseggiare, scassinare serrature, giochi di prestigio.',
+            'warfare': 'Tattica militare, comando e logistica.',
+            'weaponry': 'Combattimento con spade, pugnali o armi in asta.'
         };
     }
 
@@ -710,10 +709,10 @@ export default class CharacterSheet {
             text = this.descriptions[key] || key;
         } else if (type === 'advantage') {
             const adv = this.advantagesData.find(a => a.name === key);
-            text = adv ? `<strong>${adv.name}</strong> (${adv.cost} PE)<br>${adv.description}` : key;
+            text = adv ? `(${adv.cost} PE) ${adv.description}` : key;
         } else if (type === 'background') {
             const bg = this.backgroundsData.find(b => b.name === key);
-            text = bg ? `<strong>${bg.name}</strong><br><em>${bg.quirk}</em>` : key;
+            text = bg ? `<em>${bg.quirk}</em>` : key;
         }
 
         const tooltip = document.querySelector('#sheet-tooltip');
