@@ -8,6 +8,7 @@ export default class CharacterSheet {
         this.dicePool = [];
         this.activeTab = 'sheet'; // sheet, inventory, journal
         this.advantagesData = [];
+        this.backgroundsData = [];
         this.itemSwiping = false; // Flag to prevent page swipe during item swipe
 
         // Italian Skills Map
@@ -68,6 +69,19 @@ export default class CharacterSheet {
         }
     }
 
+    async loadBackgroundsData(edition) {
+        try {
+            if (edition === '2e') {
+                const res = await fetch('./data/v2/backgrounds.json');
+                if (res.ok) {
+                    this.backgroundsData = await res.json();
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load backgrounds for tooltip:', e);
+        }
+    }
+
     async renderCharacter(id) {
         this.character = Storage.getCharacter(id);
         const div = document.createElement('div');
@@ -98,6 +112,7 @@ export default class CharacterSheet {
 
         // Load Data for Tooltips
         await this.loadAdvantagesData(this.character.edition);
+        await this.loadBackgroundsData(this.character.edition);
 
         this.renderTabs(div);
         return div;
@@ -253,7 +268,7 @@ export default class CharacterSheet {
                     ${this.character.edition === '2e' && this.character.backgrounds && this.character.backgrounds.length > 0 ?
                 `<div style="margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             ${this.character.backgrounds.map(bg => `
-                                <div class="adv-pill" style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 5px; font-size: 0.9rem; text-align: center; border: 1px solid var(--border-worn);">
+                                <div class="interactive-text adv-pill" data-type="background" data-key="${bg.replace(/"/g, '&quot;')}" style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 5px; font-size: 0.9rem; text-align: center; border: 1px solid var(--border-worn); cursor: help;">
                                     ${bg}
                                 </div>
                             `).join('')}
@@ -696,6 +711,9 @@ export default class CharacterSheet {
         } else if (type === 'advantage') {
             const adv = this.advantagesData.find(a => a.name === key);
             text = adv ? `<strong>${adv.name}</strong> (${adv.cost} PE)<br>${adv.description}` : key;
+        } else if (type === 'background') {
+            const bg = this.backgroundsData.find(b => b.name === key);
+            text = bg ? `<strong>${bg.name}</strong><br><em>${bg.quirk}</em>` : key;
         }
 
         const tooltip = document.querySelector('#sheet-tooltip');

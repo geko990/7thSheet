@@ -11,8 +11,8 @@
             "weaponry"
         ],
         "advantages": [
-            "Rich",
-            "Noble"
+            "Benestante",
+            "Nobile"
         ]
     },
     {
@@ -27,8 +27,8 @@
             "weaponry"
         ],
         "advantages": [
-            "Duelist Academy",
-            "Quick Reflexes"
+            "Accademia di Duello",
+            "Riflessi Rapidi"
         ]
     },
     {
@@ -43,8 +43,8 @@
             "theft"
         ],
         "advantages": [
-            "Sea Legs",
-            "Barroom Brawler"
+            "Gambe da Marinaio",
+            "Rissoso"
         ]
     },
     {
@@ -59,8 +59,8 @@
             "theft"
         ],
         "advantages": [
-            "Connection",
-            "Linguist"
+            "Contatto",
+            "Linguista"
         ]
     },
     {
@@ -75,8 +75,8 @@
             "warfare"
         ],
         "advantages": [
-            "University",
-            "Linguist"
+            "Università",
+            "Linguista"
         ]
     }
 ]
