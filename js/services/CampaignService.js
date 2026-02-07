@@ -139,8 +139,8 @@ export const CampaignService = {
         return { data, error };
     },
 
-    // NPCS
-    async getNPCs(campaignId) {
+    // ENTITIES (NPC, Enemy, Item)
+    async getEntities(campaignId) {
         const { data, error } = await supabaseClient
             .from('campaign_npcs')
             .select('*')
@@ -149,26 +149,42 @@ export const CampaignService = {
         return { data, error };
     },
 
-    async addNPC(campaignId, name, description, isVisible = false) {
+    async addEntity(campaignId, entityData) {
+        // entityData: { name, description, is_visible, type, level, nationality, image_url }
         const { data, error } = await supabaseClient
             .from('campaign_npcs')
-            .insert([{ campaign_id: campaignId, name, description, is_visible: isVisible }])
+            .insert([{
+                campaign_id: campaignId,
+                name: entityData.name,
+                description: entityData.description,
+                is_visible: entityData.is_visible,
+                type: entityData.type || 'npc',
+                level: entityData.level,
+                nationality: entityData.nationality,
+                image_url: entityData.image_url
+            }])
             .select()
             .single();
         return { data, error };
     },
 
-    async updateNPCVisibility(npcId, isVisible) {
+    async updateEntityVisibility(entityId, isVisible) {
         const { data, error } = await supabaseClient
             .from('campaign_npcs')
             .update({ is_visible: isVisible })
-            .eq('id', npcId)
+            .eq('id', entityId)
             .select()
             .single();
         return { data, error };
     },
 
-    // MEMBERS
+    async deleteEntity(entityId) {
+        const { error } = await supabaseClient
+            .from('campaign_npcs')
+            .delete()
+            .eq('id', entityId);
+        return { error };
+    },    // MEMBERS
     async linkCharacter(campaignId, characterData) {
         const user = AuthService.getUser();
         if (!user) return { error: { message: "Not logged in" } };

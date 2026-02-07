@@ -415,22 +415,30 @@ export class CampaignDetail {
         modal.style.display = 'flex';
     }
 
-    openViewNPCModal(npc) {
+    openViewEntityModal(e) {
         const modal = this.container.querySelector('#generic-modal');
         const body = this.container.querySelector('#modal-body');
         const btnAction = this.container.querySelector('#modal-action-btn');
 
+        const icons = { npc: '🎭', enemy: '⚔️', item: '💎' };
+
         body.innerHTML = `
             <div class="text-center">
-                <div class="avatar" style="width: 100px; height: 100px; border-radius: 50%; background: #ddd; margin: 0 auto 15px; overflow: hidden; border: 3px solid var(--accent-gold);">
-                        ${npc.image_url ? `<img src="${npc.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 2.5rem;">🎭</span>'}
+                <div class="avatar" style="width: 120px; height: 120px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 120px; font-size: 3rem;">${icons[e.type] || '❓'}</span>`}
                 </div>
-                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 10px;">${npc.name}</h2>
-                <div style="text-align: left; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 10px; white-space: pre-wrap;">${npc.description || 'Nessuna descrizione.'}</div>
+                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${e.name}</h2>
+                
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; font-size: 0.9rem;">
+                    ${e.level ? `<span style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px;">${e.level}</span>` : ''}
+                    ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded);">${e.nationality}</span>` : ''}
+                </div>
+
+                <div style="text-align: left; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; white-space: pre-wrap; line-height: 1.6;">${e.description || 'Nessuna descrizione.'}</div>
             </div>
         `;
 
-        btnAction.style.display = 'none'; // Only close button needed
+        btnAction.style.display = 'none';
         modal.style.display = 'flex';
     }
 }
