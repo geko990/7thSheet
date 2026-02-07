@@ -10,6 +10,7 @@
     --text-faded: #5a4a3a;
     --accent-gold: #b8860b;
     --accent-red: #8b0000;
+    --accent-green: #228b22;
     --accent-navy: #1a3a52;
     --border-worn: #a0856c;
     --shadow-soft: rgba(44, 24, 16, 0.15);
@@ -117,17 +118,30 @@ select {
 .nav-btn {
     background: none;
     border: none;
-    font-size: 1.8rem;
     color: var(--text-faded);
-    padding: 10px;
-    border-radius: 50%;
+    padding: 8px 12px;
     transition: all 0.2s ease;
     opacity: 0.7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.nav-btn .nav-icon {
+    font-size: 1.6rem;
+}
+
+.nav-btn .nav-label {
+    font-size: 0.65rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .nav-btn.active {
     color: var(--accent-gold);
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     opacity: 1;
     text-shadow: 0 0 10px rgba(184, 134, 11, 0.4);
 }

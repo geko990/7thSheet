@@ -8,6 +8,7 @@ export default class CharacterSheet {
         this.dicePool = [];
         this.activeTab = 'sheet'; // sheet, inventory, journal
         this.advantagesData = [];
+        this.itemSwiping = false; // Flag to prevent page swipe during item swipe
 
         // Italian Skills Map
         this.skillMap = {
@@ -103,39 +104,22 @@ export default class CharacterSheet {
     }
 
     renderTabs(container) {
-        const charHeaderHTML = `
-            <div class="char-header text-center" id="char-header-block" style="margin-top: 20px; transition: all 0.3s;">
-                ${this.character.image ? `
-                <div class="char-sheet-avatar" style="width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
-                    <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                ` : ''}
-                <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
-                <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
-                    ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
-                </div>
-            </div>
-        `;
-
         container.innerHTML = `
             <div class="card" style="position: relative; padding-top: 10px; min-height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
                 <button class="btn btn-secondary" id="btn-close" style="position: absolute; top: 10px; right: 10px; border: none; z-index: 100;">✖</button>
 
-                <!-- Header Block -->
-                ${charHeaderHTML}
-
-                <!-- Tabs Nav -->
-                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 15px; flex-shrink: 0;">
+                <!-- Tabs Nav (FIXED position, always same place) -->
+                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-worn); margin: 10px 0 0 0; flex-shrink: 0;">
                     <button class="tab-btn active" data-tab="sheet" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Scheda</button>
                     <button class="tab-btn" data-tab="inventory" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Borsa</button>
                     <button class="tab-btn" data-tab="journal" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 3px solid transparent; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-faded);">Diario</button>
                 </div>
 
                 <!-- Content Area (Swipeable) -->
-                <div id="tab-content" style="flex: 1; overflow-y: auto; padding-bottom: 80px; touch-action: pan-y pinch-zoom;"></div>
+                <div id="tab-content" style="flex: 1; overflow-y: auto; padding: 15px 0 80px 0; touch-action: pan-y pinch-zoom;"></div>
             
-                <!-- Dice Overlay & FAB & Tooltip (Same as before) -->
-                 <div id="dice-overlay" class="modal-overlay" style="display: none;">
+                <!-- Dice Overlay & FAB & Tooltip -->
+                <div id="dice-overlay" class="modal-overlay" style="display: none;">
                     <div class="modal-content" style="text-align: center;">
                         <h3 class="mb-20">Risultato Lancio</h3>
                         <div id="dice-results" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;"></div>
@@ -145,7 +129,7 @@ export default class CharacterSheet {
                 </div>
 
                 <div id="dice-fab" style="position: fixed; bottom: 80px; right: 20px; display: none; flex-direction: column; align-items: end; gap: 10px; z-index: 100;">
-                     <div class="dice-pool-bubble" style="background: var(--bg-paper); border: 2px solid var(--accent-gold); padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px var(--shadow-strong); margin-bottom: 5px; max-width: 200px; text-align: right;">
+                    <div class="dice-pool-bubble" style="background: var(--bg-paper); border: 2px solid var(--accent-gold); padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px var(--shadow-strong); margin-bottom: 5px; max-width: 200px; text-align: right;">
                         <div id="dice-pool-list" style="font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;"></div>
                         <div style="font-weight: bold;">Totale: <span id="dice-pool-total">0</span> Dadi</div>
                     </div>
@@ -163,19 +147,10 @@ export default class CharacterSheet {
         `;
 
         this.renderTabContent(container.querySelector('#tab-content'), this.activeTab);
-        this.updateHeaderVisibility();
         this.attachGlobalListeners(container);
     }
 
-    updateHeaderVisibility() {
-        const header = document.querySelector('#char-header-block');
-        if (!header) return;
-        if (this.activeTab === 'sheet') {
-            header.style.display = 'block';
-        } else {
-            header.style.display = 'none';
-        }
-    }
+
 
     renderTabContent(container, tabName) {
         container.innerHTML = '';
@@ -191,27 +166,39 @@ export default class CharacterSheet {
 
     renderSheetTab(container) {
         container.innerHTML = `
+                <!-- Character Header (only in Sheet tab) -->
+                <div class="char-header text-center" style="margin-bottom: 20px;">
+                    ${this.character.image ? `
+                    <div class="char-sheet-avatar" style="width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
+                        <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    ` : ''}
+                    <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
+                    <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
+                        ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
+                    </div>
+                </div>
+
                 <div class="sheet-header-grid">
                     <div class="info-block">
                         <span class="info-label">Concetto</span>
                         <span class="info-val" style="font-size: 0.9rem;">${this.character.concept || '-'}</span>
                     </div>
-                     <div class="info-block" style="text-align: center;">
-                        <span class="info-label">Ricchezza</span>
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                     <div class="info-block wealth-block" id="wealth-block" style="text-align: center; cursor: pointer;">
+                        <span class="info-label">Monete</span>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
                             <div class="coin-stack" style="text-align:center;">
-                                <span style="font-size:1.2rem;">🪙</span>
+                                <span style="font-size:1.2rem; color: #FFD700;">●</span>
                                 <div style="font-weight:bold;">${this.character.wealth.gold || 0}</div>
                             </div>
                             <div class="coin-stack" style="text-align:center;">
-                                <span style="font-size:1.2rem;">🥈</span>
+                                <span style="font-size:1.2rem; color: #C0C0C0;">●</span>
                                 <div style="font-weight:bold;">${this.character.wealth.silver || 0}</div>
                             </div>
                             <div class="coin-stack" style="text-align:center;">
-                                <span style="font-size:1.2rem;">🥉</span>
+                                <span style="font-size:1.2rem; color: #CD7F32;">●</span>
                                 <div style="font-weight:bold;">${this.character.wealth.copper || 0}</div>
                             </div>
-                            <button class="btn-xs btn-secondary" id="btn-edit-wealth" style="margin-left:5px;">✏️</button>
                         </div>
                     </div>
                 </div>
@@ -312,26 +299,29 @@ export default class CharacterSheet {
         container.innerHTML = `
             <div class="sheet-section">
                 <!-- Swipe Actions handled via JS -->
-                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                    ${this.character.inventory.length === 0 ? '<p style="font-style:italic; color:var(--text-faded);">Nessun oggetto.</p>' : ''}
+                <div id="inventory-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    ${this.character.inventory.length === 0 ? '<p style="font-style:italic; color:var(--text-faded);">La borsa è vuota.</p>' : ''}
                     ${this.character.inventory.map((item, idx) => `
-                        <div class="swipe-item-container" data-idx="${idx}" style="position: relative; border-radius: 5px; overflow: hidden; height: 50px;">
+                        <div class="swipe-item-container" data-idx="${idx}" style="position: relative; border-radius: 8px; overflow: hidden; min-height: 60px; touch-action: pan-y;">
                             <!-- Delete Background (Right) -->
                             <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 100%; background: var(--accent-red); display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white;">
-                                🗑️
+                                🗑️ Elimina
                             </div>
                             <!-- Content -->
-                            <div class="inv-item-content" style="position: relative; z-index: 10; background: #fdfaf5; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px dashed var(--border-color); transform: translate3d(0,0,0); transition: transform 0.2s;">
-                                <div>
-                                    <strong style="font-size: 1.1rem;">${item.name}</strong>
-                                    ${item.qty > 1 ? `<span style="background: var(--accent-gold); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px;">x${item.qty}</span>` : ''}
+                            <div class="inv-item-content" style="position: relative; z-index: 10; background: linear-gradient(135deg, #fdfaf5 0%, #f5edd8 100%); min-height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--border-worn); border-radius: 8px; transform: translate3d(0,0,0); transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <div style="flex: 1;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <strong style="font-size: 1.1rem; color: var(--text-ink);">${item.name}</strong>
+                                        ${item.qty > 1 ? `<span style="background: var(--accent-gold); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">×${item.qty}</span>` : ''}
+                                    </div>
+                                    ${item.notes ? `<div style="font-size: 0.85rem; color: var(--text-faded); margin-top: 4px; font-style: italic;">${item.notes}</div>` : ''}
                                 </div>
-                                <div style="color: #ccc;">‹</div>
+                                <div style="color: var(--text-faded); font-size: 1.2rem;">⟨</div>
                             </div>
                         </div>
                     `).join('')}
                 </div>
-                <button class="btn btn-primary w-100" id="btn-add-item">➕ Aggiungi Oggetto</button>
+                <button class="btn btn-primary w-100" id="btn-add-item" style="border-radius: 25px; padding: 12px;">➕ Aggiungi Oggetto</button>
             </div>
         `;
     }
@@ -394,6 +384,12 @@ export default class CharacterSheet {
         }, { passive: true });
 
         contentArea.addEventListener('touchend', (e) => {
+            // Skip page swipe if an item is being swiped
+            if (this.itemSwiping) {
+                this.itemSwiping = false;
+                return;
+            }
+
             const endX = e.changedTouches[0].clientX;
             const endY = e.changedTouches[0].clientY;
             const diffX = endX - pageStartX;
@@ -452,27 +448,27 @@ export default class CharacterSheet {
             }
         });
 
-        this.updateHeaderVisibility();
         this.renderTabContent(container.querySelector('#tab-content'), tabName);
     }
 
     attachSheetListeners(container) {
-        const wealthBtn = container.querySelector('#btn-edit-wealth');
-        if (wealthBtn) wealthBtn.addEventListener('click', () => {
-            const gold = prompt("Monete d'Oro (Gold):", this.character.wealth.gold || 0);
-            const silver = prompt("Monete d'Argento (Silver):", this.character.wealth.silver || 0);
-            const copper = prompt("Monete di Bronzo (Copper):", this.character.wealth.copper || 0);
+        // Wealth block - entire block is clickable
+        const wealthBlock = container.querySelector('#wealth-block');
+        if (wealthBlock) wealthBlock.addEventListener('click', () => {
+            const gold = prompt("Monete d'Oro:", this.character.wealth.gold || 0);
+            if (gold === null) return;
+            const silver = prompt("Monete d'Argento:", this.character.wealth.silver || 0);
+            if (silver === null) return;
+            const copper = prompt("Monete di Bronzo:", this.character.wealth.copper || 0);
+            if (copper === null) return;
 
-            if (gold !== null || silver !== null || copper !== null) {
-                this.character.wealth = {
-                    gold: parseInt(gold) || 0,
-                    silver: parseInt(silver) || 0,
-                    copper: parseInt(copper) || 0
-                };
-                Storage.saveCharacter(this.character);
-                // Re-render sheet part or just update? Easiest to re-render tab.
-                this.renderTabContent(document.querySelector('#tab-content'), 'sheet');
-            }
+            this.character.wealth = {
+                gold: parseInt(gold) || 0,
+                silver: parseInt(silver) || 0,
+                copper: parseInt(copper) || 0
+            };
+            Storage.saveCharacter(this.character);
+            this.renderTabContent(document.querySelector('#tab-content'), 'sheet');
         });
 
         // ... Existing HP/Wounds listeners ...
@@ -554,21 +550,19 @@ export default class CharacterSheet {
                 startX = e.touches[0].clientX;
                 isDragging = false;
                 content.style.transition = 'none';
-                e.stopPropagation(); // Try to prevent page swipe?
-            }, { passive: false });
+            }, { passive: true });
 
             content.addEventListener('touchmove', (e) => {
                 const x = e.touches[0].clientX;
                 const diff = x - startX;
                 if (Math.abs(diff) > 10) {
                     isDragging = true;
-                    e.stopPropagation(); // Stop page swipe bubble up
+                    this.itemSwiping = true; // Flag to prevent page swipe
                     // Cap drag
                     let translate = diff;
                     if (translate < -100) translate = -100;
                     if (translate > 100) translate = 100;
 
-                    // Logic: Inventory only swipe Left? No, allow both but visual implies.
                     content.style.transform = `translate3d(${translate}px, 0, 0)`;
                     currentTranslate = translate;
                 }
@@ -716,6 +710,19 @@ export default class CharacterSheet {
         this.tooltipTimeout = setTimeout(() => {
             tooltip.style.opacity = '0';
         }, 4000);
+
+        // Allow dismissing tooltip on any touch/click
+        const dismissTooltip = () => {
+            if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
+            tooltip.style.opacity = '0';
+            document.removeEventListener('touchstart', dismissTooltip);
+            document.removeEventListener('click', dismissTooltip);
+        };
+        // Delay adding the listener so the current click doesn't immediately dismiss
+        setTimeout(() => {
+            document.addEventListener('touchstart', dismissTooltip, { once: true, passive: true });
+            document.addEventListener('click', dismissTooltip, { once: true });
+        }, 100);
     }
 
     translateKey(key) {
