@@ -186,7 +186,7 @@ export class CampaignDetail {
 
         // Check if I need to link my character
         const myMember = members.find(m => m.user_id === AuthService.user.id);
-        if (myMember && !myMember.character_data && this.myRole !== 'gm') {
+        if (myMember && !myMember.character_data) { // Removed !gm check to allow GM to have a PC/DMPC
             html += `
                 <div class="alert alert-info text-center mb-20" style="background: rgba(var(--accent-navy-rgb), 0.1); border: 1px solid var(--accent-navy); padding: 15px; border-radius: 8px;">
                     <div>Non hai ancora scelto chi interpretare!</div>
