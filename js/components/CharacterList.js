@@ -130,33 +130,19 @@ export default class CharacterList {
 
         const content = char.image ? '' : nationEmoji;
 
-        // FIXED SWIPE COLORS: Split 50/50
+        // NO SWIPE - Box removed
         return `
-            <div class="swipe-container" style="position: relative; margin-bottom: 15px; border-radius: 12px; background: #e0e0e0; overflow: hidden; height: 86px;"> 
-                
-                <!-- Edit Action (Left Half, Green) -->
-                <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 50%; background: var(--accent-green); display: flex; align-items: center; justify-content: flex-start; padding-left: 25px; color: white; font-size: 1.6rem; z-index: 1;">
-                    ✏️
+            <div class="card character-card" data-id="${char.id}" style="position: relative; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: #fdfaf5; box-shadow: 0 2px 5px rgba(0,0,0,0.05); user-select: none;">
+                <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
+                    ${content}
                 </div>
-
-                <!-- Delete Action (Right Half, Red) -->
-                <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 50%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 25px; color: white; font-size: 1.6rem; z-index: 1;">
-                    🗑️
-                </div>
-
-                <!-- Card Content -->
-                <div class="card character-card" data-id="${char.id}" style="position: relative; z-index: 10; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: #fdfaf5; height: 100%; box-sizing: border-box; transform: translate3d(0,0,0);">
-                    <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
-                        ${content}
+                <div class="character-info" style="flex: 1; overflow: hidden; text-align: left;">
+                    <div class="character-name" style="font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-ink);">${char.name || 'Senza Nome'}</div>
+                    <div class="character-details" style="font-size: 0.85rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                        ${details}
                     </div>
-                    <div class="character-info" style="flex: 1; overflow: hidden; text-align: left;">
-                        <div class="character-name" style="font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-ink);">${char.name || 'Senza Nome'}</div>
-                        <div class="character-details" style="font-size: 0.85rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
-                            ${details}
-                        </div>
-                    </div>
-                    <div style="color: var(--accent-gold); font-size: 1.2rem;">›</div>
                 </div>
+                <div style="color: var(--text-faded); font-size: 0.8rem;">●●●</div>
             </div>
         `;
     }
@@ -174,7 +160,6 @@ export default class CharacterList {
         // Create Button
         const btnCreate = container.querySelector('#btn-create-new');
         if (btnCreate) btnCreate.addEventListener('click', () => {
-            // Fixed: Use startCharacterCreation() instead of createNewCharacter()
             if (confirm("Creare un nuovo personaggio?")) {
                 if (this.app.startCharacterCreation) {
                     this.app.startCharacterCreation();
@@ -199,7 +184,6 @@ export default class CharacterList {
 
         // Modal Listeners
         const modal = container.querySelector('#edit-modal');
-        // Click outside to close
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.style.display = 'none';
@@ -218,86 +202,113 @@ export default class CharacterList {
         const cards = listContainer.querySelectorAll('.character-card');
 
         cards.forEach(card => {
-            let startX = 0;
-            let startY = 0;
-            let currentTranslate = 0;
-            let isDragging = false;
-            let isScrolling = false;
-            let tapStartTime = 0;
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
 
+            // TOUCH EVENTS
             card.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-                isDragging = false;
-                isScrolling = false;
-                tapStartTime = Date.now();
-                card.style.transition = 'none';
-            });
+                isLongPress = false;
+
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    // Trigger Context Menu
+                    navigator.vibrate?.(50); // Haptic feedback
+                    this.openContextMenu(card.dataset.id);
+                }, 500);
+            }, { passive: true });
 
             card.addEventListener('touchmove', (e) => {
-                const currentX = e.touches[0].clientX;
-                const currentY = e.touches[0].clientY;
-                const diffX = currentX - startX;
-                const diffY = currentY - startY;
-
-                // Determine if scrolling or swiping
-                if (!isDragging && !isScrolling) {
-                    if (Math.abs(diffY) > Math.abs(diffX)) {
-                        isScrolling = true;
-                        return; // Let native scroll happen
-                    } else if (Math.abs(diffX) > 10) { // Threshold for swipe start
-                        isDragging = true;
-                    }
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) {
+                    clearTimeout(timer); // Cancel if moved
                 }
-
-                if (isScrolling) return;
-
-                if (isDragging) {
-                    e.preventDefault(); // Prevent scroll while swiping
-                    // Limit swipe range
-                    if (diffX > 100) currentTranslate = 100; // Right (Edit) limit
-                    else if (diffX < -100) currentTranslate = -100; // Left (Delete) limit
-                    else currentTranslate = diffX;
-
-                    card.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
-                }
-            });
+            }, { passive: true });
 
             card.addEventListener('touchend', (e) => {
-                card.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);'; // Smooth snap
-                const tapEndTime = Date.now();
-                const tapDuration = tapEndTime - tapStartTime;
-
-                if (isDragging) {
-                    if (currentTranslate > 80) {
-                        // Swipe Right -> Edit
-                        card.style.transform = 'translate3d(0, 0, 0)';
-                        this.openEditModal(card.dataset.id);
-                    } else if (currentTranslate < -80) {
-                        // Swipe Left -> Delete
-                        card.style.transform = 'translate3d(0, 0, 0)';
-                        this.confirmDelete(card.dataset.id);
-                    } else {
-                        // Snap back
-                        card.style.transform = 'translate3d(0, 0, 0)';
-                    }
-                } else if (!isScrolling) {
-                    // Fixed: Use correct routing call
-                    if (Math.abs(currentTranslate) < 5) {
-                        // If App has viewCharacter helper, use it. Otherwise use router navigate safely.
-                        if (this.app.viewCharacter) {
-                            this.app.viewCharacter(card.dataset.id);
-                        } else {
-                            this.app.router.navigate('character-sheet', { id: card.dataset.id });
-                        }
-                    }
+                clearTimeout(timer);
+                if (isLongPress) {
+                    e.preventDefault(); // Prevent click handling
                 }
+            });
 
-                currentTranslate = 0;
-                isDragging = false;
-                isScrolling = false;
+            // CLICK (Short Press)
+            card.addEventListener('click', (e) => {
+                if (isLongPress) return; // Ignore acts as click after long press sometimes
+                // Regular OPEN
+                if (this.app.viewCharacter) {
+                    this.app.viewCharacter(card.dataset.id);
+                } else {
+                    this.app.router.navigate('character-sheet', { id: card.dataset.id });
+                }
+            });
+
+            // CONTEXT MENU (Right Click on Desktop)
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.openContextMenu(card.dataset.id);
             });
         });
+    }
+
+    openContextMenu(id) {
+        // Simple Context Menu Modal
+        const existingMenu = document.getElementById('ctx-menu-modal');
+        if (existingMenu) existingMenu.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-modal';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'flex-end'; // Bottom sheet style
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.5)';
+        menu.style.zIndex = '10000';
+
+        // Modal Content
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 100%; max-width: 400px; background: #fdfaf5; border-radius: 16px 16px 0 0; padding: 20px; text-align: center; border-top: 4px solid var(--accent-gold); animation: slideUp 0.2s ease-out;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display);">Opzioni Personaggio</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 15px;">📜 Apri Scheda</button>
+                    <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 15px;">✏️ Modifica Dati</button>
+                    <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 15px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 15px; margin-top: 10px;">Annulla</button>
+                </div>
+            </div>
+            <style>
+                @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            </style>
+        `;
+
+        document.body.appendChild(menu);
+
+        // Listeners
+        menu.querySelector('#ctx-open').onclick = () => {
+            menu.remove();
+            if (this.app.viewCharacter) this.app.viewCharacter(id);
+        };
+
+        menu.querySelector('#ctx-edit').onclick = () => {
+            menu.remove();
+            this.openEditModal(id);
+        };
+
+        menu.querySelector('#ctx-delete').onclick = () => {
+            menu.remove();
+            this.confirmDelete(id);
+        };
+
+        menu.querySelector('#ctx-cancel').onclick = () => {
+            menu.remove();
+        };
+
+        menu.onclick = (e) => {
+            if (e.target === menu) menu.remove();
+        };
     }
 
     openEditModal(id) {

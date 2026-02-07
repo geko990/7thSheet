@@ -253,36 +253,11 @@ export class CampaignDetail {
                 visibleList.forEach(e => {
                     const isHidden = !e.is_visible;
 
-                    // Wrappers for Swipe (Only for GM or if general swipe needed? GM only for delete/toggle)
-                    // If not GM, just card.
-                    if (this.myRole === 'gm') {
-                        html += `
-                        <div class="swipe-container campaign-entity-swipe" data-id="${e.id}" data-type="${type}" data-visible="${e.is_visible}" style="position: relative; overflow: hidden; height: 100%; border-radius: 8px;">
+                    // Standard Card View - No Swipe Wrapper
+                    html += `
+                        <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%; user-select: none;" data-id="${e.id}" data-visible="${e.is_visible}">
+                             ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
                             
-                            <!-- Right Swipe Action (Toggle Visibility) - Blue/Eye -->
-                            <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; background: var(--accent-navy); display: flex; align-items: center; justify-content: flex-start; padding-left: 20px; color: white;">
-                                ${e.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}
-                            </div>
-
-                            <!-- Left Swipe Action (Delete) - Red/Trash -->
-                            <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; color: white;">
-                                🗑️ Elimina
-                            </div>
-
-                            <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%; background: #fdfaf5; z-index: 10; transition: transform 0.2s;" data-id="${e.id}">
-                                ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
-                                
-                                <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
-                                     ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
-                                </div>
-                                <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
-                                ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
-                            </div>
-                        </div>`;
-                    } else {
-                        // Player View (No Swipe)
-                        html += `
-                        <div class="card entity-card" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%;" data-id="${e.id}">
                             <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
                                  ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
                             </div>
@@ -290,7 +265,6 @@ export class CampaignDetail {
                             ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
                              ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
                         </div>`;
-                    }
                 });
                 html += '</div>';
             }
@@ -301,78 +275,119 @@ export class CampaignDetail {
         // Listeners included in renderCharactersTab scope
         container.querySelector('#btn-link-char')?.addEventListener('click', () => this.openLinkCharacterModal());
 
-        if (this.myRole === 'gm') {
-            container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
-            this.attachEntitySwipeListeners(container);
-        }
+        if (this.myRole === 'gm') container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
 
-        // View Details
-        container.querySelectorAll('.entity-card').forEach(card => {
+        // Attach Long Press Listeners to Entities
+        this.attachEntityInteractionListeners(container, entities);
+    }
+
+    attachEntityInteractionListeners(container, entities) {
+        const cards = container.querySelectorAll('.entity-card');
+        cards.forEach(card => {
+            const id = card.dataset.id;
+            const entity = entities.find(e => e.id === id);
+
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            // TOUCH EVENTS
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    navigator.vibrate?.(50);
+                    this.openEntityContextMenu(entity);
+                }, 500);
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) e.preventDefault();
+            });
+
+            // CLICK (Short Press)
             card.addEventListener('click', (e) => {
-                // If swiping, don't trigger click (handle in swipe listeners or check class)
-                // We'll rely on a small drag check or just the fact that swipe moves it
-                const entity = entities.find(n => n.id === card.dataset.id);
-                if (entity) this.openViewEntityModal(entity);
+                if (isLongPress) return;
+                this.openViewEntityModal(entity);
+            });
+
+            // CONTEXT MENU (Right Click)
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.openEntityContextMenu(entity);
             });
         });
     }
 
-    attachEntitySwipeListeners(container) {
-        const swipes = container.querySelectorAll('.campaign-entity-swipe');
-        swipes.forEach(el => {
-            const card = el.querySelector('.entity-card');
-            const id = el.dataset.id;
-            const isVisible = el.dataset.visible === 'true';
+    openEntityContextMenu(entity) {
+        const existingMenu = document.getElementById('ctx-menu-modal');
+        if (existingMenu) existingMenu.remove();
 
-            let startX = 0;
-            let currentTranslate = 0;
-            let isDragging = false;
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-modal';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'flex-end'; // Bottom sheet
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.5)';
+        menu.style.zIndex = '10000';
 
-            card.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                card.style.transition = 'none';
-                isDragging = false;
-            }, { passive: true });
+        const isGm = this.myRole === 'gm';
 
-            card.addEventListener('touchmove', (e) => {
-                const diff = e.touches[0].clientX - startX;
-                if (Math.abs(diff) > 20) {
-                    isDragging = true;
-                    // Limit
-                    if (diff > 80) currentTranslate = 80;
-                    else if (diff < -80) currentTranslate = -80;
-                    else currentTranslate = diff;
+        // Modal Content
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 100%; max-width: 400px; background: #fdfaf5; border-radius: 16px 16px 0 0; padding: 20px; text-align: center; border-top: 4px solid var(--accent-gold); animation: slideUp 0.2s ease-out;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display);">${entity.name}</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 15px;">📜 Apri</button>
+                    ${isGm ? `
+                        <button class="btn btn-secondary" id="ctx-toggle" style="width: 100%; padding: 15px;">${entity.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                        <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 15px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    ` : ''}
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 15px; margin-top: 10px;">Annulla</button>
+                </div>
+            </div>
+            <style>
+                @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            </style>
+        `;
 
-                    card.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
+        document.body.appendChild(menu);
+
+        // Listeners
+        menu.querySelector('#ctx-open').onclick = () => {
+            menu.remove();
+            this.openViewEntityModal(entity);
+        };
+
+        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+
+        if (isGm) {
+            menu.querySelector('#ctx-toggle').onclick = async () => {
+                menu.remove();
+                await CampaignService.updateEntityVisibility(entity.id, !entity.is_visible);
+                this.loadTabContent();
+            };
+
+            menu.querySelector('#ctx-delete').onclick = async () => {
+                menu.remove();
+                if (confirm("Eliminare definitivamente?")) {
+                    await CampaignService.deleteEntity(entity.id);
+                    this.loadTabContent();
                 }
-            }, { passive: true });
-
-            card.addEventListener('touchend', (e) => {
-                card.style.transition = 'transform 0.2s';
-
-                if (currentTranslate > 60) {
-                    // Right Swipe -> Toggle Visibility
-                    card.style.transform = 'translate3d(0,0,0)';
-                    CampaignService.updateEntityVisibility(id, !isVisible).then(() => this.loadTabContent());
-                } else if (currentTranslate < -60) {
-                    // Left Swipe -> Delete
-                    card.style.transform = 'translate3d(0,0,0)';
-                    if (confirm("Eliminare definitivamente?")) {
-                        CampaignService.deleteEntity(id).then(() => this.loadTabContent());
-                    }
-                } else {
-                    card.style.transform = 'translate3d(0,0,0)';
-                }
-
-                // Prevent click if dragged
-                if (isDragging) {
-                    const clickHandler = (ev) => { ev.stopPropagation(); card.removeEventListener('click', clickHandler, true); };
-                    card.addEventListener('click', clickHandler, true);
-                }
-                isDragging = false;
-                currentTranslate = 0;
-            });
-        });
+            };
+        }
     }
 
     // MODALS (Add Link)
