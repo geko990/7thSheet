@@ -966,3 +966,213 @@ select {
     height: 50px;
     object-fit: contain;
 }
+
+/* ========================================
+   CREATE WIZARD - Character Creation Styles
+   ======================================== */
+
+.wizard-container {
+    padding: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.wizard-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.step-indicator {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--border-worn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    color: var(--text-faded);
+    transition: all 0.3s ease;
+}
+
+.step-indicator.active {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(184, 134, 11, 0.4);
+}
+
+.step-line {
+    width: 20px;
+    height: 2px;
+    background: var(--border-worn);
+}
+
+/* Edition Selection Cards */
+.edition-selector {
+    padding: 10px;
+}
+
+.edition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.edition-card-box {
+    background: linear-gradient(145deg, #fdfaf5 0%, #f5edd8 100%);
+    border: 2px solid var(--accent-gold);
+    border-radius: 15px;
+    padding: 20px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow-soft);
+}
+
+.edition-card-box:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 6px var(--shadow-soft);
+}
+
+.edition-icon-box {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.edition-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-faded);
+    margin: 5px 0 15px 0;
+}
+
+.edition-select-btn-box {
+    background: var(--accent-gold);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+/* Wizard Step Content */
+.wizard-step-content {
+    min-height: 300px;
+}
+
+.wizard-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-worn);
+}
+
+.wizard-controls .btn {
+    flex: 1;
+    padding: 12px;
+}
+
+/* Trait Controls */
+.traits-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.trait-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    border: 1px solid var(--border-worn);
+}
+
+.trait-label {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--text-ink);
+}
+
+.trait-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.trait-value {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--accent-gold);
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    background: linear-gradient(145deg, #fdfaf5, #d4c098);
+    color: var(--text-ink);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.btn-circle:active {
+    transform: scale(0.9);
+}
+
+/* Background Selection */
+.background-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.background-item {
+    padding: 12px;
+    border: 2px solid var(--border-worn);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.background-item.selected {
+    border-color: var(--accent-gold);
+    background: rgba(184, 134, 11, 0.1);
+}
+
+.bg-header {
+    margin-bottom: 8px;
+}
+
+.bg-quirk {
+    display: block;
+    font-style: italic;
+    color: var(--text-faded);
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.bg-details {
+    font-size: 0.8rem;
+    color: var(--text-faded);
+}
