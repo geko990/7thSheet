@@ -127,17 +127,21 @@ export default class CharacterSheet {
                     </div>
                 </div>
 
-                <div id="dice-fab" style="position: fixed; bottom: 80px; right: 20px; display: none; flex-direction: column; align-items: end; gap: 10px; z-index: 100;">
-                    <div class="dice-pool-bubble" style="background: var(--bg-paper); border: 2px solid var(--accent-gold); padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px var(--shadow-strong); margin-bottom: 5px; max-width: 200px; text-align: right;">
-                        <div id="dice-pool-list" style="font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;"></div>
-                        <div style="font-weight: bold;">Totale: <span id="dice-pool-total">0</span> Dadi</div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn-circle" id="btn-pool-reset" style="background: var(--accent-red); width: 40px; height: 40px;">🗑️</button>
-                        <button class="btn-circle" id="btn-pool-add" style="background: var(--accent-blue); width: 40px; height: 40px;">+1</button>
-                        <button class="btn btn-primary" id="btn-pool-roll" style="border-radius: 30px; padding: 10px 20px; box-shadow: 0 4px 15px var(--accent-gold);">
-                            🎲 Lancia!
-                        </button>
+                <div id="dice-fab" class="dice-fab-popup" style="display: none;">
+                    <div class="dice-fab-card">
+                        <div id="dice-pool-list" class="dice-fab-list"></div>
+                        <div class="dice-fab-total">
+                            Totale: <span id="dice-pool-total" class="total-number">0</span> Dadi
+                        </div>
+                        <div class="dice-fab-buttons">
+                            <button class="dice-fab-btn reset" id="btn-pool-reset">🗑️</button>
+                            <button class="dice-fab-btn add" id="btn-pool-add">+1</button>
+                        </div>
+                        <div class="dice-fab-roll-wrapper">
+                            <button class="dice-fab-roll-btn" id="btn-pool-roll">
+                                <img src="assets/d10.png" alt="Lancia" class="d10-image">
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -246,8 +250,14 @@ export default class CharacterSheet {
                         ${this.character.edition === '1e' ? 'Vantaggi & Scuole' : 'Background & Vantaggi'}
                     </div>
                     
-                    ${this.character.edition === '2e' ?
-                `<p><strong>Background:</strong> ${this.character.backgrounds ? this.character.backgrounds.join(', ') : ''}</p>` : ''
+                    ${this.character.edition === '2e' && this.character.backgrounds && this.character.backgrounds.length > 0 ?
+                `<div style="margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            ${this.character.backgrounds.map(bg => `
+                                <div class="adv-pill" style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 5px; font-size: 0.9rem; text-align: center; border: 1px solid var(--border-worn);">
+                                    ${bg}
+                                </div>
+                            `).join('')}
+                        </div>` : ''
             }
                     
                     ${this.character.edition === '1e' && this.character.school ?

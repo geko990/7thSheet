@@ -128,9 +128,9 @@ export default class Settings {
             this.importData(e.target.files[0]);
         });
 
-        // Clear cache logic
+        // Clear cache logic - no confirmation, user clicked the button
         const clearCacheAndReload = async () => {
-            if (!confirm("Vuoi forzare l'aggiornamento dell'app?")) return;
+            // Execute directly
 
             const btn = container.querySelector('#btn-clear-cache');
             if (btn) btn.innerHTML = '<span class="btn-icon">⏳</span>';

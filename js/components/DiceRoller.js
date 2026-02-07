@@ -59,7 +59,7 @@ export default class DiceRoller {
                     </div>
                     
                     <div class="dice-result-box" id="results-display" style="display: none;">
-                        <span class="result-type">${this.edition === '1e' ? 'Totale' : 'Raise'}</span>
+                        <span class="result-type">${this.edition === '1e' ? 'Totale' : 'Incrementi'}</span>
                         <span class="result-number" id="result-value">0</span>
                     </div>
                 </div>

@@ -849,3 +849,120 @@ select {
     height: 60px;
     object-fit: contain;
 }
+
+/* ========================================
+   DICE FAB POPUP - Character Sheet Overlay
+   ======================================== */
+
+.dice-fab-popup {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 200;
+}
+
+.dice-fab-card {
+    background: linear-gradient(145deg, #fdfaf5 0%, #f5edd8 100%);
+    border-radius: 20px;
+    border: 2px solid var(--accent-gold);
+    box-shadow: 0 8px 30px var(--shadow-strong), 0 0 0 4px rgba(184, 134, 11, 0.15);
+    padding: 15px;
+    padding-bottom: 50px;
+    min-width: 180px;
+    position: relative;
+}
+
+.dice-fab-list {
+    font-size: 0.85rem;
+    color: var(--text-faded);
+    margin-bottom: 10px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.dice-fab-list div {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dice-fab-total {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-ink);
+    text-align: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-worn);
+    margin-top: 5px;
+}
+
+.dice-fab-total .total-number {
+    color: var(--accent-gold);
+    font-size: 1.4rem;
+}
+
+.dice-fab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0;
+}
+
+.dice-fab-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.dice-fab-btn.reset {
+    background: linear-gradient(145deg, #ffebee, #ffcdd2);
+    border-color: var(--accent-red);
+}
+
+.dice-fab-btn.add {
+    background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+    border-color: var(--accent-navy);
+}
+
+.dice-fab-btn:active {
+    transform: scale(0.9);
+}
+
+.dice-fab-roll-wrapper {
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dice-fab-roll-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-gold);
+    background: linear-gradient(145deg, #fdfaf5, #d4c098);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px var(--shadow-strong);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.dice-fab-roll-btn:active {
+    transform: scale(0.95);
+}
+
+.dice-fab-roll-btn .d10-image {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
