@@ -1,4 +1,4 @@
-const CACHE_NAME = '7thsea-v0.9.2';
+const CACHE_NAME = '7thsea-v0.9.3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

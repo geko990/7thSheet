@@ -39,8 +39,8 @@ export default class CharacterList {
         div.appendChild(style);
 
         div.innerHTML += `
-            <!-- Search Bar -->
-            <div style="padding: 20px 20px 0;">
+            <!-- Search Bar (Hidden) -->
+            <div style="padding: 20px 20px 0; display: none;">
                 <h2 class="page-title text-left" style="text-align: left; margin-bottom: 15px; border: none; font-size: 1.8rem;">Personaggi</h2>
                 <div class="search-bar" style="position: relative;">
                     <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5;">🔍</span>
@@ -55,7 +55,7 @@ export default class CharacterList {
             </div>
 
             <!-- FAB Create Button -->
-            <div class="fab-container">
+            <div class="fab-container" style="justify-content: center; left: 0; width: 100%;">
                 <button class="btn-fab" id="btn-create-new">
                     <span>✨</span> Nuovo Personaggio
                 </button>

@@ -6,6 +6,7 @@ import Settings from './components/Settings.js';
 import CharacterSheet from './components/CharacterSheet.js';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
+import { AuthService } from './services/AuthService.js';
 
 class App {
     constructor() {
@@ -15,6 +16,9 @@ class App {
     }
 
     async init() {
+        // Initialize Auth service first
+        await AuthService.init();
+
         // Register routes
         this.router.register('characters', () => new CharacterList(this).render());
         this.router.register('dice', () => new DiceRoller(this).render());
