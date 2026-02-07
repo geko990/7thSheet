@@ -263,24 +263,25 @@ export default class CharacterList {
         menu.id = 'ctx-menu-modal';
         menu.className = 'modal-overlay';
         menu.style.display = 'flex';
-        menu.style.alignItems = 'flex-end'; // Bottom sheet style
-        menu.style.justifyContent = 'center';
-        menu.style.background = 'rgba(0,0,0,0.5)';
+        menu.style.alignItems = 'center'; // Center vertically
+        menu.style.justifyContent = 'center'; // Center horizontally
+        menu.style.background = 'rgba(0,0,0,0.6)'; // Darker overlay
         menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
 
-        // Modal Content
+        // Modal Content - Centered Card
         menu.innerHTML = `
-            <div class="modal-content" style="width: 100%; max-width: 400px; background: #fdfaf5; border-radius: 16px 16px 0 0; padding: 20px; text-align: center; border-top: 4px solid var(--accent-gold); animation: slideUp 0.2s ease-out;">
-                <h3 style="margin-bottom: 20px; font-family: var(--font-display);">Opzioni Personaggio</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 15px;">📜 Apri Scheda</button>
-                    <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 15px;">✏️ Modifica Dati</button>
-                    <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 15px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
-                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 15px; margin-top: 10px;">Annulla</button>
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.5rem; color: var(--accent-navy);">Opzioni Personaggio</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">📜 Apri Scheda</button>
+                    <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica Dati</button>
+                    <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
                 </div>
             </div>
             <style>
-                @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+                @keyframes popIn { to { transform: scale(1); } }
             </style>
         `;
 

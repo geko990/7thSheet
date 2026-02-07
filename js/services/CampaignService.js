@@ -202,22 +202,75 @@ export const CampaignService = {
     async uploadImage(file) {
         if (!file) return { error: { message: 'Nessun file selezionato' } };
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `${fileName}`;
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabaseClient
-            .storage
-            .from('campaign-images')
-            .upload(filePath, file);
+            const { error: uploadError } = await supabaseClient
+                .storage
+                .from('campaign-images')
+                .upload(filePath, file);
 
-        if (uploadError) return { error: uploadError };
+            if (uploadError) {
+                console.warn("Supabase Storage Error (Bucket not found?):", uploadError);
+                throw uploadError; // Trigger fallback
+            }
 
-        const { data } = supabaseClient
-            .storage
-            .from('campaign-images')
-            .getPublicUrl(filePath);
+            const { data } = supabaseClient
+                .storage
+                .from('campaign-images')
+                .getPublicUrl(filePath);
 
-        return { publicUrl: data.publicUrl };
+            return { publicUrl: data.publicUrl };
+
+        } catch (e) {
+            console.warn("Falling back to Base64 image storage due to upload error.");
+
+            // Fallback: Convert to Resized Base64
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300;
+                        const MAX_HEIGHT = 300;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compress to JPEG 0.7
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        if (dataUrl.length > 1000000) { // Still too big > 1MB?
+                            resolve({ error: { message: "Immagine troppo grande anche dopo ridimensionamento." } });
+                        } else {
+                            resolve({ publicUrl: dataUrl });
+                        }
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.onerror = () => {
+                    resolve({ error: { message: "Errore lettura file locale" } });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     }
 };

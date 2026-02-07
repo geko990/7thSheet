@@ -337,28 +337,30 @@ export class CampaignDetail {
         menu.id = 'ctx-menu-modal';
         menu.className = 'modal-overlay';
         menu.style.display = 'flex';
-        menu.style.alignItems = 'flex-end'; // Bottom sheet
-        menu.style.justifyContent = 'center';
-        menu.style.background = 'rgba(0,0,0,0.5)';
+        menu.style.alignItems = 'center'; // Center vertically
+        menu.style.justifyContent = 'center'; // Center horizontally
+        menu.style.background = 'rgba(0,0,0,0.6)'; // Darker overlay
         menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
 
         const isGm = this.myRole === 'gm';
 
-        // Modal Content
+        // Modal Content - Centered
         menu.innerHTML = `
-            <div class="modal-content" style="width: 100%; max-width: 400px; background: #fdfaf5; border-radius: 16px 16px 0 0; padding: 20px; text-align: center; border-top: 4px solid var(--accent-gold); animation: slideUp 0.2s ease-out;">
-                <h3 style="margin-bottom: 20px; font-family: var(--font-display);">${entity.name}</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 15px;">📜 Apri</button>
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${entity.name}</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">📜 Apri</button>
                     ${isGm ? `
-                        <button class="btn btn-secondary" id="ctx-toggle" style="width: 100%; padding: 15px;">${entity.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
-                        <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 15px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                        <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica</button>
+                        <button class="btn btn-secondary" id="ctx-toggle" style="width: 100%; padding: 12px;">${entity.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                        <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
                     ` : ''}
-                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 15px; margin-top: 10px;">Annulla</button>
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
                 </div>
             </div>
             <style>
-                @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+                @keyframes popIn { to { transform: scale(1); } }
             </style>
         `;
 
@@ -374,6 +376,11 @@ export class CampaignDetail {
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
         if (isGm) {
+            menu.querySelector('#ctx-edit').onclick = () => {
+                menu.remove();
+                this.openEditEntityModal(entity);
+            };
+
             menu.querySelector('#ctx-toggle').onclick = async () => {
                 menu.remove();
                 await CampaignService.updateEntityVisibility(entity.id, !entity.is_visible);
@@ -388,6 +395,121 @@ export class CampaignDetail {
                 }
             };
         }
+    }
+
+    openEditEntityModal(entity) {
+        // Reuse the add modal logic but pre-fill data and change save action
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+
+        // Copy paste of add modal HTML, ideally refactored into a shared render function
+        body.innerHTML = `
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Modifica Elemento</h3>
+            
+            <div class="mb-15 text-center">
+                <label style="margin-right: 10px;">Tipo:</label>
+                <select id="ent-type" style="padding: 5px; border-radius: 5px;">
+                    <option value="npc" ${entity.type === 'npc' ? 'selected' : ''}>🎭 NPC (Alleato/Neutrale)</option>
+                    <option value="enemy" ${entity.type === 'enemy' ? 'selected' : ''}>⚔️ Avversario (Nemico)</option>
+                    <option value="item" ${entity.type === 'item' ? 'selected' : ''}>💎 Oggetto / Indizio</option>
+                </select>
+            </div>
+
+            <div class="input-field mb-10">
+                <input type="text" id="ent-name" placeholder="Nome *" style="width: 100%;" value="${entity.name || ''}">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="ent-level" placeholder="Livello" class="input-field" style="flex: 1;" value="${entity.level || ''}">
+                <input type="text" id="ent-nat" placeholder="Nazionalità" class="input-field" style="flex: 1;" value="${entity.nationality || ''}">
+            </div>
+
+            <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
+                <label for="ent-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Cambia Immagine</label>
+                <input type="file" id="ent-file" style="display: none;" accept="image/*">
+                <div id="img-preview" style="width: 100px; height: 100px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: block; border: 2px solid var(--accent-gold);">
+                    ${entity.image_url ? `<img src="${entity.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
+                <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="width: 100%;" value="${entity.image_url || ''}">
+            </div>
+
+            <div class="input-field mb-10">
+                <textarea id="ent-desc" placeholder="Descrizione..." style="width: 100%; height: 100px; padding: 10px;">${entity.description || ''}</textarea>
+            </div>
+            
+            <div class="input-field mb-10" style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="ent-visible" style="width: auto;" ${entity.is_visible ? 'checked' : ''}>
+                <label for="ent-visible">Visibile ai giocatori?</label>
+            </div>
+        `;
+
+        const fileInput = body.querySelector('#ent-file');
+        const preview = body.querySelector('#img-preview');
+        const urlInput = body.querySelector('#ent-img');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        btnAction.style.display = 'block';
+        btnAction.textContent = "Salva";
+        btnAction.disabled = false;
+
+        btnAction.onclick = async () => {
+            const type = document.getElementById('ent-type').value;
+            const name = document.getElementById('ent-name').value;
+            const level = document.getElementById('ent-level').value;
+            const nationality = document.getElementById('ent-nat').value;
+            const description = document.getElementById('ent-desc').value;
+            const is_visible = document.getElementById('ent-visible').checked;
+
+            let image_url = urlInput.value;
+            const file = fileInput.files[0];
+
+            if (!name) return alert("Inserisci almeno il nome");
+
+            btnAction.disabled = true;
+
+            if (file) {
+                btnAction.textContent = "Caricamento Immagine...";
+                const { publicUrl, error } = await CampaignService.uploadImage(file);
+                if (error) {
+                    alert("Errore caricamento immagine: " + (error.message || error));
+                    btnAction.disabled = false;
+                    btnAction.textContent = "Salva";
+                    return;
+                }
+                image_url = publicUrl;
+            }
+
+            const updates = { name, type, level, nationality, image_url, description, is_visible };
+
+            btnAction.textContent = "Aggiornamento...";
+
+            const { error } = await CampaignService.updateEntity(entity.id, updates);
+
+            if (error) {
+                console.error(error);
+                alert("Errore salvataggio: " + error.message);
+                btnAction.disabled = false;
+                btnAction.textContent = "Salva";
+                return;
+            }
+
+            modal.style.display = 'none';
+            this.loadTabContent(); // Refresh
+        };
+
+        modal.style.display = 'flex';
     }
 
     // MODALS (Add Link)
