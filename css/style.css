@@ -983,7 +983,8 @@ select {
     justify-content: center;
     gap: 8px;
     margin-bottom: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    /* Force single line */
 }
 
 .step-indicator {
@@ -997,8 +998,23 @@ select {
     justify-content: center;
     font-family: var(--font-display);
     font-size: 0.9rem;
+    flex-shrink: 0;
+    /* Prevent shrinking below size */
     color: var(--text-faded);
     transition: all 0.3s ease;
+}
+
+@media (max-width: 400px) {
+    .wizard-progress {
+        gap: 4px;
+    }
+
+    .step-indicator {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+        border-width: 1.5px;
+    }
 }
 
 .step-indicator.active {
