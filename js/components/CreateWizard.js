@@ -269,18 +269,19 @@ export default class CreateWizard {
                 <div id="nation-desc" class="mt-20" style="font-style: italic; color: var(--text-faded);"></div>
                 
                 <!-- Cropper Overlay -->
-                <div id="cropper-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; flex-direction: column; align-items: center; justify-content: center;">
-                    <h3 style="color: white; margin-bottom: 20px;">Ritaglia Immagine</h3>
-                    <div style="position: relative; width: 300px; height: 300px; background: #333; overflow: hidden; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-                        <img id="cropper-img" style="position: absolute; pointer-events: none; opacity: 0.6; min-width: 100%; min-height: 100%; object-fit: cover;">
-                        <div id="cropper-mask" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: all; cursor: move;">
-                             <div style="width: 200px; height: 200px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.5); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"></div>
+                <!-- Cropper Overlay -->
+                <div id="cropper-overlay" class="cropper-overlay">
+                    <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-display);">Ritaglia Immagine</h3>
+                    <div class="cropper-container">
+                        <img id="cropper-img" class="cropper-img">
+                        <div id="cropper-mask" class="cropper-mask">
+                             <div class="cropper-circle"></div>
                         </div>
                     </div>
-                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <div class="cropper-controls">
                         <input type="range" id="cropper-zoom" min="0.5" max="3" step="0.1" value="1" style="width: 200px;">
                     </div>
-                    <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <div class="cropper-buttons">
                         <button class="btn btn-secondary" id="btn-cancel-crop">Annulla</button>
                         <button class="btn btn-primary" id="btn-confirm-crop">Salva</button>
                     </div>

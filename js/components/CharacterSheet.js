@@ -184,15 +184,49 @@ export default class CharacterSheet {
     renderSheetTab(container) {
         container.innerHTML = `
                 <!-- Character Header (only in Sheet tab) -->
-                <div class="char-header text-center" style="margin-bottom: 20px;">
-                    ${this.character.image ? `
-                    <div class="char-sheet-avatar" style="width: 100px; height: 100px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
-                        <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="char-header text-center" style="margin-bottom: 20px; position: relative;">
+                    <!-- Hidden File Input -->
+                    <input type="file" id="sheet-image-upload" accept="image/*" style="display: none;">
+
+                    <!-- Avatar with Edit Overlay -->
+                    <div class="char-sheet-avatar-container" style="position: relative; width: 100px; height: 100px; margin: 0 auto 10px; cursor: pointer;">
+                        ${this.character.image ? `
+                        <div class="char-sheet-avatar" style="width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--accent-gold); overflow: hidden; box-shadow: 0 5px 15px var(--shadow-strong);">
+                            <img src="${this.character.image}" alt="${this.character.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        ` : `
+                        <div class="char-sheet-avatar placeholder" style="width: 100%; height: 100%; border-radius: 50%; border: 3px dashed var(--accent-gold); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05);">
+                            <span style="font-size: 2rem; color: var(--accent-gold);">📷</span>
+                        </div>
+                        `}
+                        
+                        <!-- Edit Icon Overlay -->
+                        <div class="avatar-edit-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
+                            <span style="color: white; font-size: 1.5rem;">✏️</span>
+                        </div>
                     </div>
-                    ` : ''}
+
                     <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
                     <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
                         ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
+                    </div>
+
+                    <!-- Cropper Modal (Hidden) -->
+                    <div id="sheet-cropper-overlay" class="cropper-overlay">
+                        <h3 style="color: white; margin-bottom: 20px; font-family: var(--font-display);">Ritaglia Immagine</h3>
+                        <div class="cropper-container">
+                            <img id="sheet-cropper-img" class="cropper-img">
+                            <div id="sheet-cropper-mask" class="cropper-mask">
+                                    <div class="cropper-circle"></div>
+                            </div>
+                        </div>
+                        <div class="cropper-controls">
+                            <input type="range" id="sheet-cropper-zoom" min="0.5" max="3" step="0.1" value="1" style="width: 200px;">
+                        </div>
+                        <div class="cropper-buttons">
+                            <button class="btn btn-secondary" id="btn-sheet-cancel-crop">Annulla</button>
+                            <button class="btn btn-primary" id="btn-sheet-confirm-crop">Salva</button>
+                        </div>
                     </div>
                 </div>
 
@@ -562,6 +596,163 @@ export default class CharacterSheet {
                 this.addToPool(parseInt(e.target.dataset.val), this.translateKey(e.target.dataset.key));
             });
         });
+
+        /* ========================================
+           AVATAR EDITING & CROPPER LOGIC
+           ======================================== */
+        const avatarContainer = container.querySelector('.char-sheet-avatar-container');
+        const fileInput = container.querySelector('#sheet-image-upload');
+        const cropperOverlay = container.querySelector('#sheet-cropper-overlay');
+        const cropperImg = container.querySelector('#sheet-cropper-img');
+        const cropperMask = container.querySelector('#sheet-cropper-mask');
+        const zoomSlider = container.querySelector('#sheet-cropper-zoom');
+        const btnCancel = container.querySelector('#btn-sheet-cancel-crop');
+        const btnConfirm = container.querySelector('#btn-sheet-confirm-crop');
+
+        if (avatarContainer && fileInput) {
+            avatarContainer.addEventListener('click', () => fileInput.click());
+        }
+
+        let cropState = {
+            img: null,
+            scale: 1,
+            posX: 0,
+            posY: 0,
+            isDragging: false,
+            lastX: 0,
+            lastY: 0
+        };
+
+        const updateCropperTransform = () => {
+            if (!cropperImg) return;
+            cropperImg.style.transform = `translate(${cropState.posX}px, ${cropState.posY}px) scale(${cropState.scale})`;
+        };
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        cropperImg.src = evt.target.result;
+                        cropState.img = new Image();
+                        cropState.img.src = evt.target.result;
+                        cropState.img.onload = () => {
+                            // Reset state
+                            cropState.scale = 1;
+                            cropState.posX = 0;
+                            cropState.posY = 0;
+                            zoomSlider.value = 1;
+                            updateCropperTransform();
+                            cropperOverlay.style.display = 'flex';
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                }
+                // Reset input value to allow re-selecting same file
+                e.target.value = '';
+            });
+        }
+
+        // Cropper Interactions
+        if (cropperMask) {
+            cropperMask.addEventListener('mousedown', (e) => {
+                cropState.isDragging = true;
+                cropState.lastX = e.clientX;
+                cropState.lastY = e.clientY;
+                e.preventDefault(); // Prevent text selection
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
+                    const deltaX = e.clientX - cropState.lastX;
+                    const deltaY = e.clientY - cropState.lastY;
+                    cropState.posX += deltaX;
+                    cropState.posY += deltaY;
+                    cropState.lastX = e.clientX;
+                    cropState.lastY = e.clientY;
+                    updateCropperTransform();
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                cropState.isDragging = false;
+            });
+
+            // Touch support
+            cropperMask.addEventListener('touchstart', (e) => {
+                cropState.isDragging = true;
+                cropState.lastX = e.touches[0].clientX;
+                cropState.lastY = e.touches[0].clientY;
+                e.preventDefault();
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
+                    const deltaX = e.touches[0].clientX - cropState.lastX;
+                    const deltaY = e.touches[0].clientY - cropState.lastY;
+                    cropState.posX += deltaX;
+                    cropState.posY += deltaY;
+                    cropState.lastX = e.touches[0].clientX;
+                    cropState.lastY = e.touches[0].clientY;
+                    updateCropperTransform();
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchend', () => {
+                cropState.isDragging = false;
+            });
+        }
+
+        if (zoomSlider) {
+            zoomSlider.addEventListener('input', (e) => {
+                cropState.scale = parseFloat(e.target.value);
+                updateCropperTransform();
+            });
+        }
+
+        if (btnCancel) {
+            btnCancel.addEventListener('click', () => {
+                cropperOverlay.style.display = 'none';
+                cropState.img = null;
+            });
+        }
+
+        if (btnConfirm) {
+            btnConfirm.addEventListener('click', () => {
+                if (!cropState.img) return;
+
+                const canvas = document.createElement('canvas');
+                const size = 200; // Output size
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // Fill background (optional, but good for transparency)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+
+                ctx.save();
+                ctx.translate(size / 2, size / 2);
+                ctx.translate(cropState.posX, cropState.posY);
+                ctx.scale(cropState.scale, cropState.scale);
+                ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2);
+                ctx.restore();
+
+                const resultImage = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Update Character
+                this.character.image = resultImage;
+
+                // Save and Re-render
+                Storage.saveCharacter(this.character);
+                this.render();
+
+                // Close overlay
+                cropperOverlay.style.display = 'none';
+            });
+        }
     }
 
     // GENERIC SWIPE LOGIC FOR ITEMS
