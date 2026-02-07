@@ -176,7 +176,8 @@ export class CampaignDetail {
     }
 
     async renderCharactersTab(container) {
-        const { data: npcs } = await CampaignService.getNPCs(this.campaignId);
+        // Use getEntities instead of getNPCs
+        const { data: entities } = await CampaignService.getEntities(this.campaignId);
         const { members } = this.campaign;
 
         let html = '';
@@ -186,7 +187,7 @@ export class CampaignDetail {
 
         // Check if I need to link my character
         const myMember = members.find(m => m.user_id === AuthService.user.id);
-        if (myMember && !myMember.character_data) { // Removed !gm check to allow GM to have a PC/DMPC
+        if (myMember && !myMember.character_data) {
             html += `
                 <div class="alert alert-info text-center mb-20" style="background: rgba(var(--accent-navy-rgb), 0.1); border: 1px solid var(--accent-navy); padding: 15px; border-radius: 8px;">
                     <div>Non hai ancora scelto chi interpretare!</div>
@@ -197,7 +198,7 @@ export class CampaignDetail {
 
         html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px;">';
         members.forEach(m => {
-            if (m.role === 'gm') return; // Skip GM in players list logic or show separately?
+            if (m.role === 'gm') return;
             html += `
                 <div class="card p-10 text-center" style="background: white;">
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden;">
@@ -210,78 +211,112 @@ export class CampaignDetail {
         });
         html += '</div>';
 
-        // NPC Section
-        html += '<h3 class="section-title" style="border-bottom: 2px solid var(--accent-red); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">Personaggi Incontrati';
+        // ENTITIES Section (Grouped by Type)
+        const categories = {
+            'npc': { title: 'Alleati & NPC', icon: '🎭', color: 'var(--accent-gold)' },
+            'enemy': { title: 'Avversari', icon: '⚔️', color: 'var(--accent-red)' },
+            'item': { title: 'Oggetti & Indizi', icon: '💎', color: 'var(--accent-navy)' }
+        };
+
         if (this.myRole === 'gm') {
-            html += '<button id="btn-add-npc" class="btn btn-xs btn-primary">+ NPC</button>';
-        }
-        html += '</h3>';
-
-        if (!npcs || npcs.length === 0) {
-            html += '<div class="italic text-center">Nessuno ancora...</div>';
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;">
+                    <h3 class="section-title" style="margin: 0; border: none;">Elementi di Gioco</h3>
+                    <button id="btn-add-entity" class="btn btn-xs btn-primary">+ Nuovo</button>
+                </div>
+            `;
         } else {
-            html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
-            npcs.forEach(npc => {
-                if (this.myRole !== 'gm' && !npc.is_visible) return;
+            html += '<h3 class="section-title" style="border-bottom: 2px solid var(--border-color); margin-bottom: 15px;">Elementi di Gioco</h3>';
+        }
 
-                html += `
-                    <div class="card npc-card ${!npc.is_visible ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative;" data-id="${npc.id}">
-                        ${!npc.is_visible ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;">🔒</div>' : ''}
-                        <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #ddd; margin: 0 auto 10px; overflow: hidden; border: 2px solid var(--accent-gold);">
-                             ${npc.image_url ? `<img src="${npc.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 60px; font-size: 1.5rem;">🎭</span>'}
-                        </div>
-                        <div style="font-weight: bold; font-family: var(--font-display); color: var(--accent-navy);">${npc.name}</div>
-                        
-                        ${this.myRole === 'gm' ? `
-                             <div style="margin-top: 5px; display: flex; justify-content: center; gap: 5px;">
-                                <button class="btn-xs btn-secondary toggle-npc" data-id="${npc.id}" data-visible="${npc.is_visible}">
-                                    ${npc.is_visible ? '👁️' : '🔒'}
-                                </button>
-                             </div>
-                        ` : ''}
-                    </div>
-                 `;
+        if (!entities || entities.length === 0) {
+            html += '<div class="italic text-center">Nessun elemento ancora...</div>';
+        } else {
+            // Group entities
+            const grouped = { npc: [], enemy: [], item: [] };
+            entities.forEach(e => {
+                const type = e.type || 'npc';
+                if (grouped[type]) grouped[type].push(e);
+                else grouped.npc.push(e); // Fallback
             });
-            html += '</div>';
+
+            for (const [type, list] of Object.entries(grouped)) {
+                if (list.length === 0) continue;
+
+                // Check visibility for players
+                const visibleList = this.myRole === 'gm' ? list : list.filter(e => e.is_visible);
+                if (visibleList.length === 0 && this.myRole !== 'gm') continue;
+
+                html += `<h4 style="color: ${categories[type].color}; margin: 20px 0 10px; display: flex; align-items: center; gap: 5px;">${categories[type].icon} ${categories[type].title}</h4>`;
+                html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+
+                visibleList.forEach(e => {
+                    const isHidden = !e.is_visible;
+                    html += `
+                        <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color};" data-id="${e.id}">
+                            ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
+                            
+                            <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
+                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
+                            </div>
+                            
+                            <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
+                            ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
+                            ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
+                            
+                            ${this.myRole === 'gm' ? `
+                                 <div style="margin-top: 8px; display: flex; justify-content: center; gap: 5px;">
+                                    <button class="btn-xs btn-secondary toggle-entity" data-id="${e.id}" data-visible="${e.is_visible}">
+                                        ${e.is_visible ? '👁️' : '🔒'}
+                                    </button>
+                                    <button class="btn-xs btn-secondary delete-entity" data-id="${e.id}" style="color: var(--accent-red);">🗑️</button>
+                                 </div>
+                            ` : ''}
+                        </div>
+                     `;
+                });
+                html += '</div>';
+            }
         }
 
         container.innerHTML = html;
 
-        // Listeners
+        // Listeners included in renderCharactersTab scope
         container.querySelector('#btn-link-char')?.addEventListener('click', () => this.openLinkCharacterModal());
 
-        // NPC Listeners (Existing)
         if (this.myRole === 'gm') {
-            container.querySelector('#btn-add-npc')?.addEventListener('click', () => this.openAddNPCModal());
+            container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
 
-            container.querySelectorAll('.toggle-npc').forEach(btn => {
+            container.querySelectorAll('.toggle-entity').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     const id = btn.dataset.id;
                     const isVisible = btn.dataset.visible === 'true';
-                    await CampaignService.updateNPCVisibility(id, !isVisible);
-                    this.loadTabContent();
+                    await CampaignService.updateEntityVisibility(id, !isVisible);
+                    this.loadTabContent(); // Refresh
                 });
             });
 
-            // View NPC Details (for now just modal with description)
-            container.querySelectorAll('.npc-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    // If clicking button, ignore. If clicking card, show details.
-                    if (e.target.tagName === 'BUTTON') return;
-                    const npc = npcs.find(n => n.id === card.dataset.id);
-                    if (npc) this.openViewNPCModal(npc);
-                });
-            });
-        } else {
-            // Players can view details too
-            container.querySelectorAll('.npc-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const npc = npcs.find(n => n.id === card.dataset.id);
-                    if (npc) this.openViewNPCModal(npc);
+            container.querySelectorAll('.delete-entity').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (confirm("Eliminare definitivamente?")) {
+                        const id = btn.dataset.id;
+                        await CampaignService.deleteEntity(id);
+                        this.loadTabContent();
+                    }
                 });
             });
         }
+
+        // View Details
+        container.querySelectorAll('.entity-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                const entity = entities.find(n => n.id === card.dataset.id);
+                if (entity) this.openViewEntityModal(entity);
+            });
+        });
     }
 
     // MODALS (Add Link)
@@ -379,37 +414,66 @@ export class CampaignDetail {
         modal.style.display = 'flex';
     }
 
-    openAddNPCModal() {
+    openAddEntityModal() {
         const modal = this.container.querySelector('#generic-modal');
         const body = this.container.querySelector('#modal-body');
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-red);">Nuovo NPC</h3>
-            <div class="input-field mb-10">
-                <input type="text" id="npc-name" placeholder="Nome" style="width: 100%;">
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Elemento</h3>
+            
+            <div class="mb-15 text-center">
+                <label style="margin-right: 10px;">Tipo:</label>
+                <select id="ent-type" style="padding: 5px; border-radius: 5px;">
+                    <option value="npc">🎭 NPC (Alleato/Neutrale)</option>
+                    <option value="enemy">⚔️ Avversario (Nemico)</option>
+                    <option value="item">💎 Oggetto / Indizio</option>
+                </select>
             </div>
+
             <div class="input-field mb-10">
-                <textarea id="npc-desc" placeholder="Descrizione..." style="width: 100%; height: 100px; padding: 10px;"></textarea>
+                <input type="text" id="ent-name" placeholder="Nome *" style="width: 100%;">
             </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="ent-level" placeholder="Livello (es. Eroe, 10, Ferito)" class="input-field" style="flex: 1;">
+                <input type="text" id="ent-nat" placeholder="Nazionalità" class="input-field" style="flex: 1;">
+            </div>
+
+            <div class="input-field mb-10">
+                <input type="text" id="ent-img" placeholder="Avatar URL (opzionale)" style="width: 100%;">
+                <small style="color: var(--text-faded);">Incolla link immagine</small>
+            </div>
+
+            <div class="input-field mb-10">
+                <textarea id="ent-desc" placeholder="Descrizione..." style="width: 100%; height: 100px; padding: 10px;"></textarea>
+            </div>
+            
             <div class="input-field mb-10" style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="npc-visible" style="width: auto;">
-                <label for="npc-visible">Visibile ai giocatori?</label>
+                <input type="checkbox" id="ent-visible" style="width: auto;">
+                <label for="ent-visible">Visibile ai giocatori?</label>
             </div>
         `;
 
         btnAction.style.display = 'block';
         btnAction.textContent = "Crea";
         btnAction.onclick = async () => {
-            const name = document.getElementById('npc-name').value;
-            const desc = document.getElementById('npc-desc').value;
-            const isVisible = document.getElementById('npc-visible').checked;
+            const type = document.getElementById('ent-type').value;
+            const name = document.getElementById('ent-name').value;
+            const level = document.getElementById('ent-level').value;
+            const nationality = document.getElementById('ent-nat').value;
+            const image_url = document.getElementById('ent-img').value;
+            const description = document.getElementById('ent-desc').value;
+            const is_visible = document.getElementById('ent-visible').checked;
 
             if (!name) return alert("Inserisci almeno il nome");
 
-            await CampaignService.addNPC(this.campaignId, name, desc, isVisible);
+            const entityData = { name, type, level, nationality, image_url, description, is_visible };
+
+            btnAction.textContent = "...";
+            await CampaignService.addEntity(this.campaignId, entityData);
             modal.style.display = 'none';
-            this.loadTabContent();
+            this.loadTabContent(); // Refresh
         };
 
         modal.style.display = 'flex';
