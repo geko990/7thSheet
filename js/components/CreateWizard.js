@@ -243,22 +243,22 @@ export default class CreateWizard {
                     <input type="text" class="form-input" id="char-image-url" placeholder="https://..." style="margin-top: 5px; font-size: 0.8rem;">
                 </div>
 
-                <div class="form-group">
+                <div class="form-row">
                     <label class="form-label">Nome Eroe</label>
                     <input type="text" class="form-input" id="char-name" value="${this.character.name}" placeholder="Es. Elena de la Cruz">
                 </div>
 
-                <div class="form-group">
+                <div class="form-row">
                     <label class="form-label">Concetto</label>
-                    <input type="text" class="form-input" id="char-concept" value="${this.character.concept}" placeholder="Es. Spadaccina in cerca di vendetta">
+                    <input type="text" class="form-input" id="char-concept" value="${this.character.concept}" placeholder="Es. Spadaccina in cerca di v">
                 </div>
 
-                <div class="form-group">
+                <div class="form-row">
                     <label class="form-label">Religione</label>
-                    <input type="text" class="form-input" id="char-religion" value="${this.character.religion}" placeholder="Es. Vaticina, Objectionist...">
+                    <input type="text" class="form-input" id="char-religion" value="${this.character.religion}" placeholder="Es. Vaticina, Objectionist..">
                 </div>
 
-                <div class="form-group">
+                <div class="form-row">
                     <label class="form-label">Nazione</label>
                     <select class="form-select" id="char-nation">
                         <option value="">Seleziona Nazione...</option>
@@ -290,12 +290,53 @@ export default class CreateWizard {
 
         if (this.character.image) updatePreview(this.character.image);
 
-        imageUpload.addEventListener('change', (e) => {
+        // Image compression function
+        const compressImage = (file, maxSize = 200, quality = 0.7) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.onload = () => {
+                        // Create canvas
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Calculate new dimensions (fit in maxSize square)
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height = Math.round((height * maxSize) / width);
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width = Math.round((width * maxSize) / height);
+                                height = maxSize;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        // Draw and compress
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Export as JPEG with compression
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        imageUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => updatePreview(evt.target.result);
-                reader.readAsDataURL(file);
+                // Compress the image before storing
+                const compressed = await compressImage(file, 200, 0.7);
+                updatePreview(compressed);
             }
         });
 
@@ -1014,11 +1055,11 @@ export default class CreateWizard {
                 <div class="sheet-section">
                     <h4 class="sheet-section-title">Arcano</h4>
                     <p class="mb-20" style="font-size: 0.9em;">Seleziona la tua Virtù e il tuo Hubris (Opzionale).</p>
-                    <div class="form-group">
+                <div class="form-row">
                         <label class="form-label">Virtù</label>
                         <input type="text" class="form-input" id="char-virtue" value="${this.character.virtue || ''}" placeholder="Es. Coraggioso">
                     </div>
-                    <div class="form-group">
+                    <div class="form-row">
                         <label class="form-label">Hubris</label>
                         <input type="text" class="form-input" id="char-hubris" value="${this.character.hubris || ''}" placeholder="Es. Arrogante">
                     </div>
@@ -1026,19 +1067,19 @@ export default class CreateWizard {
 
                 <div class="sheet-section mt-20">
                     <h4 class="sheet-section-title">Storia Personale</h4>
-                    <div class="form-group">
+                    <div class="form-row">
                         <label class="form-label">Nome Storia</label>
                         <input type="text" class="form-input" id="story-name" placeholder="Es. Vendetta contro il Conte">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Obiettivo (Goal)</label>
+                    <div class="form-row">
+                        <label class="form-label">Obiettivo</label>
                         <input type="text" class="form-input" id="story-goal" placeholder="Uccidere l'uomo a sei dita">
                     </div>
-                    <div class="form-group">
+                    <div class="form-row">
                         <label class="form-label">Ricompensa</label>
                         <input type="text" class="form-input" id="story-reward" placeholder="Es. +1 a Scherma">
                     </div>
-                    <div class="form-group">
+                    <div class="form-row">
                         <label class="form-label">Primo Passo</label>
                         <input type="text" class="form-input" id="story-step1" placeholder="Trovare dove si nasconde">
                     </div>

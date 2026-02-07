@@ -16,6 +16,118 @@
         ]
     },
     {
+        "id": "archaeologist",
+        "name": "Archeologo",
+        "quirk": "Guadagni un Punto Eroe quando scopri un antico mistero.",
+        "skills": [
+            "athletics",
+            "empathy",
+            "notice",
+            "scholarship",
+            "theft"
+        ],
+        "advantages": [
+            "Linguista",
+            "Università"
+        ]
+    },
+    {
+        "id": "army_officer",
+        "name": "Ufficiale dell'Esercito",
+        "quirk": "Guadagni un Punto Eroe quando rischi la vita per i tuoi soldati.",
+        "skills": [
+            "aim",
+            "intimidate",
+            "ride",
+            "warfare",
+            "weaponry"
+        ],
+        "advantages": [
+            "Comandante",
+            "Tattico"
+        ]
+    },
+    {
+        "id": "artist",
+        "name": "Artista",
+        "quirk": "Guadagni un Punto Eroe quando la tua arte ispira qualcuno ad agire.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "perform",
+            "tempt"
+        ],
+        "advantages": [
+            "Artista Rinomato",
+            "Mecenate"
+        ]
+    },
+    {
+        "id": "courtier",
+        "name": "Cortigiano",
+        "quirk": "Guadagni un Punto Eroe quando previeni un conflitto tramite la diplomazia.",
+        "skills": [
+            "convince",
+            "empathy",
+            "perform",
+            "scholarship",
+            "tempt"
+        ],
+        "advantages": [
+            "Connesso a Corte",
+            "Linguista"
+        ]
+    },
+    {
+        "id": "crafter",
+        "name": "Artigiano",
+        "quirk": "Guadagni un Punto Eroe quando crei qualcosa di utile nella necessità.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "perform",
+            "scholarship"
+        ],
+        "advantages": [
+            "Membro di Gilda",
+            "Artigiano Esperto"
+        ]
+    },
+    {
+        "id": "criminal",
+        "name": "Criminale",
+        "quirk": "Guadagni un Punto Eroe quando infrangi la legge per una buona causa.",
+        "skills": [
+            "brawl",
+            "hide",
+            "intimidate",
+            "tempt",
+            "theft"
+        ],
+        "advantages": [
+            "Contatto nella Malavita",
+            "Rissoso"
+        ]
+    },
+    {
+        "id": "doctor",
+        "name": "Dottore",
+        "quirk": "Guadagni un Punto Eroe quando guarisci qualcuno ferito o malato.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "scholarship",
+            "tempt"
+        ],
+        "advantages": [
+            "Medico",
+            "Chirurgo"
+        ]
+    },
+    {
         "id": "duelist",
         "name": "Duellante",
         "quirk": "Guadagni un Punto Eroe quando ti lanci nel pericolo spada in pugno.",
@@ -29,6 +141,166 @@
         "advantages": [
             "Accademia di Duello",
             "Riflessi Rapidi"
+        ]
+    },
+    {
+        "id": "engineer",
+        "name": "Ingegnere",
+        "quirk": "Guadagni un Punto Eroe quando costruisci o ripari qualcosa di importante.",
+        "skills": [
+            "aim",
+            "convince",
+            "notice",
+            "scholarship",
+            "warfare"
+        ],
+        "advantages": [
+            "Inventore",
+            "Università"
+        ]
+    },
+    {
+        "id": "explorer",
+        "name": "Esploratore",
+        "quirk": "Guadagni un Punto Eroe quando scopri un luogo mai visto prima.",
+        "skills": [
+            "athletics",
+            "hide",
+            "notice",
+            "ride",
+            "sailing"
+        ],
+        "advantages": [
+            "Viandante",
+            "Linguista"
+        ]
+    },
+    {
+        "id": "farmkid",
+        "name": "Contadino",
+        "quirk": "Guadagni un Punto Eroe quando il buon senso risolve un problema complesso.",
+        "skills": [
+            "athletics",
+            "brawl",
+            "empathy",
+            "notice",
+            "ride"
+        ],
+        "advantages": [
+            "Resistente",
+            "Amico degli Animali"
+        ]
+    },
+    {
+        "id": "hunter",
+        "name": "Cacciatore",
+        "quirk": "Guadagni un Punto Eroe quando catturi una preda pericolosa.",
+        "skills": [
+            "aim",
+            "athletics",
+            "hide",
+            "notice",
+            "ride"
+        ],
+        "advantages": [
+            "Tiratore Scelto",
+            "Tracciatore"
+        ]
+    },
+    {
+        "id": "jenny",
+        "name": "Cortigiana",
+        "quirk": "Guadagni un Punto Eroe quando scopri un segreto attraverso la seduzione.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "perform",
+            "tempt"
+        ],
+        "advantages": [
+            "Affascinante",
+            "Contatto"
+        ]
+    },
+    {
+        "id": "mercenary",
+        "name": "Mercenario",
+        "quirk": "Guadagni un Punto Eroe quando combatti per soldi ma fai la cosa giusta.",
+        "skills": [
+            "aim",
+            "athletics",
+            "brawl",
+            "intimidate",
+            "weaponry"
+        ],
+        "advantages": [
+            "Veterano",
+            "Rissoso"
+        ]
+    },
+    {
+        "id": "merchant",
+        "name": "Mercante",
+        "quirk": "Guadagni un Punto Eroe quando fai un affare vantaggioso per entrambe le parti.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "scholarship",
+            "tempt"
+        ],
+        "advantages": [
+            "Benestante",
+            "Membro di Gilda"
+        ]
+    },
+    {
+        "id": "naval_officer",
+        "name": "Ufficiale di Marina",
+        "quirk": "Guadagni un Punto Eroe quando rischi la vita per la tua ciurma.",
+        "skills": [
+            "aim",
+            "intimidate",
+            "sailing",
+            "warfare",
+            "weaponry"
+        ],
+        "advantages": [
+            "Comandante",
+            "Gambe da Marinaio"
+        ]
+    },
+    {
+        "id": "orphan",
+        "name": "Orfano",
+        "quirk": "Guadagni un Punto Eroe quando aiuti un altro orfano o abbandonato.",
+        "skills": [
+            "athletics",
+            "empathy",
+            "hide",
+            "notice",
+            "theft"
+        ],
+        "advantages": [
+            "Sopravvissuto",
+            "Piccolo"
+        ]
+    },
+    {
+        "id": "performer",
+        "name": "Artista di Strada",
+        "quirk": "Guadagni un Punto Eroe quando la tua esibizione solleva gli spiriti.",
+        "skills": [
+            "athletics",
+            "convince",
+            "empathy",
+            "perform",
+            "tempt"
+        ],
+        "advantages": [
+            "Acrobata",
+            "Affascinante"
         ]
     },
     {
@@ -48,6 +320,134 @@
         ]
     },
     {
+        "id": "priest",
+        "name": "Sacerdote",
+        "quirk": "Guadagni un Punto Eroe quando guidi qualcuno sulla retta via.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "perform",
+            "scholarship"
+        ],
+        "advantages": [
+            "Ordinato",
+            "Ispirato"
+        ]
+    },
+    {
+        "id": "professor",
+        "name": "Professore",
+        "quirk": "Guadagni un Punto Eroe quando la conoscenza risolve un problema.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "scholarship",
+            "tempt"
+        ],
+        "advantages": [
+            "Università",
+            "Linguista"
+        ]
+    },
+    {
+        "id": "pugilist",
+        "name": "Pugile",
+        "quirk": "Guadagni un Punto Eroe quando vinci un combattimento a mani nude.",
+        "skills": [
+            "athletics",
+            "brawl",
+            "intimidate",
+            "notice",
+            "perform"
+        ],
+        "advantages": [
+            "Rissoso",
+            "Resistente"
+        ]
+    },
+    {
+        "id": "sailor",
+        "name": "Marinaio",
+        "quirk": "Guadagni un Punto Eroe quando la tua esperienza marinara salva la nave.",
+        "skills": [
+            "athletics",
+            "brawl",
+            "notice",
+            "sailing",
+            "theft"
+        ],
+        "advantages": [
+            "Gambe da Marinaio",
+            "Resistente"
+        ]
+    },
+    {
+        "id": "scholar",
+        "name": "Studioso",
+        "quirk": "Guadagni un Punto Eroe quando usi la conoscenza per risolvere un problema.",
+        "skills": [
+            "convince",
+            "empathy",
+            "notice",
+            "scholarship",
+            "warfare"
+        ],
+        "advantages": [
+            "Università",
+            "Linguista"
+        ]
+    },
+    {
+        "id": "servant",
+        "name": "Servitore",
+        "quirk": "Guadagni un Punto Eroe quando aiuti il tuo padrone in modo inaspettato.",
+        "skills": [
+            "convince",
+            "empathy",
+            "hide",
+            "notice",
+            "tempt"
+        ],
+        "advantages": [
+            "Invisibile",
+            "Discreto"
+        ]
+    },
+    {
+        "id": "ship_captain",
+        "name": "Capitano di Nave",
+        "quirk": "Guadagni un Punto Eroe quando il tuo comando ispira la ciurma.",
+        "skills": [
+            "convince",
+            "intimidate",
+            "notice",
+            "sailing",
+            "warfare"
+        ],
+        "advantages": [
+            "Comandante",
+            "Benestante"
+        ]
+    },
+    {
+        "id": "soldier",
+        "name": "Soldato",
+        "quirk": "Guadagni un Punto Eroe quando proteggi qualcuno più debole di te.",
+        "skills": [
+            "aim",
+            "athletics",
+            "brawl",
+            "intimidate",
+            "weaponry"
+        ],
+        "advantages": [
+            "Veterano",
+            "Resistente"
+        ]
+    },
+    {
         "id": "spy",
         "name": "Spia",
         "quirk": "Guadagni un Punto Eroe quando scopri un segreto pericoloso.",
@@ -64,19 +464,35 @@
         ]
     },
     {
-        "id": "scholar",
-        "name": "Studioso",
-        "quirk": "Guadagni un Punto Eroe quando usi la tua conoscenza per risolvere un problema.",
+        "id": "cavalry",
+        "name": "Cavalleria",
+        "quirk": "Guadagni un Punto Eroe quando una carica a cavallo cambia la battaglia.",
+        "skills": [
+            "athletics",
+            "intimidate",
+            "ride",
+            "warfare",
+            "weaponry"
+        ],
+        "advantages": [
+            "Cavaliere Esperto",
+            "Tattico"
+        ]
+    },
+    {
+        "id": "quartermaster",
+        "name": "Quartiermastro",
+        "quirk": "Guadagni un Punto Eroe quando le tue provviste salvano la situazione.",
         "skills": [
             "convince",
-            "history",
             "notice",
+            "sailing",
             "scholarship",
             "warfare"
         ],
         "advantages": [
-            "Università",
-            "Linguista"
+            "Rifornito",
+            "Organizzatore"
         ]
     }
 ]

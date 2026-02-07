@@ -1176,3 +1176,25 @@ select {
     font-size: 0.8rem;
     color: var(--text-faded);
 }
+
+/* Form Row - Inline Label + Input */
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.form-row .form-label {
+    flex: 0 0 auto;
+    min-width: 90px;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.form-row .form-input,
+.form-row .form-select {
+    flex: 1;
+    min-width: 0;
+}
