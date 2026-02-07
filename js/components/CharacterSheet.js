@@ -106,7 +106,6 @@ export default class CharacterSheet {
     renderTabs(container) {
         container.innerHTML = `
             <div class="card" style="position: relative; padding-top: 10px; min-height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
-                <button class="btn btn-secondary" id="btn-close" style="position: absolute; top: 10px; right: 10px; border: none; z-index: 100;">✖</button>
 
                 <!-- Tabs Nav (FIXED position, always same place) -->
                 <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-worn); margin: 10px 0 0 0; flex-shrink: 0;">
@@ -358,8 +357,6 @@ export default class CharacterSheet {
 
     // LISTENER ATTACHMENT
     attachGlobalListeners(container) {
-        container.querySelector('#btn-close').addEventListener('click', () => this.app.router.navigate('characters'));
-
         const tabs = container.querySelectorAll('.tab-btn');
         tabs.forEach(btn => {
             if (btn.dataset.tab === this.activeTab) {

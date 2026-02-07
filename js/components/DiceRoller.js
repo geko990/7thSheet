@@ -1,81 +1,82 @@
 import { Dice } from '../dice.js';
 
 /**
- * Dice Roller Component
- * Interactive D10 roller with Raise calculator (2e) and Roll & Keep (1e) support
+ * Dice Roller Component - Premium Redesign
+ * Compact popup with D10 roll button at bottom
  */
 export default class DiceRoller {
     constructor(app) {
         this.app = app;
         this.diceCount = 5;
         this.keepCount = 3;
-        this.edition = '2e'; // Default
+        this.edition = '2e';
         this.results = [];
         this.selectedDice = new Set();
     }
 
     async render() {
         const div = document.createElement('div');
-        div.className = 'dice-area';
+        div.className = 'dice-roller-container';
         div.innerHTML = `
-            <h2 class="page-title">Lancio Dadi</h2>
-            
-            <div class="edition-toggle mb-20 text-center">
-                <button class="btn ${this.edition === '1e' ? 'btn-primary' : 'btn-secondary'}" id="btn-ed-1e">1ª Ed (R&K)</button>
-                <button class="btn ${this.edition === '2e' ? 'btn-primary' : 'btn-secondary'}" id="btn-ed-2e">2ª Ed (Raise)</button>
-            </div>
+            <div class="dice-popup">
+                <!-- Edition Toggle Tabs -->
+                <div class="dice-edition-tabs">
+                    <button class="edition-tab ${this.edition === '1e' ? 'active' : ''}" id="btn-ed-1e">
+                        1ª Edizione
+                    </button>
+                    <button class="edition-tab ${this.edition === '2e' ? 'active' : ''}" id="btn-ed-2e">
+                        2ª Edizione
+                    </button>
+                </div>
 
-            <div class="card">
-                <div class="dice-controls">
-                    <div class="control-group">
-                        <label>Dadi Lanciati (Roll)</label>
-                        <div class="dice-count-control">
-                            <button class="dice-count-btn" id="btn-dice-minus">−</button>
-                            <span class="dice-count-display" id="dice-count">${this.diceCount}</span>
-                            <button class="dice-count-btn" id="btn-dice-plus">+</button>
-                            <span style="margin-left: 5px;">k</span>
+                <!-- Dice Controls -->
+                <div class="dice-controls-section">
+                    <div class="dice-control-row">
+                        <span class="dice-label">Dadi</span>
+                        <div class="dice-counter">
+                            <button class="counter-btn" id="btn-dice-minus">−</button>
+                            <span class="counter-value" id="dice-count">${this.diceCount}</span>
+                            <button class="counter-btn" id="btn-dice-plus">+</button>
                         </div>
                     </div>
-
+                    
                     ${this.edition === '1e' ? `
-                    <div class="control-group mt-10">
-                        <label>Dadi Tenuti (Keep)</label>
-                        <div class="dice-count-control">
-                            <button class="dice-count-btn" id="btn-keep-minus">−</button>
-                            <span class="dice-count-display" id="keep-count">${this.keepCount}</span>
-                            <button class="dice-count-btn" id="btn-keep-plus">+</button>
+                    <div class="dice-control-row">
+                        <span class="dice-label">Tenuti</span>
+                        <div class="dice-counter">
+                            <button class="counter-btn" id="btn-keep-minus">−</button>
+                            <span class="counter-value" id="keep-count">${this.keepCount}</span>
+                            <button class="counter-btn" id="btn-keep-plus">+</button>
                         </div>
                     </div>
                     ` : ''}
                 </div>
-                
-                <div class="dice-pool" id="dice-pool">
-                    <p style="color: var(--text-faded); font-style: italic;">
-                        Premi "Lancia" per tirare ${this.diceCount}d10${this.edition === '1e' ? `k${this.keepCount}` : ''}
-                    </p>
-                </div>
-                
-                <div class="results-display" id="results-display" style="display: none;">
-                    <div class="result-box">
-                        <span class="result-label">${this.edition === '1e' ? 'Totale' : 'Raise'}</span>
-                        <div id="result-value">0</div>
+
+                <!-- Results Area -->
+                <div class="dice-results-area">
+                    <div class="dice-pool" id="dice-pool">
+                        <p class="dice-hint">Tocca il D10 per lanciare ${this.diceCount}d10${this.edition === '1e' ? `k${this.keepCount}` : ''}</p>
+                    </div>
+                    
+                    <div class="dice-result-box" id="results-display" style="display: none;">
+                        <span class="result-type">${this.edition === '1e' ? 'Totale' : 'Raise'}</span>
+                        <span class="result-number" id="result-value">0</span>
                     </div>
                 </div>
-                
-                <div class="text-center mt-20">
-                    <button class="btn btn-primary" id="btn-roll">
-                        🎲 Lancia!
+
+                <!-- Edition Info -->
+                <div class="dice-info">
+                    ${this.edition === '2e'
+                ? 'Combina i dadi per formare somme di 10'
+                : 'Somma i dadi migliori tenuti'}
+                </div>
+
+                <!-- D10 Roll Button (half outside) -->
+                <div class="dice-roll-wrapper">
+                    <button class="dice-roll-btn" id="btn-roll">
+                        <img src="assets/d10.png" alt="Lancia" class="d10-image">
                     </button>
                 </div>
-            </div>
-            
-            <div class="card mt-20">
-                <div class="card-title">Come funziona</div>
-                <p style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.6;">
-                    ${this.edition === '2e'
-                ? '<strong>2ª Edizione:</strong> Combina i dadi per formare somme di 10 (Raise).'
-                : '<strong>1ª Edizione:</strong> Tieni i risultati migliori e sommali tra loro.'}
-                </p>
             </div>
         `;
 
@@ -98,7 +99,6 @@ export default class DiceRoller {
         container.querySelector('#btn-dice-minus').addEventListener('click', () => {
             if (this.diceCount > 1) {
                 this.diceCount--;
-                // Ensure Keep isn't higher than Roll
                 if (this.keepCount > this.diceCount) this.keepCount = this.diceCount;
                 this.updateView(container);
             }
@@ -111,7 +111,7 @@ export default class DiceRoller {
             }
         });
 
-        // Keep controls (only attached if present)
+        // Keep controls (1e only)
         const btnKeepMinus = container.querySelector('#btn-keep-minus');
         if (btnKeepMinus) {
             btnKeepMinus.addEventListener('click', () => {
@@ -136,7 +136,6 @@ export default class DiceRoller {
     }
 
     updateView(container) {
-        // Full re-render needed for structure changes
         this.render().then(newContent => {
             container.replaceWith(newContent);
         });
@@ -147,7 +146,6 @@ export default class DiceRoller {
         const resultsDisplay = container.querySelector('#results-display');
         const resultValue = container.querySelector('#result-value');
 
-        // Clear previous
         this.results = Dice.roll(this.diceCount);
         this.selectedDice.clear();
 
@@ -158,30 +156,20 @@ export default class DiceRoller {
             </div>
         `).join('');
 
-        // Remove animation class after animation completes
+        // Remove animation after completion
         setTimeout(() => {
             pool.querySelectorAll('.die').forEach(die => {
                 die.classList.remove('rolling');
             });
 
-            // Calculate Logic
             if (this.edition === '2e') {
                 const result = Dice.calculateRaises(this.results);
                 resultValue.textContent = result.raises;
-                // Highlight raises? (Optional enhancement)
             } else {
                 const result = Dice.calculateRollAndKeep(this.results, this.keepCount);
                 resultValue.textContent = result.total;
 
                 // Highlight kept dice
-                pool.querySelectorAll('.die').forEach(die => {
-                    const val = parseInt(die.dataset.value);
-                    // This is tricky visually as multiple dice might have same value
-                    // The simple logic: Highlight the highest N
-                });
-
-                // Simplified highlight: Just mark top N
-                // Sort indices by value
                 const indices = this.results.map((v, i) => ({ v, i }))
                     .sort((a, b) => b.v - a.v)
                     .slice(0, this.keepCount)
@@ -189,22 +177,21 @@ export default class DiceRoller {
 
                 pool.querySelectorAll('.die').forEach(die => {
                     if (indices.includes(parseInt(die.dataset.index))) {
-                        die.classList.add('kept'); // Add 'kept' style in CSS
+                        die.classList.add('kept');
                     } else {
-                        die.classList.add('dropped'); // Add 'dropped' style 
+                        die.classList.add('dropped');
                     }
                 });
             }
 
-            resultsDisplay.style.display = 'block';
+            resultsDisplay.style.display = 'flex';
 
         }, 500);
 
-        // Add click listeners (mostly for V2 manual selection, but kept for V1 fun)
+        // Click listeners for selection
         pool.querySelectorAll('.die').forEach(die => {
             die.addEventListener('click', () => {
                 die.classList.toggle('selected');
-                // You could implement manual override here
             });
         });
     }

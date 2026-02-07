@@ -1,7 +1,7 @@
 import { CONFIG } from '../config.js';
 
 /**
- * Settings Component
+ * Settings Component - Premium Styled
  */
 export default class Settings {
     constructor(app) {
@@ -10,67 +10,99 @@ export default class Settings {
 
     async render() {
         const div = document.createElement('div');
+        div.className = 'settings-container';
         div.innerHTML = `
-            <h2 class="page-title">Impostazioni</h2>
+            <div class="settings-hero">
+                <div class="settings-icon">⚙️</div>
+                <h2 class="settings-title">Impostazioni</h2>
+            </div>
             
-            <div class="card">
-                <div class="settings-section">
-                    <h3 class="settings-title">Dati</h3>
-                    
-                    <div class="settings-item">
-                        <span class="settings-label">Esporta Personaggi</span>
-                        <button class="btn btn-secondary" id="btn-export" style="padding: 8px 16px; font-size: 0.8rem;">
-                            📤 Esporta
-                        </button>
+            <div class="settings-cards">
+                <!-- Data Management Card -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <span class="settings-card-icon">📦</span>
+                        <span class="settings-card-title">Gestione Dati</span>
                     </div>
-                    
-                    <div class="settings-item">
-                        <span class="settings-label">Importa Personaggi</span>
-                        <button class="btn btn-secondary" id="btn-import" style="padding: 8px 16px; font-size: 0.8rem;">
-                            📥 Importa
-                        </button>
-                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <div class="settings-card-body">
+                        <div class="settings-row">
+                            <div class="settings-row-info">
+                                <span class="settings-row-label">Esporta</span>
+                                <span class="settings-row-desc">Salva backup dei personaggi</span>
+                            </div>
+                            <button class="settings-btn" id="btn-export">
+                                <span class="btn-icon">📤</span>
+                            </button>
+                        </div>
+                        <div class="settings-divider"></div>
+                        <div class="settings-row">
+                            <div class="settings-row-info">
+                                <span class="settings-row-label">Importa</span>
+                                <span class="settings-row-desc">Carica backup esistente</span>
+                            </div>
+                            <button class="settings-btn" id="btn-import">
+                                <span class="btn-icon">📥</span>
+                            </button>
+                            <input type="file" id="import-file" accept=".json" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- App Info Card -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <span class="settings-card-icon">ℹ️</span>
+                        <span class="settings-card-title">Informazioni</span>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="settings-row">
+                            <div class="settings-row-info">
+                                <span class="settings-row-label">Versione</span>
+                                <span class="settings-row-desc">7th Sea Character Sheet</span>
+                            </div>
+                            <span class="settings-version" id="app-version">${CONFIG.APP_VERSION}</span>
+                        </div>
+                        <div class="settings-divider"></div>
+                        <div class="settings-row">
+                            <div class="settings-row-info">
+                                <span class="settings-row-label">Aggiorna Cache</span>
+                                <span class="settings-row-desc">Forza aggiornamento app</span>
+                            </div>
+                            <button class="settings-btn settings-btn-refresh" id="btn-clear-cache">
+                                <span class="btn-icon">🔄</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Installation Card -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <span class="settings-card-icon">📱</span>
+                        <span class="settings-card-title">Installazione</span>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="install-steps">
+                            <div class="install-step">
+                                <span class="step-num">1</span>
+                                <span class="step-text">Apri il menu del browser (⋮ o ☐)</span>
+                            </div>
+                            <div class="install-step">
+                                <span class="step-num">2</span>
+                                <span class="step-text">Seleziona "Aggiungi a Home"</span>
+                            </div>
+                            <div class="install-step">
+                                <span class="step-num">3</span>
+                                <span class="step-text">Conferma l'installazione</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="card">
-                <div class="settings-section">
-                    <h3 class="settings-title">Informazioni</h3>
-                    
-                    <div class="settings-item">
-                        <span class="settings-label">Versione</span>
-                        <span class="settings-value" id="app-version">${CONFIG.APP_VERSION}</span>
-                    </div>
-                    
-                    <div class="settings-item">
-                        <span class="settings-label">Aggiorna Cache</span>
-                        <button class="btn btn-secondary" id="btn-clear-cache" style="padding: 8px 16px; font-size: 0.8rem;">
-                            🔄 Aggiorna
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="settings-section">
-                    <h3 class="settings-title">Installazione</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.6;">
-                        Per installare l'app sul tuo smartphone:
-                    </p>
-                    <ol style="font-size: 0.9rem; color: var(--text-faded); margin-top: 10px; padding-left: 20px; line-height: 1.8;">
-                        <li>Apri il menu del browser (⋮ o ☐)</li>
-                        <li>Seleziona "Aggiungi a Home" o "Installa app"</li>
-                        <li>Conferma l'installazione</li>
-                    </ol>
-                </div>
-            </div>
-            
-            <div class="text-center mt-20" style="padding-bottom: 20px;">
-                <p style="font-size: 0.8rem; color: var(--text-faded);">
-                    7th Sea Character Sheet v${CONFIG.APP_VERSION}<br>
-                    Basato su 7th Sea 2a Edizione
-                </p>
+
+            <div class="settings-footer">
+                <div class="footer-anchor">⚓</div>
+                <div class="footer-text">7th Sea v${CONFIG.APP_VERSION}</div>
             </div>
         `;
 
@@ -98,13 +130,12 @@ export default class Settings {
 
         // Clear cache logic
         const clearCacheAndReload = async () => {
-            if (!confirm('Vuoi forzare l\'aggiornamento dell\'app?')) return;
+            if (!confirm("Vuoi forzare l'aggiornamento dell'app?")) return;
 
             const btn = container.querySelector('#btn-clear-cache');
-            if (btn) btn.textContent = 'Aggiornamento...';
+            if (btn) btn.innerHTML = '<span class="btn-icon">⏳</span>';
 
             try {
-                // 1. Unregister Service Worker
                 if ('serviceWorker' in navigator) {
                     const registrations = await navigator.serviceWorker.getRegistrations();
                     for (const registration of registrations) {
@@ -112,26 +143,23 @@ export default class Settings {
                     }
                 }
 
-                // 2. Delete all Caches
                 if ('caches' in window) {
                     const names = await caches.keys();
                     await Promise.all(names.map(name => caches.delete(name)));
                 }
 
-                // 3. Reload
                 window.location.reload(true);
             } catch (e) {
-                alert('Errore durante l\'aggiornamento: ' + e.message);
+                alert("Errore durante l'aggiornamento: " + e.message);
                 window.location.reload();
             }
         };
 
         container.querySelector('#btn-clear-cache').addEventListener('click', clearCacheAndReload);
 
-        // Make version clickable as requested
+        // Version click
         const versionEl = container.querySelector('#app-version');
         versionEl.style.cursor = 'pointer';
-        versionEl.style.textDecoration = 'underline';
         versionEl.title = 'Clicca per aggiornare';
         versionEl.addEventListener('click', clearCacheAndReload);
     }
@@ -164,7 +192,7 @@ export default class Settings {
                     alert('Formato file non valido');
                 }
             } catch (err) {
-                alert('Errore durante l\'importazione');
+                alert("Errore durante l'importazione");
             }
         };
         reader.readAsText(file);
