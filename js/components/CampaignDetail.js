@@ -291,7 +291,7 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         // Logic to get local characters
-        const localChars = JSON.parse(localStorage.getItem('characters') || '[]');
+        const localChars = JSON.parse(localStorage.getItem('7thsea_characters') || '[]');
 
         body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-navy);">Scegli il tuo Eroe</h3>
