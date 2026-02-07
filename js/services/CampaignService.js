@@ -196,5 +196,28 @@ export const CampaignService = {
             .select();
 
         return { data, error };
+    },
+
+    // IMAGES
+    async uploadImage(file) {
+        if (!file) return { error: { message: 'Nessun file selezionato' } };
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabaseClient
+            .storage
+            .from('campaign-images')
+            .upload(filePath, file);
+
+        if (uploadError) return { error: uploadError };
+
+        const { data } = supabaseClient
+            .storage
+            .from('campaign-images')
+            .getPublicUrl(filePath);
+
+        return { publicUrl: data.publicUrl };
     }
 };

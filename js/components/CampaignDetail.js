@@ -252,28 +252,45 @@ export class CampaignDetail {
 
                 visibleList.forEach(e => {
                     const isHidden = !e.is_visible;
-                    html += `
-                        <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color};" data-id="${e.id}">
-                            ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
+
+                    // Wrappers for Swipe (Only for GM or if general swipe needed? GM only for delete/toggle)
+                    // If not GM, just card.
+                    if (this.myRole === 'gm') {
+                        html += `
+                        <div class="swipe-container campaign-entity-swipe" data-id="${e.id}" data-type="${type}" data-visible="${e.is_visible}" style="position: relative; overflow: hidden; height: 100%; border-radius: 8px;">
                             
+                            <!-- Right Swipe Action (Toggle Visibility) - Blue/Eye -->
+                            <div style="position: absolute; top: 0; bottom: 0; left: 0; width: 100%; background: var(--accent-navy); display: flex; align-items: center; justify-content: flex-start; padding-left: 20px; color: white;">
+                                ${e.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}
+                            </div>
+
+                            <!-- Left Swipe Action (Delete) - Red/Trash -->
+                            <div style="position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--accent-red); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; color: white;">
+                                🗑️ Elimina
+                            </div>
+
+                            <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%; background: #fdfaf5; z-index: 10; transition: transform 0.2s;" data-id="${e.id}">
+                                ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
+                                
+                                <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
+                                     ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
+                                </div>
+                                <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
+                                ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
+                            </div>
+                        </div>`;
+                    } else {
+                        // Player View (No Swipe)
+                        html += `
+                        <div class="card entity-card" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%;" data-id="${e.id}">
                             <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
                                  ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
                             </div>
-                            
                             <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
                             ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
-                            ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
-                            
-                            ${this.myRole === 'gm' ? `
-                                 <div style="margin-top: 8px; display: flex; justify-content: center; gap: 5px;">
-                                    <button class="btn-xs btn-secondary toggle-entity" data-id="${e.id}" data-visible="${e.is_visible}">
-                                        ${e.is_visible ? '👁️' : '🔒'}
-                                    </button>
-                                    <button class="btn-xs btn-secondary delete-entity" data-id="${e.id}" style="color: var(--accent-red);">🗑️</button>
-                                 </div>
-                            ` : ''}
-                        </div>
-                     `;
+                             ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
+                        </div>`;
+                    }
                 });
                 html += '</div>';
             }
@@ -286,35 +303,74 @@ export class CampaignDetail {
 
         if (this.myRole === 'gm') {
             container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
-
-            container.querySelectorAll('.toggle-entity').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const id = btn.dataset.id;
-                    const isVisible = btn.dataset.visible === 'true';
-                    await CampaignService.updateEntityVisibility(id, !isVisible);
-                    this.loadTabContent(); // Refresh
-                });
-            });
-
-            container.querySelectorAll('.delete-entity').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    if (confirm("Eliminare definitivamente?")) {
-                        const id = btn.dataset.id;
-                        await CampaignService.deleteEntity(id);
-                        this.loadTabContent();
-                    }
-                });
-            });
+            this.attachEntitySwipeListeners(container);
         }
 
         // View Details
         container.querySelectorAll('.entity-card').forEach(card => {
             card.addEventListener('click', (e) => {
-                if (e.target.tagName === 'BUTTON') return;
+                // If swiping, don't trigger click (handle in swipe listeners or check class)
+                // We'll rely on a small drag check or just the fact that swipe moves it
                 const entity = entities.find(n => n.id === card.dataset.id);
                 if (entity) this.openViewEntityModal(entity);
+            });
+        });
+    }
+
+    attachEntitySwipeListeners(container) {
+        const swipes = container.querySelectorAll('.campaign-entity-swipe');
+        swipes.forEach(el => {
+            const card = el.querySelector('.entity-card');
+            const id = el.dataset.id;
+            const isVisible = el.dataset.visible === 'true';
+
+            let startX = 0;
+            let currentTranslate = 0;
+            let isDragging = false;
+
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                card.style.transition = 'none';
+                isDragging = false;
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diff = e.touches[0].clientX - startX;
+                if (Math.abs(diff) > 20) {
+                    isDragging = true;
+                    // Limit
+                    if (diff > 80) currentTranslate = 80;
+                    else if (diff < -80) currentTranslate = -80;
+                    else currentTranslate = diff;
+
+                    card.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
+                }
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                card.style.transition = 'transform 0.2s';
+
+                if (currentTranslate > 60) {
+                    // Right Swipe -> Toggle Visibility
+                    card.style.transform = 'translate3d(0,0,0)';
+                    CampaignService.updateEntityVisibility(id, !isVisible).then(() => this.loadTabContent());
+                } else if (currentTranslate < -60) {
+                    // Left Swipe -> Delete
+                    card.style.transform = 'translate3d(0,0,0)';
+                    if (confirm("Eliminare definitivamente?")) {
+                        CampaignService.deleteEntity(id).then(() => this.loadTabContent());
+                    }
+                } else {
+                    card.style.transform = 'translate3d(0,0,0)';
+                }
+
+                // Prevent click if dragged
+                if (isDragging) {
+                    const clickHandler = (ev) => { ev.stopPropagation(); card.removeEventListener('click', clickHandler, true); };
+                    card.addEventListener('click', clickHandler, true);
+                }
+                isDragging = false;
+                currentTranslate = 0;
             });
         });
     }
@@ -369,11 +425,22 @@ export class CampaignDetail {
             };
 
             await CampaignService.linkCharacter(this.campaignId, charData);
+            await this.refreshCampaignData();
             modal.style.display = 'none';
             this.loadTabContent();
         };
 
         modal.style.display = 'flex';
+    }
+
+    async refreshCampaignData() {
+        const { data, error } = await CampaignService.getCampaignDetails(this.campaignId);
+        if (!error && data) {
+            this.campaign = data;
+            const myId = AuthService.user?.id;
+            // Update role/member data
+            this.myRole = this.campaign.members.find(m => m.user_id === myId)?.role || 'player';
+        }
     }
 
     // MODALS
@@ -440,9 +507,12 @@ export class CampaignDetail {
                 <input type="text" id="ent-nat" placeholder="Nazionalità" class="input-field" style="flex: 1;">
             </div>
 
-            <div class="input-field mb-10">
-                <input type="text" id="ent-img" placeholder="Avatar URL (opzionale)" style="width: 100%;">
-                <small style="color: var(--text-faded);">Incolla link immagine</small>
+            <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
+                <label for="ent-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Carica Immagine</label>
+                <input type="file" id="ent-file" style="display: none;" accept="image/*">
+                <div id="img-preview" style="width: 100px; height: 100px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: none; border: 2px solid var(--accent-gold);"></div>
+                <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
+                <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="width: 100%;">
             </div>
 
             <div class="input-field mb-10">
@@ -455,22 +525,56 @@ export class CampaignDetail {
             </div>
         `;
 
+        const fileInput = body.querySelector('#ent-file');
+        const preview = body.querySelector('#img-preview');
+        const urlInput = body.querySelector('#ent-img');
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.style.display = 'block';
+                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         btnAction.style.display = 'block';
         btnAction.textContent = "Crea";
+        btnAction.disabled = false;
+
         btnAction.onclick = async () => {
             const type = document.getElementById('ent-type').value;
             const name = document.getElementById('ent-name').value;
             const level = document.getElementById('ent-level').value;
             const nationality = document.getElementById('ent-nat').value;
-            const image_url = document.getElementById('ent-img').value;
             const description = document.getElementById('ent-desc').value;
             const is_visible = document.getElementById('ent-visible').checked;
 
+            let image_url = urlInput.value;
+            const file = fileInput.files[0];
+
             if (!name) return alert("Inserisci almeno il nome");
+
+            btnAction.disabled = true;
+
+            if (file) {
+                btnAction.textContent = "Caricamento Immagine...";
+                const { publicUrl, error } = await CampaignService.uploadImage(file);
+                if (error) {
+                    alert("Errore caricamento immagine: " + (error.message || error));
+                    btnAction.disabled = false;
+                    btnAction.textContent = "Crea";
+                    return;
+                }
+                image_url = publicUrl;
+            }
 
             const entityData = { name, type, level, nationality, image_url, description, is_visible };
 
-            btnAction.textContent = "...";
+            btnAction.textContent = "Salvataggio...";
             await CampaignService.addEntity(this.campaignId, entityData);
             modal.style.display = 'none';
             this.loadTabContent(); // Refresh
