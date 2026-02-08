@@ -124,7 +124,7 @@ export default class CharacterSheet {
 
     renderTabs(container) {
         container.innerHTML = `
-            <div class="card" style="position: relative; padding-top: 10px; min-height: 80vh; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;">
+            <div class="card" style="position: relative; padding-top: 10px; height: 100vh; max-height: calc(100vh - 80px); display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;">
 
                 <!-- Tabs Nav -->
                 <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-worn); margin: 0; flex-shrink: 0; background: var(--bg-paper);">
@@ -135,7 +135,7 @@ export default class CharacterSheet {
                 </div>
 
                 <!-- Content Area -->
-                <div id="tab-content" style="flex: 1; overflow-y: auto; padding: 15px 0 80px 0; touch-action: pan-y pinch-zoom;"></div>
+                <div id="tab-content" style="flex: 1; overflow-y: auto; padding: 15px 0 80px 0; touch-action: pan-y;"></div>
             
                 <!-- Dice Overlay & FAB & Tooltip -->
                 <div id="dice-overlay" class="modal-overlay" style="display: none;">
