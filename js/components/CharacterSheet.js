@@ -281,12 +281,21 @@ export default class CharacterSheet {
                         <span class="info-label">Concetto ⓘ</span>
                         <span class="info-val" style="font-size: 0.9rem;">${this.character.concept || '-'}</span>
                     </div>
-                     <div class="info-block wealth-block" id="wealth-block" style="text-align: center; cursor: pointer;">
-                        <span class="info-label">Monete</span>
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-                            <div class="coin-stack"><span style="color: #FFD700;">●</span> <b>${this.character.wealth.gold || 0}</b></div>
-                            <div class="coin-stack"><span style="color: #C0C0C0;">●</span> <b>${this.character.wealth.silver || 0}</b></div>
-                            <div class="coin-stack"><span style="color: #CD7F32;">●</span> <b>${this.character.wealth.copper || 0}</b></div>
+                     <div class="info-block wealth-block" id="wealth-block" style="text-align: center; cursor: pointer; border: 1px solid var(--border-worn); background: rgba(0,0,0,0.02);">
+                        <span class="info-label" style="display: block; margin-bottom: 5px;">Ricchezza</span>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span style="font-size: 1.2rem; color: #FFD700; margin-bottom: 2px;">●</span>
+                                <span style="font-weight: bold; font-size: 0.9rem;">${this.character.wealth.gold || 0}</span>
+                            </div>
+                             <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span style="font-size: 1.2rem; color: #C0C0C0; margin-bottom: 2px;">●</span>
+                                <span style="font-weight: bold; font-size: 0.9rem;">${this.character.wealth.silver || 0}</span>
+                            </div>
+                             <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span style="font-size: 1.2rem; color: #CD7F32; margin-bottom: 2px;">●</span>
+                                <span style="font-weight: bold; font-size: 0.9rem;">${this.character.wealth.copper || 0}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -370,22 +379,27 @@ export default class CharacterSheet {
                         <div class="swipe-item-container ${type}" data-idx="${idx}" style="position: relative; border-radius: 8px; overflow: hidden; min-height: ${isJournal ? '80px' : '70px'}; touch-action: pan-y;">
                             <div style="position: absolute; right: 0; top: 0; bottom: 0; width: 100%; background: var(--accent-red); display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white;">🗑️ Elimina</div>
                             
-                            <div class="list-item-content" style="position: relative; z-index: 10; background: ${isJournal ? '#fdfaf5' : 'white'}; display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-worn); border-radius: 8px; transform: translate3d(0,0,0); transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-height: 100%;">
-                                ${item.image ? `<img src="${item.image}" class="item-img" style="width: ${isJournal ? '60px' : '50px'}; height: ${isJournal ? '60px' : '50px'}; object-fit: cover; border-radius: 6px; margin-right: 15px;">` : ''}
-                                <div style="flex: 1;">
-                                    ${isJournal ? `
-                                        <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: bold;">${item.date || ''}</div>
-                                        ${item.title ? `<div style="font-weight: bold; margin-bottom: 4px;">${item.title}</div>` : ''}
-                                        <div style="font-family: var(--font-hand); font-size: 1rem; color: var(--text-ink); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.content}</div>
-                                    ` : `
+                            <div class="list-item-content" style="position: relative; z-index: 10; background: ${isJournal ? '#fdfaf5' : 'white'}; display: flex; flex-direction: ${isJournal ? 'column' : 'row'}; align-items: ${isJournal ? 'stretch' : 'center'}; padding: 12px; border: 1px solid var(--border-worn); border-radius: 8px; transform: translate3d(0,0,0); transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); min-height: 100%;">
+                                ${!isJournal && item.image ? `<img src="${item.image}" class="item-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; margin-right: 15px;">` : ''}
+                                
+                                ${isJournal ? `
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                        <div style="font-weight: bold; font-family: var(--font-display); color: var(--accent-navy); font-size: 1.1rem;">${item.title || ''}</div>
+                                        <div style="font-size: 0.75rem; color: var(--accent-gold); white-space: nowrap; margin-left: 10px;">${item.date || ''}</div>
+                                    </div>
+                                    <div style="font-family: var(--font-hand); font-size: 1.1rem; color: var(--text-ink); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
+                                        ${item.content}
+                                    </div>
+                                ` : `
+                                    <div style="flex: 1;">
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <strong style="font-size: 1.1rem;">${item.name}</strong>
                                             ${item.qty > 1 ? `<span style="background: var(--accent-gold); color: white; padding: 1px 6px; border-radius: 10px; font-size: 0.75rem;">×${item.qty}</span>` : ''}
                                         </div>
                                         ${item.notes ? `<div style="font-size: 0.85rem; color: var(--text-faded); margin-top: 4px;">${item.notes}</div>` : ''}
-                                    `}
-                                </div>
-                                <div style="color: var(--text-faded); font-size: 1.2rem; margin-left: 10px;">✎</div>
+                                    </div>
+                                    <div style="color: var(--text-faded); font-size: 1.2rem; margin-left: 10px;">✎</div>
+                                `}
                             </div>
                         </div>
                     `).join('')}
@@ -503,6 +517,69 @@ export default class CharacterSheet {
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
     }
 
+    openWealthModal(container) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.background = 'rgba(0,0,0,0.8)';
+        modal.style.zIndex = '20000';
+        modal.style.backdropFilter = 'blur(4px)';
+
+        const createSelect = (curr, max) => {
+            let html = `<select class="wealth-select" style="font-size: 1.2rem; padding: 10px; border-radius: 8px; border: 1px solid var(--accent-gold); background: #fdfaf5; width: 100%;">`;
+            for (let i = 0; i <= max; i++) html += `<option value="${i}" ${i === curr ? 'selected' : ''}>${i}</option>`;
+            html += `</select>`;
+            return html;
+        };
+
+        modal.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 350px; background: #fdfaf5; border-radius: 16px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">Gestione Ricchezza</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="color: #FFD700; font-size: 1.5rem; margin-bottom: 5px;">●</span>
+                        <input type="number" id="w-gold" value="${this.character.wealth.gold}" min="0" max="1000" style="width: 100%; border-radius: 8px; border: 1px solid var(--accent-gold); padding: 10px; font-size: 1.2rem; text-align: center; background: #fff;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="color: #C0C0C0; font-size: 1.5rem; margin-bottom: 5px;">●</span>
+                        ${createSelect(this.character.wealth.silver, 9)}
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="color: #CD7F32; font-size: 1.5rem; margin-bottom: 5px;">●</span>
+                        ${createSelect(this.character.wealth.copper, 9)}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" id="btn-wealth-cancel" style="flex: 1;">Annulla</button>
+                    <button class="btn btn-primary" id="btn-wealth-save" style="flex: 1;">Salva</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const sSelect = modal.querySelectorAll('select')[0];
+        const cSelect = modal.querySelectorAll('select')[1];
+        const gInput = modal.querySelector('#w-gold');
+
+        modal.querySelector('#btn-wealth-cancel').onclick = () => modal.remove();
+        modal.querySelector('#btn-wealth-save').onclick = () => {
+            const g = parseInt(gInput.value) || 0;
+            const s = parseInt(sSelect.value) || 0;
+            const c = parseInt(cSelect.value) || 0;
+
+            this.character.wealth = { gold: g, silver: s, copper: c };
+            Storage.saveCharacter(this.character);
+            this.renderTabContent(container.parentElement, 'sheet'); // Refresh Sheet Tab
+            modal.remove();
+        };
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }
+
     openViewItemModal(type, idx) {
         const list = type === 'equipment' ? this.character.equipment : (type === 'inventory' ? this.character.inventory : this.character.journal);
         const item = list[idx];
@@ -530,8 +607,8 @@ export default class CharacterSheet {
             `<div style="width: 100%; height: 200px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-bottom: 2px solid var(--accent-gold);"></div>` : '';
 
         const contentHtml = isJournal ? `
-            <div style="font-size: 0.85rem; color: var(--text-faded); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center;">${item.date || ''}</div>
-            <h2 style="font-family: var(--font-display); color: var(--accent-navy); font-size: 1.8rem; margin-bottom: 20px; text-align: center; border-bottom: 1px solid var(--border-worn); padding-bottom: 15px;">${item.title || 'Senza Titolo'}</h2>
+            <div style="font-size: 0.85rem; color: var(--text-faded); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-align: right; border-bottom: 1px solid var(--border-worn); padding-bottom: 5px;">${item.date || ''}</div>
+            ${item.title ? `<h2 style="font-family: var(--font-display); color: var(--accent-navy); font-size: 1.8rem; margin-bottom: 20px; text-align: center;">${item.title}</h2>` : ''}
             <div style="font-family: var(--font-hand); font-size: 1.3rem; line-height: 1.6; color: var(--text-ink); text-align: justify; white-space: pre-wrap;">${item.content || ''}</div>
         ` : `
             <h2 style="font-family: var(--font-display); color: var(--accent-navy); font-size: 1.8rem; margin-bottom: 5px; text-align: center;">${item.name}</h2>
@@ -547,7 +624,6 @@ export default class CharacterSheet {
                 </div>
                 <div style="padding: 15px; background: rgba(0,0,0,0.03); text-align: center; border-top: 1px solid var(--border-worn);">
                     <button id="btn-close-view" class="btn btn-primary" style="padding: 10px 40px; border-radius: 25px;">Chiudi</button>
-                    ${!isJournal ? `<button id="btn-use-item" class="btn btn-secondary" style="margin-left: 10px; display: none;">Usa</button>` : ''} 
                 </div>
             </div>
             <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
@@ -836,10 +912,36 @@ export default class CharacterSheet {
         }
 
         const t = document.querySelector('#sheet-tooltip');
-        t.innerHTML = text; t.style.opacity = 1; t.style.left = (x > window.innerWidth / 2 ? x - 260 : x + 10) + 'px'; t.style.top = y + 'px';
-        setTimeout(() => t.style.opacity = 0, 4000);
+        t.innerHTML = text;
+        t.style.opacity = 0;
+        t.style.display = 'block';
 
-        const dismiss = () => { t.style.opacity = 0; document.removeEventListener('touchstart', dismiss); document.removeEventListener('click', dismiss); };
+        // Calc position
+        const rect = t.getBoundingClientRect();
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+
+        let left = x + 15;
+        let top = y + 15;
+
+        // Horiz bounds
+        if (left + rect.width > winW - 10) {
+            left = x - rect.width - 15; // Flip left
+        }
+        if (left < 10) left = 10; // Hard clamp left
+        if (left + rect.width > winW) left = winW - rect.width - 10; // Hard clamp right
+
+        // Vert bounds
+        if (top + rect.height > winH - 10) {
+            top = y - rect.height - 15; // Flip up
+        }
+
+        t.style.left = left + 'px';
+        t.style.top = top + 'px';
+        t.style.opacity = 1;
+
+        // Dismiss logic (unchanged)
+        const dismiss = () => { t.style.opacity = 0; setTimeout(() => t.style.display = 'none', 200); document.removeEventListener('touchstart', dismiss); document.removeEventListener('click', dismiss); };
         setTimeout(() => { document.addEventListener('touchstart', dismiss, { once: true }); document.addEventListener('click', dismiss, { once: true }); }, 100);
     }
 
@@ -886,16 +988,7 @@ export default class CharacterSheet {
     attachSheetListeners(container) {
         const wealthBlock = container.querySelector('#wealth-block');
         if (wealthBlock) wealthBlock.addEventListener('click', () => {
-            const g = prompt("Oro:", this.character.wealth.gold);
-            if (g === null) return;
-            const s = prompt("Argento:", this.character.wealth.silver);
-            if (s === null) return;
-            const c = prompt("Bronzo:", this.character.wealth.copper);
-            if (c === null) return;
-
-            this.character.wealth = { gold: parseInt(g), silver: parseInt(s), copper: parseInt(c) };
-            Storage.saveCharacter(this.character);
-            this.renderTabContent(container.parentElement, 'sheet');
+            this.openWealthModal(container);
         });
 
         const detailsTrigger = container.querySelector('#details-trigger');

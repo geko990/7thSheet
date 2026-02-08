@@ -650,8 +650,8 @@ export default class CreateWizard {
                                 <span class="bg-quirk">${bg.quirk}</span>
                             </div>
                             <div class="bg-details">
-                                Skills: ${bg.skills.map(s => this.translateSkill(s)).join(', ')}<br>
-                                Advantages: ${bg.advantages.join(', ')}
+                                Abilità: ${bg.skills.map(s => this.translateSkill(s)).join(', ')}<br>
+                                Vantaggi: ${bg.advantages.join(', ')}
                             </div>
                         </div>
                     `).join('')}
@@ -684,8 +684,8 @@ export default class CreateWizard {
 
         container.innerHTML = `
             <div class="card">
-                <h3 class="card-title">Abilità & Knacks (1ª Ed)</h3>
-                <p>Costo Skill: <strong>2 PE</strong>. Costo Knack: <strong>1 PE</strong>/grado.</p>
+                <h3 class="card-title">Abilità & Specializzazioni (1ª Ed)</h3>
+                <p>Costo Abilità: <strong>2 PE</strong>. Costo Specializzazione: <strong>1 PE</strong>/grado.</p>
                 <div class="text-center mb-20">
                     <span style="font-size: 0.9rem; color: var(--text-faded);">PE Residui: <strong id="hp-remaining-step3">--</strong></span>
                 </div>
@@ -840,9 +840,9 @@ export default class CreateWizard {
                             <div class="skill-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dotted var(--border-color); background: rgba(255,255,255,0.3); border-radius: 5px;">
                                 <span style="font-weight: 600; font-size: 1rem;">${skill.name}</span>
                                 <div class="trait-controls">
-                                    <button class="btn-circle btn-skill-dec" data-id="${skill.id}" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
+                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', -1)" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
                                     <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1.2rem; min-width: 24px; text-align: center;">${this.character.skills[skill.id] || 0}</span>
-                                    <button class="btn-circle btn-skill-inc" data-id="${skill.id}" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
+                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', 1)" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
                                 </div>
                             </div>
                         `).join('')}
@@ -858,8 +858,8 @@ export default class CreateWizard {
                                     <strong>${adv.name}</strong> (${adv.cost} pti)
                                     <div style="font-size: 0.8em; color: var(--text-faded);">${adv.description || ''}</div>
                                 </div>
-                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'} btn-adv-toggle"
-                                        data-name="${adv.name.replace(/'/g, "\\'")}" data-cost="${adv.cost}"
+                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'}"
+                                        onclick="window.toggleAdvantageV2('${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
                                         style="font-size: 0.8rem; padding: 4px 8px;">
                                     ${this.character.advantages.includes(adv.name) ? 'Rimuovi' : 'Prendi'}
                                 </button>
@@ -924,10 +924,11 @@ export default class CreateWizard {
             }
         });
 
+        // Initial UI Update
         setTimeout(updateUI, 0);
 
-        // Event Delegation for Skills
-        const adjustSkillV2 = (skillId, delta) => {
+        // Global function for onclick handlers to avoid double-listener issues
+        window.adjustSkillV2 = (skillId, delta) => {
             const base = getBackgroundSkillBonus(skillId);
             const current = this.character.skills[skillId] || 0;
             const newVal = current + delta;
@@ -936,77 +937,49 @@ export default class CreateWizard {
             if (newVal > 3) return;
 
             if (delta > 0) {
-                const rem = 10 - calcSpent(); // Re-calc fresh
+                const rem = 10 - calcSpent();
                 if (rem <= 0) return;
             }
 
             this.character.skills[skillId] = newVal;
-            document.getElementById(`val-skill-${skillId}`).textContent = newVal;
+            const valEl = document.getElementById(`val-skill-${skillId}`);
+            if (valEl) valEl.textContent = newVal;
             updateUI();
         };
 
-        // Initialize background bonuses
-        this.data.skills.forEach(s => {
-            const base = getBackgroundSkillBonus(s.id);
-            if ((this.character.skills[s.id] || 0) < base) {
-                this.character.skills[s.id] = base;
+        window.toggleAdvantageV2 = (advName, cost) => {
+            const index = this.character.advantages.indexOf(advName);
+            if (index > -1) {
+                // Remove? Check if background
+                let free = false;
+                this.character.backgrounds.forEach(bgName => {
+                    const bg = this.data.backgrounds.find(b => b.name === bgName);
+                    if (bg && bg.advantages.includes(advName)) free = true;
+                });
+                if (free) {
+                    alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
+                    return;
+                }
+                this.character.advantages.splice(index, 1);
+            } else {
+                const rem = 10 - calcSpent();
+                if (rem < cost) {
+                    alert('Punti insufficienti.');
+                    return;
+                }
+                this.character.advantages.push(advName);
             }
-        });
-
-        setTimeout(updateUI, 0);
-
-        // Use a flag on the container to prevent duplicate listeners
-        if (!container.dataset.step4ListenerAttached) {
-            container.addEventListener('click', (e) => {
-                if (e.target.closest('.btn-skill-inc')) {
-                    const btn = e.target.closest('.btn-skill-inc');
-                    adjustSkillV2(btn.dataset.id, 1);
-                }
-                if (e.target.closest('.btn-skill-dec')) {
-                    const btn = e.target.closest('.btn-skill-dec');
-                    adjustSkillV2(btn.dataset.id, -1);
-                }
-
-                if (e.target.closest('.btn-adv-toggle')) {
-                    const btn = e.target.closest('.btn-adv-toggle');
-                    const advName = btn.dataset.name;
-                    const cost = parseInt(btn.dataset.cost);
-
-                    const index = this.character.advantages.indexOf(advName);
-                    if (index > -1) {
-                        // Remove? Check if background
-                        let free = false;
-                        this.character.backgrounds.forEach(bgName => {
-                            const bg = this.data.backgrounds.find(b => b.name === bgName);
-                            if (bg && bg.advantages.includes(advName)) free = true;
-                        });
-                        if (free) {
-                            alert('Questo vantaggio è fornito dal Background e non può essere rimosso.');
-                            return;
-                        }
-                        this.character.advantages.splice(index, 1);
-                    } else {
-                        const rem = 10 - calcSpent();
-                        if (rem < cost) {
-                            alert('Punti insufficienti.');
-                            return;
-                        }
-                        this.character.advantages.push(advName);
-                    }
-
-                    // Re-render UI only (keeping listener)
-                    // We need to re-run the HTML generation part but NOT re-attach listener.
-                    // The easiest way is to call renderStep4V2 again, which now has the guard clause.
-                    this.renderStep4V2(container);
-                }
-            });
-            container.dataset.step4ListenerAttached = 'true';
+            this.renderStep4V2(container);
+        };
+    }
+});
+container.dataset.step4ListenerAttached = 'true';
         }
     }
 
-    renderStep4V1(container) {
-        // V1 Advantages
-        container.innerHTML = `
+renderStep4V1(container) {
+    // V1 Advantages
+    container.innerHTML = `
             <div class="card">
                 <h3 class="card-title">Vantaggi (1ª Ed)</h3>
                 <p>Acquista Vantaggi usando i Punti Eroe residui.</p>
@@ -1032,121 +1005,121 @@ export default class CreateWizard {
             </div>
             `;
 
-        // Need access to total HP calculation from Step 2/3
-        // We really need a shared 'calculateHPSpent' method.
-        // For now, I'll copy the logic logic or approximate.
-        // Actually, since this is a class, I can add a method?
-        // But renderStep4V1 is inside renderStep4.
+    // Need access to total HP calculation from Step 2/3
+    // We really need a shared 'calculateHPSpent' method.
+    // For now, I'll copy the logic logic or approximate.
+    // Actually, since this is a class, I can add a method?
+    // But renderStep4V1 is inside renderStep4.
 
-        // REFACTOR: Centralize calc into class method `calculateV1Cost()`
+    // REFACTOR: Centralize calc into class method `calculateV1Cost()`
 
-        const updateDisplay = () => {
-            const spent = this._calculateTotalSpentV1(); // Call helper
-            const remaining = 100 - spent;
-            const el = document.getElementById('hp-remaining-step4');
-            if (el) {
-                el.textContent = remaining;
-                el.style.color = remaining < 0 ? 'var(--accent-red)' : 'var(--text-ink)';
-            }
-            return remaining;
-        };
-
-        setTimeout(updateDisplay, 0);
-
-        window.toggleAdvV1 = (advName, cost) => {
-            const index = this.character.advantages.indexOf(advName);
-            if (index > -1) {
-                this.character.advantages.splice(index, 1);
-            } else {
-                const rem = 100 - this._calculateTotalSpentV1();
-                if (rem < cost) {
-                    alert('Punti Eroe insufficienti.');
-                    return;
-                }
-                this.character.advantages.push(advName);
-            }
-            this.renderStep4V1(container);
-        };
-    }
-
-    // Helper for V1 Costs
-    _calculateTotalSpentV1() {
-        let cost = 0;
-        // Traits
-        const getBaseTrait = (trait) => {
-            let base = 2;
-            const nationName = this.character.nation;
-            const nation = this.data.nations.find(n => n.name === nationName);
-            if (nation && nation.bonus_trait === trait) base = 3;
-            return base;
-        };
-        Object.keys(this.character.traits).forEach(t => {
-            const added = this.character.traits[t] - getBaseTrait(t);
-            cost += added * 8;
-        });
-
-        // Skills (V1)
-        if (this.character.v1_purchased_skills) {
-            cost += this.character.v1_purchased_skills.length * 2;
-            Object.values(this.character.skills).forEach(val => {
-                cost += val;
-            });
+    const updateDisplay = () => {
+        const spent = this._calculateTotalSpentV1(); // Call helper
+        const remaining = 100 - spent;
+        const el = document.getElementById('hp-remaining-step4');
+        if (el) {
+            el.textContent = remaining;
+            el.style.color = remaining < 0 ? 'var(--accent-red)' : 'var(--text-ink)';
         }
+        return remaining;
+    };
 
-        // Advantages
-        this.character.advantages.forEach(advName => {
-            const adv = this.data.advantages.find(a => a.name === advName);
-            if (adv) cost += adv.cost;
-        });
+    setTimeout(updateDisplay, 0);
 
-        return cost;
-    }
-
-    validateStep() {
-        if (this.step === 1) {
-            if (!this.character.name || !this.character.nation) {
-                alert('Inserisci Nome e Nazione');
-                return false;
-            }
-        }
-        if (this.step === 2) {
-            if (this.edition === '2e') {
-                // Check if 2 points are spent
-                // We can roughly check based on traits sum vs base
-                // Base sum = 10 (2*5) + 1 (Nation) = 11.
-                // Target sum = 13.
-                const currentSum = Object.values(this.character.traits).reduce((a, b) => a + b, 0);
-                const nationBonus = 1; // Always 1 in our logic
-                const baseSum = 10 + nationBonus;
-                const spent = currentSum - baseSum;
-                if (spent < 2) {
-                    alert(`Hai ancora ${2 - spent} punti da assegnare ai Tratti.`);
-                    return false;
-                }
-            }
-            // V1: Just check if we didn't overspend 100 points? 
-            // Logic in render handles it, but maybe verify here 
-        }
-        if (this.step === 3 && this.edition === '2e') {
-            if (this.character.backgrounds.length !== 2) {
-                alert('Seleziona esattamente 2 Background');
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // STEP 5: V1 (Schools/Sorcery) / V2 (Stories/Arcana)
-    renderStep5(container) {
-        if (this.edition === '1e') {
-            this.renderStep5V1(container);
+    window.toggleAdvV1 = (advName, cost) => {
+        const index = this.character.advantages.indexOf(advName);
+        if (index > -1) {
+            this.character.advantages.splice(index, 1);
         } else {
-            this.renderStep5V2(container);
+            const rem = 100 - this._calculateTotalSpentV1();
+            if (rem < cost) {
+                alert('Punti Eroe insufficienti.');
+                return;
+            }
+            this.character.advantages.push(advName);
         }
+        this.renderStep4V1(container);
+    };
+}
+
+// Helper for V1 Costs
+_calculateTotalSpentV1() {
+    let cost = 0;
+    // Traits
+    const getBaseTrait = (trait) => {
+        let base = 2;
+        const nationName = this.character.nation;
+        const nation = this.data.nations.find(n => n.name === nationName);
+        if (nation && nation.bonus_trait === trait) base = 3;
+        return base;
+    };
+    Object.keys(this.character.traits).forEach(t => {
+        const added = this.character.traits[t] - getBaseTrait(t);
+        cost += added * 8;
+    });
+
+    // Skills (V1)
+    if (this.character.v1_purchased_skills) {
+        cost += this.character.v1_purchased_skills.length * 2;
+        Object.values(this.character.skills).forEach(val => {
+            cost += val;
+        });
     }
 
-    renderStep5V2(container) {
-        container.innerHTML = `
+    // Advantages
+    this.character.advantages.forEach(advName => {
+        const adv = this.data.advantages.find(a => a.name === advName);
+        if (adv) cost += adv.cost;
+    });
+
+    return cost;
+}
+
+validateStep() {
+    if (this.step === 1) {
+        if (!this.character.name || !this.character.nation) {
+            alert('Inserisci Nome e Nazione');
+            return false;
+        }
+    }
+    if (this.step === 2) {
+        if (this.edition === '2e') {
+            // Check if 2 points are spent
+            // We can roughly check based on traits sum vs base
+            // Base sum = 10 (2*5) + 1 (Nation) = 11.
+            // Target sum = 13.
+            const currentSum = Object.values(this.character.traits).reduce((a, b) => a + b, 0);
+            const nationBonus = 1; // Always 1 in our logic
+            const baseSum = 10 + nationBonus;
+            const spent = currentSum - baseSum;
+            if (spent < 2) {
+                alert(`Hai ancora ${2 - spent} punti da assegnare ai Tratti.`);
+                return false;
+            }
+        }
+        // V1: Just check if we didn't overspend 100 points? 
+        // Logic in render handles it, but maybe verify here 
+    }
+    if (this.step === 3 && this.edition === '2e') {
+        if (this.character.backgrounds.length !== 2) {
+            alert('Seleziona esattamente 2 Background');
+            return false;
+        }
+    }
+    return true;
+}
+
+// STEP 5: V1 (Schools/Sorcery) / V2 (Stories/Arcana)
+renderStep5(container) {
+    if (this.edition === '1e') {
+        this.renderStep5V1(container);
+    } else {
+        this.renderStep5V2(container);
+    }
+}
+
+renderStep5V2(container) {
+    container.innerHTML = `
             <div class="card">
                 <h3 class="card-title">Storie & Arcani (2ª Ed)</h3>
                 
@@ -1185,39 +1158,39 @@ export default class CreateWizard {
             </div>
             `;
 
-        // Bind inputs
-        const virtueInput = container.querySelector('#char-virtue');
-        const hubrisInput = container.querySelector('#char-hubris');
+    // Bind inputs
+    const virtueInput = container.querySelector('#char-virtue');
+    const hubrisInput = container.querySelector('#char-hubris');
 
-        virtueInput.addEventListener('input', (e) => this.character.virtue = e.target.value);
-        hubrisInput.addEventListener('input', (e) => this.character.hubris = e.target.value);
+    virtueInput.addEventListener('input', (e) => this.character.virtue = e.target.value);
+    hubrisInput.addEventListener('input', (e) => this.character.hubris = e.target.value);
 
-        // Story logic: saving to temporary object or direct to array?
-        // Character schema has `stories: []`.
-        // We'll create/update the first story object.
-        if (this.character.stories.length === 0) {
-            this.character.stories.push({ name: '', goal: '', reward: '', steps: [''] });
-        }
-        const story = this.character.stories[0];
-
-        const sName = container.querySelector('#story-name');
-        const sGoal = container.querySelector('#story-goal');
-        const sReward = container.querySelector('#story-reward');
-        const sStep1 = container.querySelector('#story-step1');
-
-        sName.value = story.name;
-        sGoal.value = story.goal;
-        sReward.value = story.reward;
-        sStep1.value = story.steps[0] || '';
-
-        sName.addEventListener('input', (e) => story.name = e.target.value);
-        sGoal.addEventListener('input', (e) => story.goal = e.target.value);
-        sReward.addEventListener('input', (e) => story.reward = e.target.value);
-        sStep1.addEventListener('input', (e) => story.steps[0] = e.target.value);
+    // Story logic: saving to temporary object or direct to array?
+    // Character schema has `stories: []`.
+    // We'll create/update the first story object.
+    if (this.character.stories.length === 0) {
+        this.character.stories.push({ name: '', goal: '', reward: '', steps: [''] });
     }
+    const story = this.character.stories[0];
 
-    renderStep5V1(container) {
-        container.innerHTML = `
+    const sName = container.querySelector('#story-name');
+    const sGoal = container.querySelector('#story-goal');
+    const sReward = container.querySelector('#story-reward');
+    const sStep1 = container.querySelector('#story-step1');
+
+    sName.value = story.name;
+    sGoal.value = story.goal;
+    sReward.value = story.reward;
+    sStep1.value = story.steps[0] || '';
+
+    sName.addEventListener('input', (e) => story.name = e.target.value);
+    sGoal.addEventListener('input', (e) => story.goal = e.target.value);
+    sReward.addEventListener('input', (e) => story.reward = e.target.value);
+    sStep1.addEventListener('input', (e) => story.steps[0] = e.target.value);
+}
+
+renderStep5V1(container) {
+    container.innerHTML = `
             <div class="card">
                 <h3 class="card-title">Scuole & Stregoneria (1ª Ed)</h3>
                 <p>Costo elevato (20-30 PE). Solitamente uno solo.</p>
@@ -1228,15 +1201,15 @@ export default class CreateWizard {
                 <div class="sheet-section">
                     <h4 class="sheet-section-title">Scuole di Scherma</h4>
                     ${this.data.schools.length > 0 ?
-                `
+            `
                         <select class="form-select" id="char-school">
                             <option value="">Nessuna Scuola</option>
                             ${this.data.schools.map(s => `<option value="${s.id}" ${this.character.school === s.id ? 'selected' : ''}>${s.name} (${s.cost} PE)</option>`).join('')}
                         </select>
                         <div id="school-desc" class="mt-20" style="font-style: italic; font-size: 0.8em; color: var(--text-faded);"></div>
                         `
-                : '<p>Nessuna scuola disponibile.</p>'
-            }
+            : '<p>Nessuna scuola disponibile.</p>'
+        }
                 </div>
 
                 <div class="sheet-section mt-20">
@@ -1254,60 +1227,60 @@ export default class CreateWizard {
             </div>
             `;
 
-        const schoolSelect = container.querySelector('#char-school');
-        const schoolDesc = container.querySelector('#school-desc');
+    const schoolSelect = container.querySelector('#char-school');
+    const schoolDesc = container.querySelector('#school-desc');
 
-        const updateDisplay = () => {
-            const cost = this._calculateTotalSpentV1();
-            const remaining = 100 - cost;
-            const el = document.getElementById('hp-remaining-step5');
-            if (el) {
-                el.textContent = remaining;
-                el.style.color = remaining < 0 ? 'var(--accent-red)' : 'var(--text-ink)';
-            }
-            return remaining;
-        };
-
-        const updateSchoolDesc = () => {
-            if (schoolSelect) {
-                const s = this.data.schools.find(sch => sch.id === schoolSelect.value);
-                if (s) schoolDesc.textContent = s.description || 'Nessuna descrizione.';
-                else schoolDesc.textContent = '';
-            }
-        };
-
-        setTimeout(() => {
-            updateDisplay();
-            updateSchoolDesc();
-        }, 0);
-
-        if (schoolSelect) {
-            schoolSelect.addEventListener('change', (e) => {
-                this.character.school = e.target.value;
-                updateSchoolDesc();
-                updateDisplay();
-            });
+    const updateDisplay = () => {
+        const cost = this._calculateTotalSpentV1();
+        const remaining = 100 - cost;
+        const el = document.getElementById('hp-remaining-step5');
+        if (el) {
+            el.textContent = remaining;
+            el.style.color = remaining < 0 ? 'var(--accent-red)' : 'var(--text-ink)';
         }
+        return remaining;
+    };
 
-        window.adjustSorcery = (delta) => {
-            const current = this.character.sorceryLevel || 0;
-            const newVal = current + delta;
-            if (newVal < 0) return;
-            // Check cost? 7 pts/level usually (Full blooded 40pts = level 5ish?)
-            // Simplified: 7 pts per rank.
-            if (delta > 0) {
-                const rem = 100 - this._calculateTotalSpentV1();
-                if (rem < 7) return;
-            }
-            this.character.sorceryLevel = newVal;
-            document.getElementById('val-sorcery').textContent = newVal;
+    const updateSchoolDesc = () => {
+        if (schoolSelect) {
+            const s = this.data.schools.find(sch => sch.id === schoolSelect.value);
+            if (s) schoolDesc.textContent = s.description || 'Nessuna descrizione.';
+            else schoolDesc.textContent = '';
+        }
+    };
+
+    setTimeout(() => {
+        updateDisplay();
+        updateSchoolDesc();
+    }, 0);
+
+    if (schoolSelect) {
+        schoolSelect.addEventListener('change', (e) => {
+            this.character.school = e.target.value;
+            updateSchoolDesc();
             updateDisplay();
-        };
+        });
     }
 
-    // STEP 6: Review & Finalize (Actually step 6 in UI)
-    renderStep6(container) {
-        container.innerHTML = `
+    window.adjustSorcery = (delta) => {
+        const current = this.character.sorceryLevel || 0;
+        const newVal = current + delta;
+        if (newVal < 0) return;
+        // Check cost? 7 pts/level usually (Full blooded 40pts = level 5ish?)
+        // Simplified: 7 pts per rank.
+        if (delta > 0) {
+            const rem = 100 - this._calculateTotalSpentV1();
+            if (rem < 7) return;
+        }
+        this.character.sorceryLevel = newVal;
+        document.getElementById('val-sorcery').textContent = newVal;
+        updateDisplay();
+    };
+}
+
+// STEP 6: Review & Finalize (Actually step 6 in UI)
+renderStep6(container) {
+    container.innerHTML = `
             <div class="card text-center">
                 <h3 class="card-title">Riepilogo</h3>
                 <ul style="text-align: left; list-style: none; padding: 0; font-size: 0.9rem;">
@@ -1316,128 +1289,128 @@ export default class CreateWizard {
                     <li><strong>Tratti:</strong> ${Object.entries(this.character.traits).map(([k, v]) => `${this.translateTrait(k)} ${v}`).join(', ')}</li>
                     
                     ${this.edition === '2e' ?
-                `<li><strong>Backgrounds:</strong> ${this.character.backgrounds.join(', ')}</li>` :
-                `<li><strong>Total Spend:</strong> ${this._calculateTotalSpentV1()}/100 PE</li>`
-            }
+            `<li><strong>Backgrounds:</strong> ${this.character.backgrounds.join(', ')}</li>` :
+            `<li><strong>Total Spend:</strong> ${this._calculateTotalSpentV1()}/100 PE</li>`
+        }
                     
                     ${this.character.advantages.length ? `<li><strong>Vantaggi:</strong> ${this.character.advantages.join(', ')}</li>` : ''}
                     
                     ${this.edition === '1e' && (this.character.school || this.character.sorceryLevel) ?
-                `<li><strong>Speciali:</strong> ${this.character.school || ''} ${this.character.sorceryLevel ? `(Stregoneria ${this.character.sorceryLevel})` : ''}</li>` : ''
-            }
+            `<li><strong>Speciali:</strong> ${this.character.school || ''} ${this.character.sorceryLevel ? `(Stregoneria ${this.character.sorceryLevel})` : ''}</li>` : ''
+        }
                 </ul>
                 <p class="mt-20">Se sei soddisfatto, clicca Completa per salvare!</p>
             </div>
             `;
+}
+
+_calculateTotalSpentV1() {
+    // ... (Already added in previous step replacer, assuming it exists or needs to be ensured)
+    // If previous step didn't add it globally, need to add it here.
+    // But since I'm overwriting the whole class bottom effectively, I should include it.
+    // Wait, I am using 'EndLine: 1003' which implies Append or complete replacement of bottom?
+    // My previous Replace added it.
+    // I will duplicate logic to be safe if scope issue, but assuming same class instance.
+    // Better: Reference the method added in renderStep4 if available. 
+    // Oh, the previous 'Replace' targeted 'renderStep4' and added helper. 
+    // So I can just rely on 'this._calculateTotalSpentV1'.
+
+    // However, I need to update it to include School and Sorcery cost!
+
+    let cost = 0;
+    // Traits
+    const getBaseTrait = (trait) => {
+        let base = 2;
+        const nationName = this.character.nation;
+        const nation = this.data.nations.find(n => n.name === nationName);
+        if (nation && nation.bonus_trait === trait) base = 3;
+        return base;
+    };
+    Object.keys(this.character.traits).forEach(t => {
+        const added = this.character.traits[t] - getBaseTrait(t);
+        cost += added * 8;
+    });
+
+    // Skills (V1)
+    if (this.character.v1_purchased_skills) {
+        cost += this.character.v1_purchased_skills.length * 2;
+        Object.values(this.character.skills).forEach(val => {
+            cost += val;
+        });
     }
 
-    _calculateTotalSpentV1() {
-        // ... (Already added in previous step replacer, assuming it exists or needs to be ensured)
-        // If previous step didn't add it globally, need to add it here.
-        // But since I'm overwriting the whole class bottom effectively, I should include it.
-        // Wait, I am using 'EndLine: 1003' which implies Append or complete replacement of bottom?
-        // My previous Replace added it.
-        // I will duplicate logic to be safe if scope issue, but assuming same class instance.
-        // Better: Reference the method added in renderStep4 if available. 
-        // Oh, the previous 'Replace' targeted 'renderStep4' and added helper. 
-        // So I can just rely on 'this._calculateTotalSpentV1'.
+    // Advantages
+    this.character.advantages.forEach(advName => {
+        const adv = this.data.advantages.find(a => a.name === advName);
+        if (adv) cost += adv.cost;
+    });
 
-        // However, I need to update it to include School and Sorcery cost!
-
-        let cost = 0;
-        // Traits
-        const getBaseTrait = (trait) => {
-            let base = 2;
-            const nationName = this.character.nation;
-            const nation = this.data.nations.find(n => n.name === nationName);
-            if (nation && nation.bonus_trait === trait) base = 3;
-            return base;
-        };
-        Object.keys(this.character.traits).forEach(t => {
-            const added = this.character.traits[t] - getBaseTrait(t);
-            cost += added * 8;
-        });
-
-        // Skills (V1)
-        if (this.character.v1_purchased_skills) {
-            cost += this.character.v1_purchased_skills.length * 2;
-            Object.values(this.character.skills).forEach(val => {
-                cost += val;
-            });
-        }
-
-        // Advantages
-        this.character.advantages.forEach(advName => {
-            const adv = this.data.advantages.find(a => a.name === advName);
-            if (adv) cost += adv.cost;
-        });
-
-        // Schools
-        if (this.character.school) {
-            const s = this.data.schools.find(sch => sch.id === this.character.school);
-            if (s) cost += s.cost;
-        }
-
-        // Sorcery
-        if (this.character.sorceryLevel) {
-            cost += this.character.sorceryLevel * 7;
-        }
-
-        return cost;
+    // Schools
+    if (this.character.school) {
+        const s = this.data.schools.find(sch => sch.id === this.character.school);
+        if (s) cost += s.cost;
     }
 
-    finishCreation() {
-        if (this.edition === '2e') {
-            // Process V2 Backgrounds bonuses (Apply them permanently?)
-            // Usually in 2e you note where bonuses come from but on sheet they are just numbers.
-            // But we applied logic in Step 4 to track "total". 
-            // So character.skills already has the final values.
-            // We just need to add Advantages from Backgrounds if not already in list.
+    // Sorcery
+    if (this.character.sorceryLevel) {
+        cost += this.character.sorceryLevel * 7;
+    }
 
-            this.character.backgrounds.forEach(bgName => {
-                const bgData = this.data.backgrounds.find(b => b.name === bgName);
-                if (bgData) {
-                    // Skills already handled by user adjustments (starting from base)
-                    // Advantages: Ensure they are in the list
-                    bgData.advantages.forEach(adv => {
-                        if (!this.character.advantages.includes(adv)) {
-                            this.character.advantages.push(adv);
-                        }
-                    });
-                }
-            });
-        }
+    return cost;
+}
 
-        // Generate ID
-        if (!this.character.id) {
-            this.character.id = Storage.generateId();
-            this.character.createdAt = new Date().toISOString();
-        }
-        this.character.updatedAt = new Date().toISOString();
+finishCreation() {
+    if (this.edition === '2e') {
+        // Process V2 Backgrounds bonuses (Apply them permanently?)
+        // Usually in 2e you note where bonuses come from but on sheet they are just numbers.
+        // But we applied logic in Step 4 to track "total". 
+        // So character.skills already has the final values.
+        // We just need to add Advantages from Backgrounds if not already in list.
 
-        const result = Storage.saveCharacter(this.character);
-
-        if (result.success) {
-            if (result.warning) {
-                alert(result.warning);
+        this.character.backgrounds.forEach(bgName => {
+            const bgData = this.data.backgrounds.find(b => b.name === bgName);
+            if (bgData) {
+                // Skills already handled by user adjustments (starting from base)
+                // Advantages: Ensure they are in the list
+                bgData.advantages.forEach(adv => {
+                    if (!this.character.advantages.includes(adv)) {
+                        this.character.advantages.push(adv);
+                    }
+                });
             }
-            this.app.router.navigate('characters');
-        } else {
-            alert('Errore durante il salvataggio: ' + (result.error || 'Sconosciuto'));
+        });
+    }
+
+    // Generate ID
+    if (!this.character.id) {
+        this.character.id = Storage.generateId();
+        this.character.createdAt = new Date().toISOString();
+    }
+    this.character.updatedAt = new Date().toISOString();
+
+    const result = Storage.saveCharacter(this.character);
+
+    if (result.success) {
+        if (result.warning) {
+            alert(result.warning);
         }
+        this.app.router.navigate('characters');
+    } else {
+        alert('Errore durante il salvataggio: ' + (result.error || 'Sconosciuto'));
     }
+}
 
-    translateTrait(trait) {
-        const map = {
-            'brawn': 'Muscoli', 'finesse': 'Finezza', 'resolve': 'Risolutezza',
-            'wits': 'Acume', 'panache': 'Panache',
-            'balance': 'Equilibrio' // V1 trait sometimes used? Or just knacks
-        };
-        return map[trait.toLowerCase()] || trait;
-    }
+translateTrait(trait) {
+    const map = {
+        'brawn': 'Muscoli', 'finesse': 'Finezza', 'resolve': 'Risolutezza',
+        'wits': 'Acume', 'panache': 'Panache',
+        'balance': 'Equilibrio' // V1 trait sometimes used? Or just knacks
+    };
+    return map[trait.toLowerCase()] || trait;
+}
 
-    translateSkill(skillId) {
-        const skill = this.data.skills.find(s => s.id === skillId);
-        return skill ? skill.name : skillId;
-    }
+translateSkill(skillId) {
+    const skill = this.data.skills.find(s => s.id === skillId);
+    return skill ? skill.name : skillId;
+}
 }
