@@ -20,7 +20,19 @@ export class AdventureTab {
         if (!this.container) return;
 
         try {
-            const user = AuthService.getUser(); // Sync get from cached state
+            let user = AuthService.getUser();
+
+            // Double check session if user is missing (fixes refresh bounce)
+            if (!user && supabaseClient) {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session?.user) {
+                    user = session.user;
+                    // Sync back to AuthService if needed (optional, but good for consistency)
+                    if (AuthService.setUser) AuthService.setUser(user);
+                    else AuthService.user = user;
+                }
+            }
+
             console.log('AdventureTab: User state:', user);
 
             if (this.loading) {
