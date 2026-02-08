@@ -900,7 +900,7 @@ export default class CharacterSheet {
         document.querySelector('#dice-overlay').style.display = 'flex';
     }
 
-    showTooltip(type, key, x, y) {
+    showTooltip(type, key, x, y, targetElement = null) {
         let text = key;
         if (type === 'trait' || type === 'skill') text = this.descriptions[key] || key;
         else if (type === 'advantage') {
@@ -916,34 +916,37 @@ export default class CharacterSheet {
         t.style.opacity = 0;
         t.style.display = 'block';
 
-        // Calc position
         const rect = t.getBoundingClientRect();
         const winW = window.innerWidth;
         const winH = window.innerHeight;
 
-        let left = x + 15;
-        let top = y + 15;
+        let left, top;
 
-        // Horiz bounds
-        if (left + rect.width > winW - 10) {
-            left = x - rect.width - 15; // Flip left
+        if (targetElement) {
+            const targetRect = targetElement.getBoundingClientRect();
+            left = targetRect.left + (targetRect.width / 2) - (rect.width / 2);
+            top = targetRect.top - rect.height - 10;
+            if (top < 10) top = targetRect.bottom + 10;
+        } else {
+            left = x - (rect.width / 2);
+            top = y - rect.height - 20;
+            if (top < 10) top = y + 20;
         }
-        if (left < 10) left = 10; // Hard clamp left
-        if (left + rect.width > winW) left = winW - rect.width - 10; // Hard clamp right
 
-        // Vert bounds
-        if (top + rect.height > winH - 10) {
-            top = y - rect.height - 15; // Flip up
-        }
+        if (left < 10) left = 10;
+        if (left + rect.width > winW - 10) left = winW - rect.width - 10;
 
         t.style.left = left + 'px';
         t.style.top = top + 'px';
         t.style.opacity = 1;
 
-        // Dismiss logic (unchanged)
         const dismiss = () => { t.style.opacity = 0; setTimeout(() => t.style.display = 'none', 200); document.removeEventListener('touchstart', dismiss); document.removeEventListener('click', dismiss); };
         setTimeout(() => { document.addEventListener('touchstart', dismiss, { once: true }); document.addEventListener('click', dismiss, { once: true }); }, 100);
     }
+
+
+
+
 
     showDetailsPopup() {
         const popup = document.createElement('div');

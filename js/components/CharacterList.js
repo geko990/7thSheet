@@ -110,9 +110,12 @@ export default class CharacterList {
     renderList(characters) {
         if (characters.length === 0) {
             return `
-                <div class="empty-state">
-                    <div class="empty-state-icon">⚓</div>
-                    <p class="empty-state-text">Nessun personaggio trovato.</p>
+                <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 60vh; text-align: center; color: var(--text-faded);">
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 10px;">Nessun Personaggio</h3>
+                        <p>Il tuo equipaggio è ancora vuoto.<br>Crea il tuo primo eroe!</p>
+                    </div>
+                    <img src="assets/empty_characters.png" alt="Eroi" style="width: 100%; max-width: 400px; opacity: 0.8; mix-blend-mode: multiply;">
                 </div>
             `;
         }

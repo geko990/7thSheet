@@ -840,9 +840,9 @@ export default class CreateWizard {
                             <div class="skill-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dotted var(--border-color); background: rgba(255,255,255,0.3); border-radius: 5px;">
                                 <span style="font-weight: 600; font-size: 1rem;">${skill.name}</span>
                                 <div class="trait-controls">
-                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', -1)" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
+                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', -1)" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
                                     <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1.2rem; min-width: 24px; text-align: center;">${this.character.skills[skill.id] || 0}</span>
-                                    <button class="btn-circle" onclick="window.adjustSkillV2('${skill.id}', 1)" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
+                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', 1)" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
                                 </div>
                             </div>
                         `).join('')}
@@ -859,7 +859,7 @@ export default class CreateWizard {
                                     <div style="font-size: 0.8em; color: var(--text-faded);">${adv.description || ''}</div>
                                 </div>
                                 <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'}"
-                                        onclick="window.toggleAdvantageV2('${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
+                                        onclick="window.toggleAdvantageV2(event, '${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
                                         style="font-size: 0.8rem; padding: 4px 8px;">
                                     ${this.character.advantages.includes(adv.name) ? 'Rimuovi' : 'Prendi'}
                                 </button>
@@ -928,10 +928,14 @@ export default class CreateWizard {
         setTimeout(updateUI, 0);
 
         // Global function for onclick handlers to avoid double-listener issues
-        window.adjustSkillV2 = (skillId, delta) => {
+        // Global function for onclick handlers to avoid double-listener issues
+        window.adjustSkillV2 = (event, skillId, delta) => {
+            event.stopPropagation(); // Stop bubbling
             const base = getBackgroundSkillBonus(skillId);
             const current = this.character.skills[skillId] || 0;
             const newVal = current + delta;
+
+            console.log(`Skill: ${skillId}, Base: ${base}, Current: ${current}, New: ${newVal}, Delta: ${delta}`);
 
             if (newVal < base) return;
             if (newVal > 3) return;
@@ -947,7 +951,9 @@ export default class CreateWizard {
             updateUI();
         };
 
-        window.toggleAdvantageV2 = (advName, cost) => {
+        window.toggleAdvantageV2 = (event, advName, cost) => {
+            event.stopPropagation();
+
             const index = this.character.advantages.indexOf(advName);
             if (index > -1) {
                 // Remove? Check if background
