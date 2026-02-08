@@ -106,13 +106,21 @@ select {
     top: 0;
     left: 0;
     width: 100%;
+    /* Mobile-first height */
+    height: var(--header-height);
     height: calc(var(--header-height) + env(safe-area-inset-top));
-    /* Cover notch */
     padding-top: env(safe-area-inset-top);
-    /* Push content down */
-    background: url('../assets/header_bg.jpg') repeat-x center;
-    background-size: auto 100%;
-    /* Keep texture scale relative to height? No, auto 100% stretches. */
+
+    /* Background */
+    background-color: #3e2723;
+    /* Fallback brown */
+    background-image: url('../assets/header_bg.jpg');
+    background-repeat: repeat-x;
+    background-position: center bottom;
+    /* Align to bottom so notch area is filled by color/image */
+    background-size: cover;
+    /* Cover the whole header area */
+
     color: var(--text-paper);
     z-index: 100;
     display: flex;
@@ -121,7 +129,6 @@ select {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     border-bottom: 2px solid #3e2723;
     overflow: visible;
-    /* Allow ribbon to hang out */
 }
 
 #app-header h1 {
@@ -134,20 +141,19 @@ select {
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 
     /* Ribbon Styling */
-    background-image: url('../assets/header_ribbon.png?v=0.9.42');
+    background-image: url('../assets/header_ribbon.png?v=0.9.43');
     background-size: contain;
     background-position: center top;
     background-repeat: no-repeat;
-    width: 400px;
-    /* Reduced by ~30% */
-    height: 120px;
-    /* Reduced by ~30% */
+    width: 300px;
+    /* Reduced by 25% */
+    height: 90px;
+    /* Reduced by 25% */
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    top: 10px;
-    /* Adjusted Position */
+    top: 0px;
     padding-bottom: 0px;
     z-index: 101;
 }
@@ -158,10 +164,10 @@ select {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
-    padding-top: calc(var(--header-height) + 90px);
+    padding-top: calc(var(--header-height) + 60px);
     /* Reduced spacing */
     /* Fallback */
-    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 90px);
+    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 60px);
     padding-bottom: calc(var(--nav-height) + 20px);
     display: flex;
     flex-direction: column;
