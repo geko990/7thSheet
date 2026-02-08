@@ -2,15 +2,15 @@ import { Router } from './router.js';
 import { CONFIG } from './config.js';
 import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
-import Settings from './components/Settings.js?v=0.9.28';
-import CharacterSheet from './components/CharacterSheet.js?v=0.9.28';
+import Settings from './components/Settings.js?v=0.9.29';
+import CharacterSheet from './components/CharacterSheet.js?v=0.9.29';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
-import { AuthService } from './services/AuthService.js?v=0.9.28';
-import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.28';
-import { Dice } from './dice.js?v=0.9.28';
-import { Storage } from './storage.js?v=0.9.28';
-import { CampaignService } from './services/CampaignService.js?v=0.9.28';
+import { AuthService } from './services/AuthService.js?v=0.9.29';
+import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.29';
+import { Dice } from './dice.js?v=0.9.29';
+import { Storage } from './storage.js?v=0.9.29';
+import { CampaignService } from './services/CampaignService.js?v=0.9.29';
 
 class App {
     constructor() {
@@ -39,6 +39,9 @@ class App {
             new CampaignDetail(this).render(div, params.id);
             return div;
         });
+
+        // Initialize update handlers
+        this.initUpdateMechanisms();
 
         // Initial navigation
         this.router.initNavigation();
@@ -98,6 +101,61 @@ class App {
     closeModal() {
         const modalOverlay = document.getElementById('modal-overlay');
         modalOverlay.classList.add('hidden');
+    }
+
+    initUpdateMechanisms() {
+        // 1. Hidden Update Button (Anchor)
+        const anchorBtn = document.getElementById('header-anchor');
+        if (anchorBtn) {
+            anchorBtn.addEventListener('click', () => {
+                if (confirm('Forzare aggiornamento app?')) {
+                    this.forceAppUpdate();
+                }
+            });
+        }
+
+        // 2. Auto-Update on Idle (Fresh Launch)
+        const isFreshLaunch = !sessionStorage.getItem('app_session_active');
+
+        if (isFreshLaunch) {
+            sessionStorage.setItem('app_session_active', 'true');
+            console.log('Fresh launch detected. Starting idle update timer...');
+
+            let idleTimer = setTimeout(() => {
+                console.log('User inactive for 10s on fresh launch. Updating...');
+                this.forceAppUpdate();
+            }, 10000); // 10 seconds
+
+            const clearIdleTimer = () => {
+                if (idleTimer) {
+                    clearTimeout(idleTimer);
+                    idleTimer = null;
+                    console.log('User interaction detected. Auto-update cancelled.');
+                    ['click', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
+                        document.removeEventListener(evt, clearIdleTimer, { capture: true })
+                    );
+                }
+            };
+
+            ['click', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
+                document.addEventListener(evt, clearIdleTimer, { capture: true, once: true })
+            );
+        }
+    }
+
+    async forceAppUpdate() {
+        try {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            window.location.reload(true);
+        } catch (e) {
+            console.warn('Update failed:', e);
+            window.location.reload();
+        }
     }
 }
 
