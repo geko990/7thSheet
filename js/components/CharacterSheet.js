@@ -123,11 +123,15 @@ export default class CharacterSheet {
     }
 
     renderTabs(container) {
+        // Container cleanup: ensure we don't have double scrolling
+        container.style.height = '100%';
+        container.style.overflow = 'hidden';
+
         container.innerHTML = `
-            <div class="card" style="position: relative; padding-top: 10px; height: 100vh; max-height: calc(100vh - 80px); display: flex; flex-direction: column; overflow: hidden; padding-bottom: 0;">
+            <div class="card" style="position: relative; display: flex; flex-direction: column; overflow: hidden; padding: 0; margin: 0; border: none; background: transparent; height: 100%;">
 
                 <!-- Tabs Nav -->
-                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-worn); margin: 0; flex-shrink: 0; background: var(--bg-paper);">
+                <div class="tabs-nav" style="display: flex; border-bottom: 2px solid var(--border-worn); margin: 0; flex-shrink: 0; background: var(--bg-paper); padding-top: 10px;">
                     <button class="tab-btn active" data-tab="sheet">Scheda</button>
                     <button class="tab-btn" data-tab="equipment">Equip.</button>
                     <button class="tab-btn" data-tab="inventory">Borsa</button>
@@ -135,7 +139,7 @@ export default class CharacterSheet {
                 </div>
 
                 <!-- Content Area -->
-                <div id="tab-content" style="flex: 1; overflow-y: auto; padding: 15px 0 80px 0; touch-action: pan-y;"></div>
+                <div id="tab-content" style="flex: 1; overflow-y: auto; padding: 15px 0 80px 0; -webkit-overflow-scrolling: touch;"></div>
             
                 <!-- Dice Overlay & FAB & Tooltip -->
                 <div id="dice-overlay" class="modal-overlay" style="display: none;">
