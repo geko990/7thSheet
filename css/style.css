@@ -1611,12 +1611,8 @@ select {
     /* Background Asset */
     background-image: url('../assets/dadi.png');
     background-repeat: no-repeat;
-    background-position: center bottom 80px;
-    /* Adjust vertical position */
-    background-size: 80% auto;
-    /* Scale reasonably */
-    opacity: 1;
-    /* Ensure transparency in PNG handles fading */
+    background-position: center bottom 60px;
+    background-size: 100% auto;
 }
 
 .dice-popup {
@@ -1626,4 +1622,8 @@ select {
     left: auto !important;
     transform: none !important;
     margin: 20px auto;
+
+    /* Transparent Background */
+    background-color: rgba(253, 250, 245, 0.9) !important;
+    backdrop-filter: blur(2px);
 }
