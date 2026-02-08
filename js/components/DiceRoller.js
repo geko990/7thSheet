@@ -19,7 +19,7 @@ export default class DiceRoller {
         div.className = 'dice-roller-container';
         div.innerHTML = `
             <!-- Fixed Background Layer (Matches CharacterList Style) -->
-            <div class="fixed-dice-bg" style="position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+            <div class="fixed-dice-bg" style="position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
                 <img src="assets/dadi.png" alt="" style="width: 100%;">
             </div>
 
