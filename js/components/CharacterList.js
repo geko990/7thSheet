@@ -110,14 +110,14 @@ export default class CharacterList {
     renderList(characters) {
         const bgHtml = `
             <div class="fixed-char-bg" style="position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
-                <img src="assets/empty_characters_transparent.png?v=0.9.24" alt="" style="width: 100%;">
+                <img src="assets/empty_characters_transparent.png?v=0.9.25" alt="" style="width: 100%;">
             </div>
         `;
 
         if (characters.length === 0) {
             return `
-                <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: calc(100vh - 140px); overflow: hidden; text-align: center; color: var(--text-faded); padding-bottom: 0;">
-                    <div style="margin-bottom: auto; margin-top: 15vh;">
+                <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-height: 400px; overflow: hidden; text-align: center; color: var(--text-faded); padding-bottom: 0;">
+                    <div style="margin-bottom: auto; margin-top: 100px;">
                         <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 10px; font-size: 1.5rem;">Nessun Personaggio</h3>
                         <p style="font-size: 1.1rem;">Il tuo equipaggio è ancora vuoto.<br>Crea il tuo primo eroe!</p>
                     </div>
