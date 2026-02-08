@@ -123,30 +123,30 @@ select {
 
 #app-header h1 {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 2.2rem;
+    /* Larger text */
     font-weight: 700;
     color: var(--text-ink);
     letter-spacing: 1px;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 
     /* Ribbon Styling */
-    background-image: url('../assets/header_ribbon.png?v=0.9.34');
+    background-image: url('../assets/header_ribbon.png?v=0.9.36');
     background-size: contain;
     background-position: center top;
     background-repeat: no-repeat;
-    width: 340px;
-    height: 110px;
-    /* Taller for contain */
+    width: 500px;
+    /* Scaled up */
+    height: 150px;
+    /* Scaled up */
     display: flex;
     align-items: center;
-    /* Center text vertically */
     justify-content: center;
     position: relative;
-    top: 25px;
-    padding-bottom: 10px;
-    /* Slight offset for text if needed */
+    top: 5px;
+    /* Lifted up */
+    padding-bottom: 0px;
     z-index: 101;
-    /* Removed filter to prevent artifacts */
 }
 
 /* Main Content */
@@ -155,9 +155,9 @@ select {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
-    padding-top: calc(var(--header-height) + 70px);
+    padding-top: calc(var(--header-height) + 110px);
     /* Fallback */
-    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 70px);
+    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 110px);
     padding-bottom: calc(var(--nav-height) + 20px);
     display: flex;
     flex-direction: column;
