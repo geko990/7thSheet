@@ -433,7 +433,10 @@ export class CampaignDetail {
                     ${entity.image_url ? `<img src="${entity.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
-                <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="width: 100%;" value="${entity.image_url || ''}">
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="flex: 1;" value="${entity.image_url || ''}">
+                    <button id="btn-paste-clipboard" class="btn btn-secondary btn-sm" style="padding: 5px 10px;" title="Incolla da Appunti">📋</button>
+                </div>
                 <div id="paste-hint" style="font-size: 0.75rem; color: var(--text-faded); margin-top: 5px; font-style: italic;">Puoi anche incollare un'immagine (CTRL+V)</div>
             </div>
 
@@ -466,19 +469,16 @@ export class CampaignDetail {
             }
         });
 
-        // Paste Handler
+        // Paste Handler (CTRL+V)
         PasteHandler.attach(urlInput, (file) => {
-            // Create a DataTransfer to set the file input
             const dt = new DataTransfer();
             dt.items.add(file);
             fileInput.files = dt.files;
 
-            // Trigger change event manually or just update preview
             const reader = new FileReader();
             reader.onload = (ev) => updatePreview(ev.target.result);
             reader.readAsDataURL(file);
 
-            // Visual feedback
             pasteHint.textContent = "Immagine incollata!";
             pasteHint.style.color = "var(--accent-green)";
             setTimeout(() => {
@@ -486,6 +486,41 @@ export class CampaignDetail {
                 pasteHint.style.color = "var(--text-faded)";
             }, 2000);
         });
+
+        // Manual Paste Button (Mobile)
+        const pasteBtn = body.querySelector('#btn-paste-clipboard');
+        if (pasteBtn && navigator.clipboard && navigator.clipboard.read) {
+            pasteBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    for (const item of clipboardItems) {
+                        const imageType = item.types.find(type => type.startsWith('image/'));
+                        if (imageType) {
+                            const blob = await item.getType(imageType);
+                            const file = new File([blob], "pasted-image.png", { type: imageType });
+
+                            const dt = new DataTransfer();
+                            dt.items.add(file);
+                            fileInput.files = dt.files;
+
+                            const reader = new FileReader();
+                            reader.onload = (ev) => updatePreview(ev.target.result);
+                            reader.readAsDataURL(file);
+
+                            pasteHint.textContent = "Immagine incollata dagli appunti!";
+                            pasteHint.style.color = "var(--accent-green)";
+                            return;
+                        }
+                    }
+                    alert("Nessuna immagine trovata negli appunti.");
+                } catch (err) {
+                    console.error(err);
+                    alert("Impossibile accedere agli appunti. Assicurati di aver dato i permessi.");
+                }
+            });
+        }
 
         // Also attach to the whole modal body for better UX
         PasteHandler.attach(body, (file) => {
@@ -693,7 +728,11 @@ export class CampaignDetail {
                 <input type="file" id="ent-file" style="display: none;" accept="image/*">
                 <div id="img-preview" style="width: 100px; height: 100px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: none; border: 2px solid var(--accent-gold);"></div>
                 <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
-                <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="width: 100%;">
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="flex: 1;">
+                    <button id="btn-paste-clipboard" class="btn btn-secondary btn-sm" style="padding: 5px 10px;" title="Incolla da Appunti">📋</button>
+                </div>
+                <div id="paste-hint" style="font-size: 0.75rem; color: var(--text-faded); margin-top: 5px; font-style: italic;">Puoi anche incollare un'immagine (CTRL+V)</div>
             </div>
 
             <div class="input-field mb-10">

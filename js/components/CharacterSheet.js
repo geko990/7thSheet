@@ -2,6 +2,7 @@ import { Storage } from '../storage.js';
 import { Dice } from '../dice.js';
 import { AuthService } from '../services/AuthService.js';
 import { CampaignService } from '../services/CampaignService.js';
+import { PasteHandler } from '../utils/PasteHandler.js';
 
 export default class CharacterSheet {
     constructor(app) {
@@ -248,6 +249,7 @@ export default class CharacterSheet {
                         <div class="avatar-edit-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
                             <span style="color: white; font-size: 1.5rem;">✏️</span>
                             <span style="color: white; font-size: 0.6rem; margin-top: 2px;">Incolla (CTRL+V)</span>
+                            <button id="btn-avatar-paste-mobile" style="pointer-events: auto; background: var(--bg-parchment); border: 1px solid white; border-radius: 50%; width: 30px; height: 30px; font-size: 1rem; margin-top: 5px; display: none;">📋</button>
                         </div>
                     </div>
                     <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
@@ -835,8 +837,44 @@ export default class CharacterSheet {
 
         if (avatarContainer && fileInput) avatarContainer.addEventListener('click', () => fileInput.click());
 
-        // Paste Support
         if (avatarContainer && fileInput) {
+            // Mobile Paste Button Logic
+            const mobileBtn = avatarContainer.querySelector('#btn-avatar-paste-mobile');
+            if (mobileBtn) {
+                // Check clipboard support
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    mobileBtn.style.display = 'block';
+                }
+
+                mobileBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    try {
+                        const clipboardItems = await navigator.clipboard.read();
+                        for (const item of clipboardItems) {
+                            // Find image type
+                            const imageType = item.types.find(type => type.startsWith('image/'));
+                            if (imageType) {
+                                const blob = await item.getType(imageType);
+                                const file = new File([blob], "avatar-paste.png", { type: imageType });
+
+                                const dt = new DataTransfer();
+                                dt.items.add(file);
+                                fileInput.files = dt.files;
+                                // Trigger change
+                                fileInput.dispatchEvent(new Event('change'));
+                                return;
+                            }
+                        }
+                        alert("Nessuna immagine trovata negli appunti.");
+                    } catch (err) {
+                        console.error('Clipboard Error:', err);
+                        alert("Impossibile accedere agli appunti. Assicurati di aver dato i permessi.");
+                    }
+                });
+            }
+
             PasteHandler.attach(avatarContainer, (file) => {
                 // Create a DataTransfer to set the file input
                 const dt = new DataTransfer();
@@ -853,7 +891,7 @@ export default class CharacterSheet {
                     overlay.innerHTML = '<span style="color: var(--accent-green); font-size: 1.5rem;">✨</span>';
                     setTimeout(() => {
                         overlay.style.opacity = '';
-                        overlay.innerHTML = '<span style="color: white; font-size: 1.5rem;">✏️</span>';
+                        overlay.innerHTML = '<span style="color: white; font-size: 1.5rem;">✏️</span><span style="color: white; font-size: 0.6rem; margin-top: 2px;">Incolla (CTRL+V)</span>';
                     }, 1000);
                 }
             });

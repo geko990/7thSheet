@@ -1,4 +1,4 @@
-const CACHE_NAME = '7th-sea-sheet-v0.9.8';
+const CACHE_NAME = '7th-sea-sheet-v0.9.9';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -8,8 +8,10 @@ const ASSETS_TO_CACHE = [
     './js/router.js',
     './js/storage.js',
     './js/dice.js',
+    './js/utils/PasteHandler.js',
     './js/services/SupabaseClient.js',
     './js/services/AuthService.js',
+    './js/services/CampaignService.js',
     './js/components/AdventureTab.js',
     './manifest.json',
     './js/components/CreateWizard.js',
@@ -17,6 +19,7 @@ const ASSETS_TO_CACHE = [
     './js/components/CharacterSheet.js',
     './js/components/DiceRoller.js',
     './js/components/Settings.js',
+    './js/components/CampaignDetail.js',
     './data/v1/nations.json',
     './data/v1/skills.json',
     './data/v1/schools.json',
