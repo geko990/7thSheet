@@ -162,7 +162,8 @@ select {
 /* Offset for Text to keep it high */
 .header-text-wrapper {
     position: relative;
-    top: -27px;
+    top: -3px;
+    /* 7th sea scritta header*/
     /* Move text UP to original position (25px offset + slight tweak) */
 }
 
