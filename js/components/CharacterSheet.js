@@ -1120,7 +1120,16 @@ export default class CharacterSheet {
                     cropperImg.src = evt.target.result;
                     cropState.img = new Image();
                     cropState.img.src = evt.target.result;
-                    cropState.img.onload = () => { cropState.scale = 1; cropState.posX = 0; cropState.posY = 0; zoomSlider.value = 1; updateCropperTransform(); cropperOverlay.style.display = 'flex'; };
+                    cropState.img.onload = () => {
+                        const fitScale = Math.min(300 / cropState.img.width, 300 / cropState.img.height, 1);
+                        cropState.scale = fitScale;
+                        cropState.posX = 0;
+                        cropState.posY = 0;
+                        zoomSlider.min = "0.1";
+                        zoomSlider.value = fitScale;
+                        updateCropperTransform();
+                        cropperOverlay.style.display = 'flex';
+                    };
                 };
                 reader.readAsDataURL(file);
             }

@@ -350,11 +350,19 @@ export default class CreateWizard {
                     cropState.img = new Image();
                     cropState.img.src = evt.target.result;
                     cropState.img.onload = () => {
-                        // Initial setup
-                        cropState.scale = 1;
+                        // Initial setup: Auto-fit
+                        const containerW = 300; // Approx css width
+                        const containerH = 300;
+                        const scaleW = containerW / cropState.img.width;
+                        const scaleH = containerH / cropState.img.height;
+                        const fitScale = Math.min(scaleW, scaleH, 1); // Fit, but max 1
+
+                        cropState.scale = fitScale;
                         cropState.posX = 0;
                         cropState.posY = 0;
-                        zoomSlider.value = 1;
+                        zoomSlider.min = "0.1"; // Allow zooming out
+                        zoomSlider.value = fitScale;
+
                         updateCropperTransform();
                         cropperOverlay.style.display = 'flex';
                     };
@@ -825,52 +833,7 @@ export default class CreateWizard {
 
 
     renderStep4V2(container) {
-        container.innerHTML = `
-            <div class="card">
-                <h3 class="card-title">Abilità & Vantaggi (2ª Ed)</h3>
-                <p>Hai <strong>10 punti</strong> da distribuire.</p>
-                <div class="text-center mb-20">
-                    <span style="font-size: 1rem;">Punti Residui: <strong id="v2-points-step4" style="color: var(--accent-gold);">10</strong></span>
-                </div>
-
-                <div class="sheet-section">
-                    <h4 class="sheet-section-title">Abilità (1 punto/grado)</h4>
-                    <div class="skills-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
-                        ${this.data.skills.map(skill => `
-                            <div class="skill-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dotted var(--border-color); background: rgba(255,255,255,0.3); border-radius: 5px;">
-                                <span style="font-weight: 600; font-size: 1rem;">${skill.name}</span>
-                                <div class="trait-controls">
-                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', -1)" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
-                                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1.2rem; min-width: 24px; text-align: center;">${this.character.skills[skill.id] || 0}</span>
-                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', 1)" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="sheet-section mt-20">
-                    <h4 class="sheet-section-title">Vantaggi</h4>
-                    <div class="adv-list" style="max-height: 250px; overflow-y: auto;">
-                        ${this.data.advantages.map(adv => `
-                            <div class="adv-item" style="display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px dashed var(--border-worn);">
-                                <div>
-                                    <strong>${adv.name}</strong> (${adv.cost} pti)
-                                    <div style="font-size: 0.8em; color: var(--text-faded);">${adv.description || ''}</div>
-                                </div>
-                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'}"
-                                        onclick="window.toggleAdvantageV2(event, '${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
-                                        style="font-size: 0.8rem; padding: 4px 8px;">
-                                    ${this.character.advantages.includes(adv.name) ? 'Rimuovi' : 'Prendi'}
-                                </button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-            `;
-
-        // V2 Point Logic
+        // V2 Point Logic - Helpers defined FIRST
         const getBackgroundSkillBonus = (skillId) => {
             let bonus = 0;
             this.character.backgrounds.forEach(bgName => {
@@ -916,19 +879,65 @@ export default class CreateWizard {
             return remaining;
         };
 
-        // Initialize background bonuses
+        // Initialize background bonuses BEFORE rendering
         this.data.skills.forEach(s => {
             const base = getBackgroundSkillBonus(s.id);
+            // Ensure we at least have the base value
             if ((this.character.skills[s.id] || 0) < base) {
                 this.character.skills[s.id] = base;
             }
         });
 
+        // NOW Render the UI with correct values
+        container.innerHTML = `
+            <div class="card">
+                <h3 class="card-title">Abilità & Vantaggi (2ª Ed)</h3>
+                <p>Hai <strong>10 punti</strong> da distribuire.</p>
+                <div class="text-center mb-20">
+                    <span style="font-size: 1rem;">Punti Residui: <strong id="v2-points-step4" style="color: var(--accent-gold);">10</strong></span>
+                </div>
+
+                <div class="sheet-section">
+                    <h4 class="sheet-section-title">Abilità (1 punto/grado)</h4>
+                    <div class="skills-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                        ${this.data.skills.map(skill => `
+                            <div class="skill-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dotted var(--border-color); background: rgba(255,255,255,0.3); border-radius: 5px;">
+                                <span style="font-weight: 600; font-size: 1rem;">${skill.name}</span>
+                                <div class="trait-controls">
+                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', -1)" style="width: 32px; height: 32px; font-size: 1.2rem;">-</button>
+                                    <span class="trait-value" id="val-skill-${skill.id}" style="font-size: 1.2rem; min-width: 24px; text-align: center;">${this.character.skills[skill.id] || 0}</span>
+                                    <button class="btn-circle" onclick="window.adjustSkillV2(event, '${skill.id}', 1)" style="width: 32px; height: 32px; font-size: 1.2rem;">+</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="sheet-section mt-20">
+                    <h4 class="sheet-section-title">Vantaggi</h4>
+                    <div class="adv-list" style="max-height: 250px; overflow-y: auto;">
+                        ${this.data.advantages.map(adv => `
+                            <div class="adv-item" style="display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px dashed var(--border-worn);">
+                                <div>
+                                    <strong>${adv.name}</strong> (${adv.cost} pti)
+                                    <div style="font-size: 0.8em; color: var(--text-faded);">${adv.description || ''}</div>
+                                </div>
+                                <button class="btn btn-sm ${this.character.advantages.includes(adv.name) ? 'btn-danger' : 'btn-secondary'}"
+                                        onclick="window.toggleAdvantageV2(event, '${adv.name.replace(/'/g, "\\'")}', ${adv.cost})"
+                                        style="font-size: 0.8rem; padding: 4px 8px;">
+                                    ${this.character.advantages.includes(adv.name) ? 'Rimuovi' : 'Prendi'}
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+
         // Initial UI Update
         setTimeout(updateUI, 0);
 
-        // Global function for onclick handlers to avoid double-listener issues
-        // Global function for onclick handlers to avoid double-listener issues
+        // Global function for onclick handlers
         window.adjustSkillV2 = (event, skillId, delta) => {
             if (event) {
                 event.stopPropagation();
@@ -946,13 +955,13 @@ export default class CreateWizard {
             const current = this.character.skills[skillId] || 0;
             const newVal = current + delta;
 
-            console.log(`Skill: ${skillId}, Base: ${base}, Current: ${current}, New: ${newVal}, Delta: ${delta}`);
-
+            // Allow going down to base, but not below
             if (newVal < base) return;
-            if (newVal > 3) return;
+            if (newVal > 5) return; // Cap at 5 normally
 
+            // Check cost limit only if adding
             if (delta > 0) {
-                const rem = 10 - calcSpent();
+                const rem = updateUI(); // Get current remaining
                 if (rem <= 0) return;
             }
 
