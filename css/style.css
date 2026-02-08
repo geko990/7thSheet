@@ -1598,6 +1598,7 @@ select {
 }
 
 /* Dice Roller Centering */
+/* Dice Roller Centering */
 .dice-roller-container {
     flex: 1;
     display: flex;
@@ -1606,6 +1607,16 @@ select {
     justify-content: center;
     width: 100%;
     min-height: 100%;
+
+    /* Background Asset */
+    background-image: url('../assets/dadi.png');
+    background-repeat: no-repeat;
+    background-position: center bottom 80px;
+    /* Adjust vertical position */
+    background-size: 80% auto;
+    /* Scale reasonably */
+    opacity: 1;
+    /* Ensure transparency in PNG handles fading */
 }
 
 .dice-popup {
