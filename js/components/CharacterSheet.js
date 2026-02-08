@@ -164,7 +164,7 @@ export default class CharacterSheet {
                         </div>
                         <div class="dice-fab-roll-wrapper">
                             <button class="dice-fab-roll-btn" id="btn-pool-roll">
-                                <img src="assets/d10.png" alt="Lancia" class="d10-image">
+                                <img src="assets/d10.png?v=0.9.32" alt="Lancia" class="d10-image">
                             </button>
                         </div>
                     </div>

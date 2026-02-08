@@ -74,7 +74,7 @@ export default class DiceRoller {
                 <!-- D10 Roll Button (half outside) -->
                 <div class="dice-roll-wrapper">
                     <button class="dice-roll-btn" id="btn-roll">
-                        <img src="assets/d10.png" alt="Lancia" class="d10-image">
+                        <img src="assets/d10.png?v=0.9.32" alt="Lancia" class="d10-image">
                     </button>
                 </div>
             </div>
