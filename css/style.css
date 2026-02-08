@@ -1608,11 +1608,8 @@ select {
     width: 100%;
     min-height: 100%;
 
-    /* Background Asset */
-    background-image: url('../assets/dadi.png');
-    background-repeat: no-repeat;
-    background-position: center bottom calc(var(--nav-height) + 20px);
-    background-size: 100% auto;
+    /* Background Asset Removed - Moved to JS Fixed Element */
+    /* background-image: url('../assets/dadi.png'); */
 }
 
 .dice-popup {

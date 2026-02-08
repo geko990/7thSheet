@@ -18,7 +18,12 @@ export default class DiceRoller {
         const div = document.createElement('div');
         div.className = 'dice-roller-container';
         div.innerHTML = `
-            <div class="dice-popup">
+            <!-- Fixed Background Layer (Matches CharacterList Style) -->
+            <div class="fixed-dice-bg" style="position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/dadi.png" alt="" style="width: 100%;">
+            </div>
+
+            <div class="dice-popup" style="z-index: 1;">
                 <!-- Edition Toggle Tabs -->
                 <div class="dice-edition-tabs">
                     <button class="edition-tab ${this.edition === '1e' ? 'active' : ''}" id="btn-ed-1e">
