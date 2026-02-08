@@ -162,7 +162,7 @@ select {
 /* Offset for Text to keep it high */
 .header-text-wrapper {
     position: relative;
-    top: -3px;
+    top: -4px;
     /* 7th sea scritta header*/
     /* Move text UP to original position (25px offset + slight tweak) */
 }
@@ -173,10 +173,10 @@ select {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
-    padding-top: calc(var(--header-height) + 80px);
-    /* Increased for lower ribbon */
+    padding-top: calc(var(--header-height) + 85px);
+    /* Exact fit for ribbon bottom (115px) + 10px gap */
     /* Fallback */
-    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 80px);
+    padding-top: calc(env(safe-area-inset-top) + var(--header-height) + 85px);
     padding-bottom: calc(var(--nav-height) + 20px);
     display: flex;
     flex-direction: column;

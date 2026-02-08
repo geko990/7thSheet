@@ -19,17 +19,23 @@ export class AdventureTab {
         if (navigateCallback) this.navigateCallback = navigateCallback;
         if (!this.container) return;
 
-        const user = AuthService.getUser(); // Sync get from cached state
+        try {
+            const user = AuthService.getUser(); // Sync get from cached state
+            console.log('AdventureTab: User state:', user);
 
-        if (this.loading) {
-            this.container.innerHTML = '<div class="text-center p-20">Caricamento...</div>';
-            return;
-        }
+            if (this.loading) {
+                this.container.innerHTML = '<div class="text-center p-20">Caricamento...</div>';
+                return;
+            }
 
-        if (!user) {
-            this.renderAuthForm();
-        } else {
-            await this.renderDashboard(user);
+            if (!user) {
+                this.renderAuthForm();
+            } else {
+                await this.renderDashboard(user);
+            }
+        } catch (error) {
+            console.error('AdventureTab Render Error:', error);
+            this.container.innerHTML = `<div class="text-center p-20" style="color: red;">Errore nel caricamento: ${error.message}</div>`;
         }
     }
 
