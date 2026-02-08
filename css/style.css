@@ -130,21 +130,23 @@ select {
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 
     /* Ribbon Styling */
-    background-image: url('../assets/header_ribbon.png?v=0.9.31');
-    background-size: 100% 100%;
+    background-image: url('../assets/header_ribbon.png?v=0.9.34');
+    background-size: contain;
+    background-position: center top;
     background-repeat: no-repeat;
     width: 340px;
-    /* Wider */
-    height: 90px;
-    /* Taller */
+    height: 110px;
+    /* Taller for contain */
     display: flex;
     align-items: center;
+    /* Center text vertically */
     justify-content: center;
     position: relative;
-    top: 20px;
-    /* Center on bottom edge */
-    padding-bottom: 0;
-    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.4));
+    top: 25px;
+    padding-bottom: 10px;
+    /* Slight offset for text if needed */
+    z-index: 101;
+    /* Removed filter to prevent artifacts */
 }
 
 /* Main Content */
