@@ -1,5 +1,5 @@
 export const CONFIG = {
-    APP_VERSION: '0.9.6',
+    APP_VERSION: '0.9.7',
     APP_NAME: '7th Sea',
     BUILD_DATE: new Date().toLocaleDateString('it-IT')
 };
