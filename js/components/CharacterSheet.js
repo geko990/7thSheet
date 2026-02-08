@@ -404,61 +404,157 @@ export default class CharacterSheet {
             else this.openItemModal(type);
         });
 
-        // Item Clicks (Edit) & Swipe
+        // Item Interactions
         const items = container.querySelectorAll('.swipe-item-container');
         items.forEach(el => {
             const idx = parseInt(el.dataset.idx);
-
-            // Click to Edit
             const content = el.querySelector('.list-item-content');
-            content.addEventListener('click', () => {
-                if (type === 'journal') this.openJournalModal(idx);
-                else this.openItemModal(type, idx);
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            // TOUCH START
+            content.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    navigator.vibrate?.(50);
+                    this.openItemContextMenu(type, idx);
+                }, 500);
+            }, { passive: true });
+
+            // TOUCH MOVE (Cancel long press if moved)
+            content.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) {
+                    clearTimeout(timer);
+                }
+            }, { passive: true });
+
+            // TOUCH END
+            content.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) {
+                    e.preventDefault();
+                }
             });
 
-            // Swipe Logic
-            this.setupSwipe(el, idx, type);
+            // CLICK (Short Press)
+            content.addEventListener('click', (e) => {
+                if (isLongPress) return;
+                this.openViewItemModal(type, idx);
+            });
+
+            // CONTEXT MENU (Desktop)
+            content.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.openItemContextMenu(type, idx);
+            });
         });
     }
 
-    setupSwipe(el, idx, type) {
-        const content = el.querySelector('.list-item-content');
-        let startX = 0;
-        let currentTranslate = 0;
+    openItemContextMenu(type, idx) {
+        // Simple Context Menu Modal
+        const existingMenu = document.getElementById('ctx-menu-modal');
+        if (existingMenu) existingMenu.remove();
 
-        content.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            content.style.transition = 'none';
-        }, { passive: true });
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-modal';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
 
-        content.addEventListener('touchmove', (e) => {
-            const diff = e.touches[0].clientX - startX;
-            if (diff < -20) { // Only swipe left allowed
-                this.itemSwiping = true;
-                let translate = diff;
-                if (translate < -100) translate = -100;
-                if (translate > 0) translate = 0;
-                content.style.transform = `translate3d(${translate}px, 0, 0)`;
-                currentTranslate = translate;
+        const list = type === 'equipment' ? this.character.equipment : (type === 'inventory' ? this.character.inventory : this.character.journal);
+        const item = list[idx];
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || item.title || 'Opzioni'}</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-primary" id="ctx-view" style="width: 100%; padding: 12px;">👁️ Mostra</button>
+                    <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica</button>
+                    <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+            <style> @keyframes popIn { to { transform: scale(1); } } </style>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#ctx-view').onclick = () => { menu.remove(); this.openViewItemModal(type, idx); };
+        menu.querySelector('#ctx-edit').onclick = () => { menu.remove(); type === 'journal' ? this.openJournalModal(idx) : this.openItemModal(type, idx); };
+        menu.querySelector('#ctx-delete').onclick = () => {
+            menu.remove();
+            if (confirm("Eliminare definitivamente?")) {
+                list.splice(idx, 1);
+                Storage.saveCharacter(this.character);
+                this.renderTabContent(document.querySelector('#tab-content'), type);
             }
-        }, { passive: true });
+        };
+        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+    }
 
-        content.addEventListener('touchend', (e) => {
-            content.style.transition = 'transform 0.2s ease-out';
-            this.itemSwiping = false;
-            if (currentTranslate < -60) {
-                if (confirm('Eliminare questo elemento?')) {
-                    const list = type === 'equipment' ? this.character.equipment : (type === 'inventory' ? this.character.inventory : this.character.journal);
-                    list.splice(idx, 1);
-                    Storage.saveCharacter(this.character);
-                    this.renderTabContent(document.querySelector('#tab-content'), type);
-                } else {
-                    content.style.transform = 'translate3d(0,0,0)';
-                }
-            } else {
-                content.style.transform = 'translate3d(0,0,0)';
-            }
-        });
+    openViewItemModal(type, idx) {
+        const list = type === 'equipment' ? this.character.equipment : (type === 'inventory' ? this.character.inventory : this.character.journal);
+        const item = list[idx];
+        const isJournal = type === 'journal';
+
+        // Helper to close
+        const close = () => {
+            const overlay = document.getElementById('view-modal-overlay');
+            if (overlay) overlay.remove();
+        };
+
+        const overlay = document.createElement('div');
+        overlay.id = 'view-modal-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.background = 'rgba(0,0,0,0.8)';
+        overlay.style.zIndex = '10000';
+        overlay.style.backdropFilter = 'blur(5px)';
+
+        overlay.onclick = (e) => { if (e.target === overlay) close(); };
+
+        const imageHtml = item.image ?
+            `<div style="width: 100%; height: 200px; background-image: url('${item.image}'); background-size: cover; background-position: center; border-bottom: 2px solid var(--accent-gold);"></div>` : '';
+
+        const contentHtml = isJournal ? `
+            <div style="font-size: 0.85rem; color: var(--text-faded); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; text-align: center;">${item.date || ''}</div>
+            <h2 style="font-family: var(--font-display); color: var(--accent-navy); font-size: 1.8rem; margin-bottom: 20px; text-align: center; border-bottom: 1px solid var(--border-worn); padding-bottom: 15px;">${item.title || 'Senza Titolo'}</h2>
+            <div style="font-family: var(--font-hand); font-size: 1.3rem; line-height: 1.6; color: var(--text-ink); text-align: justify; white-space: pre-wrap;">${item.content || ''}</div>
+        ` : `
+            <h2 style="font-family: var(--font-display); color: var(--accent-navy); font-size: 1.8rem; margin-bottom: 5px; text-align: center;">${item.name}</h2>
+            ${item.qty > 1 ? `<div style="text-align: center; margin-bottom: 15px;"><span style="background: var(--accent-gold); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.9rem;">Quantità: ${item.qty}</span></div>` : ''}
+            <div style="font-family: var(--font-serif); font-size: 1.1rem; line-height: 1.5; color: var(--text-ink); margin-top: 15px; border-top: 1px solid var(--border-worn); padding-top: 15px;">${item.notes || 'Nessuna descrizione.'}</div>
+        `;
+
+        overlay.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 450px; background: #fdfaf5; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;">
+                ${imageHtml}
+                <div style="padding: 30px; max-height: 60vh; overflow-y: auto;">
+                    ${contentHtml}
+                </div>
+                <div style="padding: 15px; background: rgba(0,0,0,0.03); text-align: center; border-top: 1px solid var(--border-worn);">
+                    <button id="btn-close-view" class="btn btn-primary" style="padding: 10px 40px; border-radius: 25px;">Chiudi</button>
+                    ${!isJournal ? `<button id="btn-use-item" class="btn btn-secondary" style="margin-left: 10px; display: none;">Usa</button>` : ''} 
+                </div>
+            </div>
+            <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
+        `;
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('#btn-close-view').onclick = close;
     }
 
     openItemModal(type, idx = null) {
@@ -948,8 +1044,20 @@ export default class CharacterSheet {
             window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
             window.addEventListener('mouseup', () => cropState.isDragging = false);
 
-            cropperMask.addEventListener('touchstart', (e) => { startDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
-            window.addEventListener('touchmove', (e) => { moveDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+            cropperMask.addEventListener('touchstart', (e) => {
+                if (cropperOverlay.style.display === 'flex') {
+                    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
+                    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
             window.addEventListener('touchend', () => cropState.isDragging = false);
         }
 
