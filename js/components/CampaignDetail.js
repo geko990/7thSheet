@@ -1,5 +1,6 @@
 import { AuthService } from '../services/AuthService.js';
 import { CampaignService } from '../services/CampaignService.js';
+import { PasteHandler } from '../utils/PasteHandler.js';
 
 export class CampaignDetail {
     constructor(app) {
@@ -433,6 +434,7 @@ export class CampaignDetail {
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
                 <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="width: 100%;" value="${entity.image_url || ''}">
+                <div id="paste-hint" style="font-size: 0.75rem; color: var(--text-faded); margin-top: 5px; font-style: italic;">Puoi anche incollare un'immagine (CTRL+V)</div>
             </div>
 
             <div class="input-field mb-10">
@@ -448,16 +450,58 @@ export class CampaignDetail {
         const fileInput = body.querySelector('#ent-file');
         const preview = body.querySelector('#img-preview');
         const urlInput = body.querySelector('#ent-img');
+        const pasteHint = body.querySelector('#paste-hint');
+
+        // Helper to update preview
+        const updatePreview = (src) => {
+            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        };
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                };
+                reader.onload = (ev) => updatePreview(ev.target.result);
                 reader.readAsDataURL(file);
             }
+        });
+
+        // Paste Handler
+        PasteHandler.attach(urlInput, (file) => {
+            // Create a DataTransfer to set the file input
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+
+            // Trigger change event manually or just update preview
+            const reader = new FileReader();
+            reader.onload = (ev) => updatePreview(ev.target.result);
+            reader.readAsDataURL(file);
+
+            // Visual feedback
+            pasteHint.textContent = "Immagine incollata!";
+            pasteHint.style.color = "var(--accent-green)";
+            setTimeout(() => {
+                pasteHint.textContent = "Puoi anche incollare un'immagine (CTRL+V)";
+                pasteHint.style.color = "var(--text-faded)";
+            }, 2000);
+        });
+
+        // Also attach to the whole modal body for better UX
+        PasteHandler.attach(body, (file) => {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            const reader = new FileReader();
+            reader.onload = (ev) => updatePreview(ev.target.result);
+            reader.readAsDataURL(file);
+
+            pasteHint.textContent = "Immagine incollata!";
+            pasteHint.style.color = "var(--accent-green)";
+            setTimeout(() => {
+                pasteHint.textContent = "Puoi anche incollare un'immagine (CTRL+V)";
+                pasteHint.style.color = "var(--text-faded)";
+            }, 2000);
         });
 
         btnAction.style.display = 'block';

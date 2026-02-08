@@ -245,8 +245,9 @@ export default class CharacterSheet {
                             <span style="font-size: 2rem; color: var(--accent-gold);">📷</span>
                         </div>
                         `}
-                        <div class="avatar-edit-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
+                        <div class="avatar-edit-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
                             <span style="color: white; font-size: 1.5rem;">✏️</span>
+                            <span style="color: white; font-size: 0.6rem; margin-top: 2px;">Incolla (CTRL+V)</span>
                         </div>
                     </div>
                     <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
@@ -828,9 +829,47 @@ export default class CharacterSheet {
             el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.addToPool(parseInt(el.dataset.val), this.translateKey(el.dataset.key)); });
         });
 
-        // AVATAR EDITING & CROPPER
+        // AVATAR        // Image Upload
         const avatarContainer = container.querySelector('.char-sheet-avatar-container');
         const fileInput = container.querySelector('#sheet-image-upload');
+
+        if (avatarContainer && fileInput) avatarContainer.addEventListener('click', () => fileInput.click());
+
+        // Paste Support
+        if (avatarContainer && fileInput) {
+            PasteHandler.attach(avatarContainer, (file) => {
+                // Create a DataTransfer to set the file input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+
+                // Trigger change event manually
+                fileInput.dispatchEvent(new Event('change'));
+
+                // Visual feedback
+                const overlay = avatarContainer.querySelector('.avatar-edit-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '1';
+                    overlay.innerHTML = '<span style="color: var(--accent-green); font-size: 1.5rem;">✨</span>';
+                    setTimeout(() => {
+                        overlay.style.opacity = '';
+                        overlay.innerHTML = '<span style="color: white; font-size: 1.5rem;">✏️</span>';
+                    }, 1000);
+                }
+            });
+        }
+
+        // Also global paste when sheet is active? Maybe too aggressive.
+        // Let's stick to container for now, but maybe the whole sheet header?
+        const header = container.querySelector('.char-header');
+        if (header && fileInput) {
+            PasteHandler.attach(header, (file) => {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change'));
+            });
+        }
         const cropperOverlay = container.querySelector('#sheet-cropper-overlay');
         const cropperImg = container.querySelector('#sheet-cropper-img');
         const cropperMask = container.querySelector('#sheet-cropper-mask');
