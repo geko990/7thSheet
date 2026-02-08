@@ -51,6 +51,14 @@ export const AuthService = {
         return { error };
     },
 
+    async resetPasswordForEmail(email) {
+        if (!supabaseClient) return { error: { message: 'Supabase not configured' } };
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '?reset_password=true',
+        });
+        return { data, error };
+    },
+
     getUser() {
         return this.user;
     }

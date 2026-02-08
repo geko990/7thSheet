@@ -60,6 +60,10 @@ export class AdventureTab {
                             <label style="display: block; margin-bottom: 5px; color: var(--text-faded);">Password</label>
                             <input type="password" id="auth-password" class="input-field w-100" required>
                         </div>
+                        
+                        <div class="text-right mb-20">
+                            <a href="#" id="btn-forgot-password" style="font-size: 0.8rem; color: var(--accent-gold); text-decoration: none;">Password dimenticata?</a>
+                        </div>
 
                         <div id="auth-error" class="mb-15 text-center" style="color: red; font-size: 0.9rem; display: none;"></div>
 
@@ -81,9 +85,10 @@ export class AdventureTab {
         const emailInput = this.container.querySelector('#auth-email');
         const passwordInput = this.container.querySelector('#auth-password');
         const btnSubmit = this.container.querySelector('#btn-submit');
-        const errorDiv = this.container.querySelector('#auth-error');
+        // const errorDiv = this.container.querySelector('#auth-error'); // Removed inline error
         const tabLogin = this.container.querySelector('#tab-login');
         const tabRegister = this.container.querySelector('#tab-register');
+        const btnForgot = this.container.querySelector('#btn-forgot-password');
 
         let isLogin = true;
 
@@ -93,11 +98,19 @@ export class AdventureTab {
             tabLogin.className = `btn btn-sm ${isLogin ? 'btn-primary active' : 'btn-secondary'}`;
             tabRegister.className = `btn btn-sm ${!isLogin ? 'btn-primary active' : 'btn-secondary'}`;
             btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
-            errorDiv.style.display = 'none';
+            // btnForgot.style.display = isLogin ? 'inline-block' : 'none'; // Optional: hide on register
         };
 
         tabLogin.addEventListener('click', (e) => { e.preventDefault(); toggleMode(true); });
         tabRegister.addEventListener('click', (e) => { e.preventDefault(); toggleMode(false); });
+
+        // Forgot Password Handler
+        if (btnForgot) {
+            btnForgot.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showPasswordResetModal(emailInput.value);
+            });
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -108,7 +121,7 @@ export class AdventureTab {
 
             btnSubmit.disabled = true;
             btnSubmit.textContent = 'Caricamento...';
-            errorDiv.style.display = 'none';
+            // errorDiv.style.display = 'none';
 
             let result;
             if (isLogin) {
@@ -117,17 +130,82 @@ export class AdventureTab {
                 result = await AuthService.signUp(email, password, email.split('@')[0]);
             }
 
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+
             if (result.error) {
-                errorDiv.textContent = result.error.message;
-                errorDiv.style.display = 'block';
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+                // errorDiv.textContent = result.error.message;
+                // errorDiv.style.display = 'block';
+                this.showErrorPopup(result.error.message);
             } else {
-                // Success: render dashboard (AuthService triggers event, but we can call directly)
-                // Wait for event listener or call render
-                // this.render();
+                // Success
+                if (!isLogin) {
+                    // Registration success
+                    this.showSuccessPopup("Registrazione avvenuta! Controlla la tua email per confermare l'account.");
+                }
             }
         });
+    }
+
+    showErrorPopup(message) {
+        const modalHtml = `
+            <div class="text-center">
+                <div style="font-size: 3rem; margin-bottom: 10px;">☠️</div>
+                <h3 style="font-family: var(--font-display); color: var(--accent-red); margin-bottom: 15px;">Errore Pirata!</h3>
+                <p style="margin-bottom: 20px;">${message}</p>
+                <button class="btn btn-primary w-100" id="btn-close-error">Riprova</button>
+            </div>
+        `;
+        window.app.showModal(modalHtml); // Assuming window.app is accessible or pass app instance
+        // Or implement simplified modal here if window.app not reliable
+    }
+
+    showSuccessPopup(message) {
+        const modalHtml = `
+            <div class="text-center">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⚓</div>
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Successo!</h3>
+                <p style="margin-bottom: 20px;">${message}</p>
+                <button class="btn btn-primary w-100" id="btn-close-success">Avanti</button>
+            </div>
+        `;
+        window.app.showModal(modalHtml);
+    }
+
+    showPasswordResetModal(initialEmail = '') {
+        const modalHtml = `
+            <div class="text-center">
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Recupero Password</h3>
+                <p class="mb-15" style="font-size: 0.9rem;">Inserisci la tua email. Se esiste un account, riceverai un link per resettare la password.</p>
+                <input type="email" id="reset-email" class="input-field w-100 mb-20" value="${initialEmail}" placeholder="tua@email.com">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary w-50" id="btn-reset-cancel">Annulla</button>
+                    <button class="btn btn-primary w-50" id="btn-reset-confirm">Invia</button>
+                </div>
+            </div>
+        `;
+        window.app.showModal(modalHtml);
+
+        // Attach listeners (Need to wait for modal to be in DOM)
+        setTimeout(() => {
+            document.getElementById('btn-reset-cancel').addEventListener('click', () => window.app.closeModal());
+            document.getElementById('btn-reset-confirm').addEventListener('click', async () => {
+                const email = document.getElementById('reset-email').value.trim();
+                if (!email) return;
+
+                const btn = document.getElementById('btn-reset-confirm');
+                btn.disabled = true;
+                btn.textContent = "...";
+
+                const { error } = await AuthService.resetPasswordForEmail(email);
+
+                if (error) {
+                    this.showErrorPopup(error.message);
+                } else {
+                    this.showSuccessPopup("Email di recupero inviata! Controlla la tua casella di posta.");
+                }
+            });
+        }, 100);
     }
 
     async renderDashboard(user) {
