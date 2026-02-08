@@ -109,7 +109,7 @@ export default class CharacterList {
 
     renderList(characters) {
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: -20px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.6; mask-image: linear-gradient(to top, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 50%, transparent 100%);">
+            <div class="fixed-char-bg" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.8; mask-image: linear-gradient(to top, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);">
                 <img src="assets/empty_characters_transparent.png?v=0.9.19" alt="" style="width: 100%; mix-blend-mode: multiply;">
             </div>
         `;
