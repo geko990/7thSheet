@@ -930,7 +930,18 @@ export default class CreateWizard {
         // Global function for onclick handlers to avoid double-listener issues
         // Global function for onclick handlers to avoid double-listener issues
         window.adjustSkillV2 = (event, skillId, delta) => {
-            event.stopPropagation(); // Stop bubbling
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+
+            // Debounce check (200ms)
+            const now = Date.now();
+            if (window.lastSkillAdjustTime && (now - window.lastSkillAdjustTime < 200)) {
+                return;
+            }
+            window.lastSkillAdjustTime = now;
+
             const base = getBackgroundSkillBonus(skillId);
             const current = this.character.skills[skillId] || 0;
             const newVal = current + delta;
