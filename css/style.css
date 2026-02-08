@@ -1611,7 +1611,7 @@ select {
     /* Background Asset */
     background-image: url('../assets/dadi.png');
     background-repeat: no-repeat;
-    background-position: center bottom 60px;
+    background-position: center bottom calc(var(--nav-height) + 20px);
     background-size: 100% auto;
 }
 
