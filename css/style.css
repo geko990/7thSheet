@@ -35,13 +35,15 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    touch-action: manipulation;
 }
 
 html,
 body {
     height: 100%;
-    overflow: hidden;
+    /* overflow: hidden;  <-- REMOVED to allow natural scrolling if needed, or managed by app container */
+    overflow: auto;
+    overscroll-behavior-y: none;
+    /* Prevents pull-to-refresh but allows scroll */
 }
 
 body {
@@ -64,12 +66,15 @@ select {
 #app {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
+    /* Better than 100vh for mobile browsers */
     max-width: 600px;
     margin: 0 auto;
     background: var(--bg-parchment);
     box-shadow: 0 0 40px var(--shadow-strong);
     position: relative;
+    overflow: hidden;
+    /* App container clips, internal elements scroll */
 }
 
 /* Header */
