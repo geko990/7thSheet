@@ -109,8 +109,8 @@ export default class CharacterList {
 
     renderList(characters) {
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.8; mask-image: linear-gradient(to top, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);">
-                <img src="assets/empty_characters_transparent.png?v=0.9.19" alt="" style="width: 100%; mix-blend-mode: multiply;">
+            <div class="fixed-char-bg" style="position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.9; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/empty_characters_transparent.png?v=0.9.22" alt="" style="width: 100%;">
             </div>
         `;
 
