@@ -39,7 +39,96 @@ export class AdventureTab {
         }
     }
 
-    // ... (renderAuthForm remains same) ...
+    renderAuthForm() {
+        this.container.innerHTML = `
+            <div class="auth-container" style="max-width: 400px; margin: 0 auto; padding: 20px;">
+                <div class="card p-20">
+                    <h3 class="text-center mb-20" style="font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem;">Avventure Online</h3>
+                    
+                    <div class="tabs mb-20" style="display: flex; justify-content: center; gap: 10px;">
+                        <button class="btn btn-sm btn-primary active" id="tab-login">Accedi</button>
+                        <button class="btn btn-sm btn-secondary" id="tab-register">Registrati</button>
+                    </div>
+
+                    <form id="auth-form">
+                        <div class="form-group mb-15">
+                            <label style="display: block; margin-bottom: 5px; color: var(--text-faded);">Email</label>
+                            <input type="email" id="auth-email" class="input-field w-100" required>
+                        </div>
+                        
+                        <div class="form-group mb-20">
+                            <label style="display: block; margin-bottom: 5px; color: var(--text-faded);">Password</label>
+                            <input type="password" id="auth-password" class="input-field w-100" required>
+                        </div>
+
+                        <div id="auth-error" class="mb-15 text-center" style="color: red; font-size: 0.9rem; display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary w-100" id="btn-submit">Accedi</button>
+                    </form>
+                    
+                    <div class="text-center mt-20" style="font-size: 0.8rem; color: var(--text-faded);">
+                        Sincronizza le tue schede e gioca online.
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.attachAuthListeners();
+    }
+
+    attachAuthListeners() {
+        const form = this.container.querySelector('#auth-form');
+        const emailInput = this.container.querySelector('#auth-email');
+        const passwordInput = this.container.querySelector('#auth-password');
+        const btnSubmit = this.container.querySelector('#btn-submit');
+        const errorDiv = this.container.querySelector('#auth-error');
+        const tabLogin = this.container.querySelector('#tab-login');
+        const tabRegister = this.container.querySelector('#tab-register');
+
+        let isLogin = true;
+
+        const toggleMode = (login) => {
+            isLogin = login;
+            /* Update UI */
+            tabLogin.className = `btn btn-sm ${isLogin ? 'btn-primary active' : 'btn-secondary'}`;
+            tabRegister.className = `btn btn-sm ${!isLogin ? 'btn-primary active' : 'btn-secondary'}`;
+            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+            errorDiv.style.display = 'none';
+        };
+
+        tabLogin.addEventListener('click', (e) => { e.preventDefault(); toggleMode(true); });
+        tabRegister.addEventListener('click', (e) => { e.preventDefault(); toggleMode(false); });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) return;
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Caricamento...';
+            errorDiv.style.display = 'none';
+
+            let result;
+            if (isLogin) {
+                result = await AuthService.signIn(email, password);
+            } else {
+                result = await AuthService.signUp(email, password, email.split('@')[0]);
+            }
+
+            if (result.error) {
+                errorDiv.textContent = result.error.message;
+                errorDiv.style.display = 'block';
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+            } else {
+                // Success: render dashboard (AuthService triggers event, but we can call directly)
+                // Wait for event listener or call render
+                // this.render();
+            }
+        });
+    }
 
     async renderDashboard(user) {
         const { data: campaigns } = await CampaignService.getMyCampaigns();
