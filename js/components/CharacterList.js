@@ -160,14 +160,12 @@ export default class CharacterList {
         // Create Button
         const btnCreate = container.querySelector('#btn-create-new');
         if (btnCreate) btnCreate.addEventListener('click', () => {
-            if (confirm("Creare un nuovo personaggio?")) {
-                if (this.app.startCharacterCreation) {
-                    this.app.startCharacterCreation();
-                } else if (this.app.createNewCharacter) {
-                    this.app.createNewCharacter();
-                } else {
-                    console.error("No create method found on App");
-                }
+            if (this.app.startCharacterCreation) {
+                this.app.startCharacterCreation();
+            } else if (this.app.createNewCharacter) {
+                this.app.createNewCharacter();
+            } else {
+                console.error("No create method found on App");
             }
         });
 
