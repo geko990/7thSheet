@@ -1296,7 +1296,7 @@ export default class CharacterSheet {
             // Draw logic matching visual transform
             ctx.translate(size / 2, size / 2);
 
-            const ratio = size / 200;
+            const ratio = size / 300;
             ctx.translate(cropState.posX * ratio, cropState.posY * ratio);
 
             ctx.scale(cropState.scale * ratio, cropState.scale * ratio);

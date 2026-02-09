@@ -417,7 +417,7 @@ export default class CreateWizard {
         confirmCropBtn.addEventListener('click', () => {
             if (!cropState.img) return;
             const canvas = document.createElement('canvas');
-            const size = 200; // Output size
+            const size = 300; // Output size
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
