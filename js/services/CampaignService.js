@@ -213,6 +213,16 @@ export const CampaignService = {
         return { data: data?.[0] || null, error };
     },
 
+    async updateStory(storyId, updates) {
+        const { data, error } = await supabaseClient
+            .from('campaign_stories')
+            .update(updates)
+            .eq('id', storyId)
+            .select()
+            .single();
+        return { data, error };
+    },
+
     async updateStoryVisibility(storyId, isVisible) {
         const { data, error } = await supabaseClient
             .from('campaign_stories')

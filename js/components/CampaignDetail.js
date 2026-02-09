@@ -197,7 +197,7 @@ export class CampaignDetail {
 
     attachStoryListeners(container, stories) {
         if (this.myRole === 'gm') {
-            container.querySelector('#btn-add-story')?.addEventListener('click', () => this.openAddStoryModal());
+            container.querySelector('#btn-add-story')?.addEventListener('click', () => this.openStoryModal());
         }
 
         const cards = container.querySelectorAll('.story-card');
@@ -1070,6 +1070,7 @@ export class CampaignDetail {
                 <h4 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">${story.title}</h4>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button id="st-open" class="btn btn-primary" style="width: 100%;">📖 Leggi</button>
+                    <button id="st-edit" class="btn btn-secondary" style="width: 100%;">✏️ Modifica</button>
                     <button id="st-toggle" class="btn btn-secondary" style="width: 100%;">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
                     <button id="st-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
                     <button id="st-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Annulla</button>
@@ -1084,6 +1085,11 @@ export class CampaignDetail {
         menu.querySelector('#st-open').onclick = () => {
             menu.remove();
             this.openViewStoryModal(story);
+        };
+
+        menu.querySelector('#st-edit').onclick = () => {
+            menu.remove();
+            this.openStoryModal(story);
         };
 
         menu.querySelector('#st-toggle').onclick = async () => {
@@ -1198,31 +1204,38 @@ export class CampaignDetail {
     }
 
     // MODALS
-    openAddStoryModal() {
+    openStoryModal(story = null) {
         const modal = this.container.querySelector('#generic-modal');
         const body = this.container.querySelector('#modal-body');
         const btnAction = this.container.querySelector('#modal-action-btn');
+        const isEdit = !!story;
 
         body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Paragrafo</h3>
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">${isEdit ? 'Modifica Paragrafo' : 'Nuovo Paragrafo'}</h3>
             <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
                 <label for="story-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Carica Immagine (Opzionale)</label>
                 <input type="file" id="story-file" style="display: none;" accept="image/*">
-                <div id="story-img-preview" style="width: 100%; height: 150px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: none; border: 2px solid var(--accent-gold); background-size: cover; background-position: center;"></div>
-                <input type="text" id="story-url" placeholder="Oppure incolla URL immagine" style="width: 100%; font-size: 0.8rem; padding: 5px;">
+                <div id="story-img-preview" style="width: 100%; height: 150px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: ${story?.image_url ? 'block' : 'none'}; border: 2px solid var(--accent-gold); background-size: cover; background-position: center; background-image: ${story?.image_url ? `url('${story.image_url}')` : 'none'}"></div>
+                <input type="text" id="story-url" placeholder="Oppure incolla URL immagine" style="width: 100%; font-size: 0.8rem; padding: 5px;" value="${story?.image_url || ''}">
             </div>
 
             <div class="input-field mb-10">
-                <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;">
+                <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;" value="${story?.title || ''}">
             </div>
+            <!-- Date is usually auto-generated or part of content/title in this app's logic, but let's check implementation plan. 
+                 Wait, the previous code had 'story-date' input but it wasn't used in addStory! 
+                 I'll remove it if it's unused or check if I need to support it. 
+                 Looking at previous addStory: addStory(campaignId, title, content, isVisible, imageUrl) 
+                 It seems date wasn't passed. I'll omit it for now to match addStory signature, or maybe it was intended to be part of title?
+                 Actually, looking at previous code, there was an input id="story-date" but it wasn't retrieved in onclick! 
+                 So I will skip it or keep it as decoration if it was intended to be saved in title? 
+                 Let's stick to what works: title, content, image, visibility. -->
+            
             <div class="input-field mb-10">
-                 <input type="text" id="story-date" placeholder="Data (es. 12 Primaverile 1668)" style="width: 100%;">
-            </div>
-            <div class="input-field mb-10">
-                <textarea id="story-content" placeholder="Scrivi qui cosa è successo..." style="width: 100%; height: 150px; font-family: inherit; padding: 10px;"></textarea>
+                <textarea id="story-content" placeholder="Scrivi qui cosa è successo..." style="width: 100%; height: 150px; font-family: inherit; padding: 10px;">${story?.content || ''}</textarea>
             </div>
             <div class="input-field mb-10" style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="story-visible" style="width: auto;">
+                <input type="checkbox" id="story-visible" style="width: auto;" ${story?.is_visible ? 'checked' : ''}>
                 <label for="story-visible">Visibile subito ai giocatori?</label>
             </div>
 `;
@@ -1253,7 +1266,7 @@ export class CampaignDetail {
         };
 
         btnAction.style.display = 'block';
-        btnAction.textContent = "Pubblica";
+        btnAction.textContent = isEdit ? "Salva Modifiche" : "Pubblica";
         btnAction.onclick = async () => {
             const title = document.getElementById('story-title').value;
             const content = document.getElementById('story-content').value;
@@ -1261,9 +1274,6 @@ export class CampaignDetail {
             let imageUrl = urlInput.value;
             const file = fileInput.files[0];
 
-            // Title is optional as per request? "Titolo opzionale". 
-            // The prompt said "immagine opzionale, data, titolo opzionale, descrizione".
-            // So title check can be relaxed or kept. Let's keep content required.
             if (!content) return alert("Inserisci almeno la descrizione!");
 
             btnAction.disabled = true;
@@ -1274,7 +1284,7 @@ export class CampaignDetail {
                 if (error) {
                     alert("Errore caricamento immagine: " + (error.message || error));
                     btnAction.disabled = false;
-                    btnAction.textContent = "Pubblica";
+                    btnAction.textContent = isEdit ? "Salva Modifiche" : "Pubblica";
                     return;
                 }
                 imageUrl = publicUrl;
@@ -1283,7 +1293,17 @@ export class CampaignDetail {
             // Defaults
             const finalTitle = title || "Diario del " + new Date().toLocaleDateString();
 
-            await CampaignService.addStory(this.campaignId, finalTitle, content, isVisible, imageUrl);
+            if (isEdit) {
+                await CampaignService.updateStory(story.id, {
+                    title: finalTitle,
+                    content,
+                    is_visible: isVisible,
+                    image_url: imageUrl
+                });
+            } else {
+                await CampaignService.addStory(this.campaignId, finalTitle, content, isVisible, imageUrl);
+            }
+
             modal.style.display = 'none';
             this.loadTabContent(); // Refresh
         };
