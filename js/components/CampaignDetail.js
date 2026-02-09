@@ -159,23 +159,29 @@ export class CampaignDetail {
 
                 html += `
                     <div class="card story-card ${!story.is_visible ? 'opacity-70' : ''}" data-id="${story.id}" style="
-                        padding: 15px; 
+                        padding: 0; 
                         background: white; 
                         position: relative; 
                         border-left: 3px solid var(--accent-gold);
                         cursor: pointer;
-                        
+                        overflow: hidden;
                         transition: transform 0.1s;
-                    " class="card story-card no-select ${!story.is_visible ? 'opacity-70' : ''}">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-main);">${story.title}</h3>
-                            <span style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap;">${dateStr}</span>
-                        </div>
+                    ">
+                        ${story.image_url ?
+                        `<div style="width: 100%; height: 120px; background: url('${story.image_url}') center/cover no-repeat; border-bottom: 1px solid var(--border-color);"></div>`
+                        : ''}
                         
-                        ${!story.is_visible ? '<div style="font-size: 0.7rem; color: var(--accent-red); margin-bottom: 5px;">🔒 NASCOSTO</div>' : ''}
-                        
-                        <div style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.4;">
-                            ${previewText}
+                        <div style="padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-main);">${story.title}</h3>
+                                <span style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap;">${dateStr}</span>
+                            </div>
+                            
+                            ${!story.is_visible ? '<div style="font-size: 0.7rem; color: var(--accent-red); margin-bottom: 5px;">🔒 NASCOSTO</div>' : ''}
+                            
+                            <div style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.4;">
+                                ${previewText}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1044,6 +1050,9 @@ export class CampaignDetail {
 
         body.innerHTML = `
             <div style="font-family: 'Times New Roman', serif; color: #333;">
+                ${story.image_url ?
+                `<div style="width: 100%; height: 200px; background: url('${story.image_url}') center/cover no-repeat; border-radius: 8px; margin-bottom: 20px; border: 2px solid var(--accent-gold);"></div>`
+                : ''}
                 <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent-gold); padding-bottom: 15px;">
                     <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${story.title}</h2>
                     <div style="font-size: 0.8rem; color: var(--text-faded);">${new Date(story.created_at).toLocaleDateString()}</div>
@@ -1211,6 +1220,13 @@ export class CampaignDetail {
 
         body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Paragrafo</h3>
+            <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
+                <label for="story-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Carica Immagine (Opzionale)</label>
+                <input type="file" id="story-file" style="display: none;" accept="image/*">
+                <div id="story-img-preview" style="width: 100%; height: 150px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: none; border: 2px solid var(--accent-gold); background-size: cover; background-position: center;"></div>
+                <input type="text" id="story-url" placeholder="Oppure incolla URL immagine" style="width: 100%; font-size: 0.8rem; padding: 5px;">
+            </div>
+
             <div class="input-field mb-10">
                 <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;">
             </div>
@@ -1223,17 +1239,63 @@ export class CampaignDetail {
             </div>
 `;
 
+        const fileInput = body.querySelector('#story-file');
+        const urlInput = body.querySelector('#story-url');
+        const preview = body.querySelector('#story-img-preview');
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.style.display = 'block';
+                    preview.style.backgroundImage = `url('${ev.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        urlInput.oninput = (e) => {
+            if (e.target.value) {
+                preview.style.display = 'block';
+                preview.style.backgroundImage = `url('${e.target.value}')`;
+            } else {
+                preview.style.display = 'none';
+            }
+        };
+
         btnAction.style.display = 'block';
         btnAction.textContent = "Pubblica";
         btnAction.onclick = async () => {
             const title = document.getElementById('story-title').value;
             const content = document.getElementById('story-content').value;
             const isVisible = document.getElementById('story-visible').checked;
+            let imageUrl = urlInput.value;
+            const file = fileInput.files[0];
 
-            if (!title || !content) return alert("Compila tutto!");
+            // Title is optional as per request? "Titolo opzionale". 
+            // The prompt said "immagine opzionale, data, titolo opzionale, descrizione".
+            // So title check can be relaxed or kept. Let's keep content required.
+            if (!content) return alert("Inserisci almeno la descrizione!");
 
-            btnAction.textContent = "...";
-            await CampaignService.addStory(this.campaignId, title, content, isVisible);
+            btnAction.disabled = true;
+            btnAction.textContent = "Caricamento...";
+
+            if (file) {
+                const { publicUrl, error } = await CampaignService.uploadImage(file);
+                if (error) {
+                    alert("Errore caricamento immagine: " + (error.message || error));
+                    btnAction.disabled = false;
+                    btnAction.textContent = "Pubblica";
+                    return;
+                }
+                imageUrl = publicUrl;
+            }
+
+            // Defaults
+            const finalTitle = title || "Diario del " + new Date().toLocaleDateString();
+
+            await CampaignService.addStory(this.campaignId, finalTitle, content, isVisible, imageUrl);
             modal.style.display = 'none';
             this.loadTabContent(); // Refresh
         };

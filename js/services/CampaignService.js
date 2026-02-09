@@ -151,10 +151,16 @@ export const CampaignService = {
         return { data, error };
     },
 
-    async addStory(campaignId, title, content, isVisible = false) {
+    async addStory(campaignId, title, content, isVisible = false, imageUrl = null) {
         const { data, error } = await supabaseClient
             .from('campaign_stories')
-            .insert([{ campaign_id: campaignId, title, content, is_visible: isVisible }])
+            .insert([{
+                campaign_id: campaignId,
+                title,
+                content,
+                is_visible: isVisible,
+                image_url: imageUrl
+            }])
             .select()
             .single();
         return { data, error };
@@ -205,6 +211,16 @@ export const CampaignService = {
             .eq('id', entityId)
             .select();
         return { data: data?.[0] || null, error };
+    },
+
+    async updateStoryVisibility(storyId, isVisible) {
+        const { data, error } = await supabaseClient
+            .from('campaign_stories')
+            .update({ is_visible: isVisible })
+            .eq('id', storyId)
+            .select()
+            .single();
+        return { data, error };
     },
 
     async updateEntityVisibility(entityId, isVisible) {
