@@ -590,7 +590,7 @@ export class CampaignDetail {
             card.addEventListener('touchmove', (e) => {
                 const diffX = Math.abs(e.touches[0].clientX - startX);
                 const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) {
+                if (diffX > 20 || diffY > 20) {
                     clearTimeout(timer);
                     isLongPress = false;
                 }
@@ -1249,13 +1249,23 @@ export class CampaignDetail {
         body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Elemento</h3>
             
-            <div class="mb-15 text-center">
-                <label style="margin-right: 10px;">Tipo:</label>
-                <select id="ent-type" style="padding: 5px; border-radius: 5px;">
-                    <option value="npc">🎭 NPC (Alleato/Neutrale)</option>
-                    <option value="enemy">⚔️ Avversario (Nemico)</option>
-                    <option value="item">💎 Oggetto / Indizio</option>
-                </select>
+            <div class="mb-15 text-center" style="display: flex; gap: 10px; justify-content: center;">
+                <div>
+                    <label style="margin-right: 5px;">Tipo:</label>
+                    <select id="ent-type" style="padding: 5px; border-radius: 5px;">
+                        <option value="npc">🎭 NPC</option>
+                        <option value="enemy">⚔️ Nemico</option>
+                        <option value="item">💎 Oggetto</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-right: 5px;">Focus:</label>
+                    <select id="ent-focus" style="padding: 5px; border-radius: 5px;">
+                        <option value="top">⬆️ Alto</option>
+                        <option value="center" selected>⏺️ Centro</option>
+                        <option value="bottom">⬇️ Basso</option>
+                    </select>
+                </div>
             </div>
 
             <div class="input-field mb-10">
@@ -1326,6 +1336,7 @@ export class CampaignDetail {
 
         btnAction.onclick = async () => {
             const type = document.getElementById('ent-type').value;
+            const focus = document.getElementById('ent-focus').value; // Get focus
             const name = document.getElementById('ent-name').value;
             const level = document.getElementById('ent-level').value;
             const nationality = document.getElementById('ent-nat').value;
@@ -1351,7 +1362,10 @@ export class CampaignDetail {
                 image_url = publicUrl;
             }
 
-            const entityData = { name, type, level, nationality, image_url, description, is_visible };
+            const entityData = {
+                name, type, level, nationality, image_url, description, is_visible,
+                data: { image_focus: focus, notes: '', items: [] } // Store focus
+            };
 
             btnAction.textContent = "Salvataggio...";
             const { error: addError } = await CampaignService.addEntity(this.campaignId, entityData);

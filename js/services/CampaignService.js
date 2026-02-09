@@ -191,7 +191,8 @@ export const CampaignService = {
                 type: entityData.type || 'npc',
                 level: entityData.level,
                 nationality: entityData.nationality,
-                image_url: entityData.image_url
+                image_url: entityData.image_url,
+                data: entityData.data || {}
             }])
             .select(); // Remove .single() to be robust
         return { data: data?.[0] || null, error };
