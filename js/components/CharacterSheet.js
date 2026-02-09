@@ -633,27 +633,28 @@ export default class CharacterSheet {
         overlay.querySelector('#btn-close-view').onclick = close;
     }
 
-    openViewImageModal(imageUrl) {
-        const close = () => {
-            const overlay = document.getElementById('view-image-overlay');
-            if (overlay) overlay.remove();
-        };
-
+    openViewImageModal(imageUrl, isAvatar = false) {
         const overlay = document.createElement('div');
-        overlay.id = 'view-image-overlay';
+        overlay.id = 'view-image-modal';
         overlay.className = 'modal-overlay';
         overlay.style.display = 'flex';
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
-        overlay.style.background = 'rgba(0,0,0,0.9)'; // Darker background for image view
-        overlay.style.zIndex = '20000';
+        overlay.style.background = 'rgba(0,0,0,0.9)'; // Darker background
+        overlay.style.zIndex = '10000';
         overlay.style.backdropFilter = 'blur(5px)';
         overlay.onclick = (e) => { if (e.target === overlay) close(); };
 
+        const close = () => overlay.remove();
+
+        const imgStyle = isAvatar
+            ? 'max-width: 80vw; max-height: 80vw; border-radius: 50%; box-shadow: 0 0 30px rgba(255, 215, 0, 0.3); border: 4px solid var(--accent-gold); object-fit: cover; aspect-ratio: 1/1;'
+            : 'max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;';
+
         overlay.innerHTML = `
-            <div class="modal-content" style="background: transparent; box-shadow: none; padding: 0; max-width: 90%; max-height: 90%; position: relative; animation: zoomIn 0.2s ease-out;">
-                <img src="${imageUrl}" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;">
-                <button id="btn-close-image" style="position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
+            <div class="modal-content" style="background: transparent; box-shadow: none; padding: 0; max-width: 100%; max-height: 100%; position: relative; animation: zoomIn 0.2s ease-out; display: flex; justify-content: center; align-items: center;">
+                <img src="${imageUrl}" style="${imgStyle}">
+                <button id="btn-close-image" style="position: absolute; top: -50px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
             </div>
             <style> @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } } </style>
         `;
@@ -1130,7 +1131,7 @@ export default class CharacterSheet {
 
             const handleSingleTap = () => {
                 if (this.character.image) {
-                    this.openViewImageModal(this.character.image);
+                    this.openViewImageModal(this.character.image, true);
                 } else {
                     this.openAvatarContextMenu(); // Or just trigger upload? Context menu is better for options
                 }
@@ -1276,38 +1277,51 @@ export default class CharacterSheet {
             if (!cropState.img) return;
 
             const canvas = document.createElement('canvas');
-            const size = 300; // Increased resolution
+            const size = 400; // High resolution
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
 
-            // White background (optional, but good for transparency)
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, size, size);
+            // Clear - Transparent for PNG
+            ctx.clearRect(0, 0, size, size);
 
             ctx.save();
-            // Center Canvas
+
+            // CIRCULAR MASK (The "Dynamic Border" effect)
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.clip();
+
+            // Draw logic matching visual transform
             ctx.translate(size / 2, size / 2);
-            // Translate Image Position
-            ctx.translate(cropState.posX, cropState.posY);
-            // Scale
-            ctx.scale(cropState.scale, cropState.scale);
-            // Draw Image Centered
+
+            const ratio = size / 300;
+            ctx.translate(cropState.posX * ratio, cropState.posY * ratio);
+
+            ctx.scale(cropState.scale * ratio, cropState.scale * ratio);
+
             ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2);
+
             ctx.restore();
 
-            this.character.image = canvas.toDataURL('image/jpeg', 0.85);
+            // Save as PNG to support transparency of the corners
+            this.character.image = canvas.toDataURL('image/png');
             Storage.saveCharacter(this.character);
-            this.render(); // Re-render whole sheet to update avatar
+            this.render();
             cropperOverlay.style.display = 'none';
         };
-    }
+        Storage.saveCharacter(this.character);
+        this.render(); // Re-render whole sheet to update avatar
+        cropperOverlay.style.display = 'none';
+    };
+}
 
-    render() {
-        this.renderCharacter(this.character.id).then(div => {
-            const old = document.querySelector('.character-sheet-container');
-            if (old && old.parentNode) old.parentNode.replaceChild(div, old);
-            else this.app.container.appendChild(div);
-        });
-    }
+render() {
+    this.renderCharacter(this.character.id).then(div => {
+        const old = document.querySelector('.character-sheet-container');
+        if (old && old.parentNode) old.parentNode.replaceChild(div, old);
+        else this.app.container.appendChild(div);
+    });
+}
 }
