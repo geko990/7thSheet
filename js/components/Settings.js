@@ -350,7 +350,8 @@ export default class Settings {
                 alert("Errore: " + result.error.message);
             } else {
                 if (!isLogin) alert("Registrazione avvenuta! Controlla la mail.");
-                else window.location.reload(); // Reload to refresh state
+                // Re-render to show profile instead of reloading
+                this.render(this.container);
             }
         });
     }
