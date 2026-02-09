@@ -611,7 +611,22 @@ export class CampaignDetail {
             
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <input type="text" id="ent-level" placeholder="Livello" class="input-field" style="flex: 1;" value="${entity.level || ''}">
-                <input type="text" id="ent-nat" placeholder="Nazionalità" class="input-field" style="flex: 1;" value="${entity.nationality || ''}">
+                <select id="ent-nat" class="input-field" style="flex: 1;">
+                    <option value="">-- Nazionalità --</option>
+                    <option value="Avalon" ${entity.nationality === 'Avalon' ? 'selected' : ''}>Avalon</option>
+                    <option value="Castille" ${entity.nationality === 'Castille' ? 'selected' : ''}>Castille</option>
+                    <option value="Eisen" ${entity.nationality === 'Eisen' ? 'selected' : ''}>Eisen</option>
+                    <option value="Montaigne" ${entity.nationality === 'Montaigne' ? 'selected' : ''}>Montaigne</option>
+                    <option value="Sarmatia" ${entity.nationality === 'Sarmatia' ? 'selected' : ''}>Sarmatia</option>
+                    <option value="Ussura" ${entity.nationality === 'Ussura' ? 'selected' : ''}>Ussura</option>
+                    <option value="Vestenmennavenjar" ${entity.nationality === 'Vestenmennavenjar' ? 'selected' : ''}>Vesten</option>
+                    <option value="Vodacce" ${entity.nationality === 'Vodacce' ? 'selected' : ''}>Vodacce</option>
+                    <option value="La Bucca" ${entity.nationality === 'La Bucca' ? 'selected' : ''}>La Bucca</option>
+                    <option value="Aragosta" ${entity.nationality === 'Aragosta' ? 'selected' : ''}>Aragosta</option>
+                    <option value="Numa" ${entity.nationality === 'Numa' ? 'selected' : ''}>Numa</option>
+                    <option value="Cathay" ${entity.nationality === 'Cathay' ? 'selected' : ''}>Cathay</option>
+                    <option value="Crescent" ${entity.nationality === 'Crescent' ? 'selected' : ''}>Crescent</option>
+                </select>
             </div>
 
             <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
@@ -1105,7 +1120,22 @@ export class CampaignDetail {
             
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <input type="text" id="ent-level" placeholder="Livello (es. Eroe, 10, Ferito)" class="input-field" style="flex: 1;">
-                <input type="text" id="ent-nat" placeholder="Nazionalità" class="input-field" style="flex: 1;">
+                <select id="ent-nat" class="input-field" style="flex: 1;">
+                    <option value="">-- Nazionalità --</option>
+                    <option value="Avalon">Avalon</option>
+                    <option value="Castille">Castille</option>
+                    <option value="Eisen">Eisen</option>
+                    <option value="Montaigne">Montaigne</option>
+                    <option value="Sarmatia">Sarmatia</option>
+                    <option value="Ussura">Ussura</option>
+                    <option value="Vestenmennavenjar">Vesten</option>
+                    <option value="Vodacce">Vodacce</option>
+                    <option value="La Bucca">La Bucca</option>
+                    <option value="Aragosta">Aragosta</option>
+                    <option value="Numa">Numa</option>
+                    <option value="Cathay">Cathay</option>
+                    <option value="Crescent">Crescent</option>
+                </select>
             </div>
 
             <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">

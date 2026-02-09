@@ -194,9 +194,17 @@ export const CampaignService = {
                 nationality: entityData.nationality,
                 image_url: entityData.image_url
             }])
-            .select()
-            .single();
-        return { data, error };
+            .select(); // Remove .single() to be robust
+        return { data: data?.[0] || null, error };
+    },
+
+    async updateEntity(entityId, updates) {
+        const { data, error } = await supabaseClient
+            .from('campaign_npcs')
+            .update(updates)
+            .eq('id', entityId)
+            .select();
+        return { data: data?.[0] || null, error };
     },
 
     async updateEntityVisibility(entityId, isVisible) {
