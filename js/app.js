@@ -2,15 +2,15 @@ import { Router } from './router.js';
 import { CONFIG } from './config.js';
 import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
-import Settings from './components/Settings.js?v=0.9.74';
-import CharacterSheet from './components/CharacterSheet.js?v=0.9.74';
+import Settings from './components/Settings.js?v=0.9.75';
+import CharacterSheet from './components/CharacterSheet.js?v=0.9.75';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
-import { AuthService } from './services/AuthService.js?v=0.9.74';
-import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.74';
-import { Dice } from './dice.js?v=0.9.74';
-import { Storage } from './storage.js?v=0.9.74';
-import { CampaignService } from './services/CampaignService.js?v=0.9.74';
+import { AuthService } from './services/AuthService.js?v=0.9.75';
+import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.75';
+import { Dice } from './dice.js?v=0.9.75';
+import { Storage } from './storage.js?v=0.9.75';
+import { CampaignService } from './services/CampaignService.js?v=0.9.75';
 
 class App {
     constructor() {
@@ -62,16 +62,13 @@ class App {
                     const registration = await navigator.serviceWorker.register(swUrl, { scope });
                     console.log('ServiceWorker registered with scope:', registration.scope);
 
-                    // Auto-detect update
+                    // Auto-detect update (Silent)
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         console.log('New worker installing...');
-
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New version available
-                                console.log('New version available');
-                                this.showUpdateNotification();
+                                console.log('New version installed in background.');
                             }
                         });
                     });
@@ -181,26 +178,6 @@ class App {
             }
             window.location.reload(true);
         } catch (e) { window.location.reload(); }
-    }
-
-    showUpdateNotification() {
-        const div = document.createElement('div');
-        div.style.cssText = `
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--accent-navy); color: white; padding: 15px 25px;
-            border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 9999; display: flex; align-items: center; gap: 15px;
-            font-family: var(--font-main); animation: slideUp 0.3s ease-out;
-        `;
-        div.innerHTML = `
-            <span>Nuova versione disponibile!</span>
-            <button id="btn-reload-update" style="
-                background: var(--accent-gold); border: none; padding: 5px 15px;
-                border-radius: 15px; color: white; font-weight: bold; cursor: pointer;
-            ">Aggiorna</button>
-        `;
-        document.body.appendChild(div);
-        div.querySelector('#btn-reload-update').onclick = () => this.forceAppUpdate();
     }
 }
 
