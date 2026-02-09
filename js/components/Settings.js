@@ -156,8 +156,8 @@ export default class Settings {
                         <div class="settings-divider"></div>
                         <div class="settings-row">
                              <div class="settings-row-info">
-                                <span class="settings-row-label">Aggiorna Cache</span>
-                                <span class="settings-row-desc">Forza aggiornamento app</span>
+                                <span class="settings-row-label">Aggiornamenti</span>
+                                <span class="settings-row-desc">Forza aggiornamento all'ultima versione</span>
                             </div>
                             <button class="settings-btn settings-btn-refresh" id="btn-clear-cache">
                                 <span class="btn-icon">🔄</span>
@@ -378,20 +378,7 @@ export default class Settings {
         const clearCacheAndReload = async () => {
             const btn = container.querySelector('#btn-clear-cache');
             if (btn) btn.innerHTML = '<span class="btn-icon">⏳</span>';
-            try {
-                if ('serviceWorker' in navigator) {
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (const registration of registrations) await registration.unregister();
-                }
-                if ('caches' in window) {
-                    const names = await caches.keys();
-                    await Promise.all(names.map(name => caches.delete(name)));
-                }
-                window.location.reload(true);
-            } catch (e) {
-                alert("Errore aggiornamento: " + e.message);
-                window.location.reload();
-            }
+            await this.app.forceAppUpdate();
         };
 
         container.querySelector('#btn-clear-cache').addEventListener('click', clearCacheAndReload);
