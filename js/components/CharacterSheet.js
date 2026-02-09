@@ -1287,11 +1287,11 @@ export default class CharacterSheet {
 
             ctx.save();
 
-            // CIRCULAR MASK (The "Dynamic Border" effect)
-            ctx.beginPath();
-            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.clip();
+            // CIRCULAR MASK removed to save full square
+            // ctx.beginPath();
+            // ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
+            // ctx.closePath();
+            // ctx.clip();
 
             // Draw logic matching visual transform
             ctx.translate(size / 2, size / 2);
