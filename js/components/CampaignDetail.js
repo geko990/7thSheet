@@ -407,7 +407,8 @@ export class CampaignDetail {
             // CONTEXT MENU
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                if (this.myRole === 'gm') {
+                // Allow if GM OR if it's me
+                if (this.myRole === 'gm' || member.user_id === this.userId) {
                     this.openPlayerContextMenu(member);
                 }
             });
@@ -430,17 +431,43 @@ export class CampaignDetail {
         menu.style.zIndex = '10000';
         menu.style.backdropFilter = 'blur(2px)';
 
-        const targetName = member.character_data?.name || member.profile.username;
+        const targetName = member.character_data?.name || member.profile.username || 'Giocatore';
+        const isMe = member.user_id === this.userId;
+        const isGm = this.myRole === 'gm';
+        const isTargetGm = member.role === 'gm';
+
+        let actionButtons = '';
+
+        if (isGm && !isMe) {
+            // GM Actions on others
+            if (!isTargetGm) {
+                actionButtons += `<button class="btn btn-primary" id="ctx-promote">⭐ Promuovi a Master</button>`;
+            } else {
+                actionButtons += `<button class="btn btn-secondary" id="ctx-demote">⬇️ Retrocedi a Player</button>`;
+            }
+            // Kick option
+            if (!isTargetGm) { // Shouldn't kick other GMs easily without demoting first? Or allow it.
+                actionButtons += `<button class="btn btn-secondary" id="ctx-kick" style="color: var(--accent-red); border-color: var(--accent-red);">🥾 Espelli</button>`;
+            }
+        }
+
+        if (isMe) {
+            // Self Actions
+            // If I am the ONLY GM, I effectively delete the campaign or need to promote someone else?
+            // For now, simple "Leave"
+            actionButtons += `<button class="btn btn-secondary" id="ctx-leave" style="color: var(--accent-red); border-color: var(--accent-red);">👋 Abbandona</button>`;
+        }
+
+        if (!actionButtons) {
+            // Nothing to do (e.g. Player clicking on another Player)
+            return;
+        }
 
         menu.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
                 <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    ${member.role !== 'gm' ? `
-                        <button class="btn btn-primary" id="ctx-promote">⭐ Promuovi a Master</button>
-                    ` : `
-                        <button class="btn btn-secondary" id="ctx-demote">⬇️ Retrocedi a Player</button>
-                    `}
+                    ${actionButtons}
                     <button class="btn btn-secondary" id="ctx-cancel-player" style="margin-top: 5px;">Annulla</button>
                 </div>
             </div>
@@ -454,6 +481,7 @@ export class CampaignDetail {
         menu.querySelector('#ctx-cancel-player').onclick = () => menu.remove();
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
+        // Bind Actions
         const promoteBtn = menu.querySelector('#ctx-promote');
         if (promoteBtn) {
             promoteBtn.onclick = async () => {
@@ -476,6 +504,40 @@ export class CampaignDetail {
                     menu.remove();
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+
+        const kickBtn = menu.querySelector('#ctx-kick');
+        if (kickBtn) {
+            kickBtn.onclick = async () => {
+                if (confirm(`Sei sicuro di voler espellere ${targetName}?`)) {
+                    kickBtn.textContent = '...';
+                    const { error } = await CampaignService.removeMember(this.campaignId, member.user_id);
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+
+        const leaveBtn = menu.querySelector('#ctx-leave');
+        if (leaveBtn) {
+            leaveBtn.onclick = async () => {
+                let msg = "Vuoi lasciare questa avventura?";
+                if (isGm) msg += " Sei un GM! Se sei l'unico, la campagna potrebbe rimanere orfana.";
+
+                if (confirm(msg)) {
+                    leaveBtn.textContent = '...';
+                    const { error } = await CampaignService.removeMember(this.campaignId, member.user_id);
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else {
+                        // Navigate back or refresh
+                        window.app.adventureTab.render(); // Go back to list
+                        // Or trigger router
+                        window.app.router.navigate('adventures');
+                    }
                 }
             };
         }
