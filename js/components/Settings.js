@@ -350,8 +350,12 @@ export default class Settings {
                 alert("Errore: " + result.error.message);
             } else {
                 if (!isLogin) alert("Registrazione avvenuta! Controlla la mail.");
-                // Re-render to show profile instead of reloading
-                this.render(this.container);
+
+                // Force App State Refresh
+                window.dispatchEvent(new CustomEvent('auth:change', { detail: result.data.session?.user }));
+
+                // Navigate to Characters (Profile)
+                this.app.router.navigate('characters');
             }
         });
     }
@@ -378,7 +382,7 @@ export default class Settings {
         const clearCacheAndReload = async () => {
             const btn = container.querySelector('#btn-clear-cache');
             if (btn) btn.innerHTML = '<span class="btn-icon">⏳</span>';
-            await this.app.forceAppUpdate();
+            await this.app.fullReset();
         };
 
         container.querySelector('#btn-clear-cache').addEventListener('click', clearCacheAndReload);

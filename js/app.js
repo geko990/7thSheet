@@ -2,15 +2,15 @@ import { Router } from './router.js';
 import { CONFIG } from './config.js';
 import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
-import Settings from './components/Settings.js?v=0.9.69';
-import CharacterSheet from './components/CharacterSheet.js?v=0.9.69';
+import Settings from './components/Settings.js?v=0.9.70';
+import CharacterSheet from './components/CharacterSheet.js?v=0.9.70';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
-import { AuthService } from './services/AuthService.js?v=0.9.69';
-import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.69';
-import { Dice } from './dice.js?v=0.9.69';
-import { Storage } from './storage.js?v=0.9.69';
-import { CampaignService } from './services/CampaignService.js?v=0.9.69';
+import { AuthService } from './services/AuthService.js?v=0.9.70';
+import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.70';
+import { Dice } from './dice.js?v=0.9.70';
+import { Storage } from './storage.js?v=0.9.70';
+import { CampaignService } from './services/CampaignService.js?v=0.9.70';
 
 class App {
     constructor() {
@@ -152,21 +152,35 @@ class App {
     async forceAppUpdate() {
         try {
             if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration && registration.waiting) {
+                    // Send message to waiting worker to skip waiting
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+                    // Wait a bit for it to activate
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
             }
-            // Clear cache
-            if ('caches' in window) {
-                const keys = await caches.keys();
-                for (const key of keys) await caches.delete(key);
-            }
+            // Simple reload should be enough if SW takes control
             window.location.reload(true);
         } catch (e) {
             console.warn('Update failed:', e);
             window.location.reload();
         }
+    }
+
+    async fullReset() {
+        try {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) await registration.unregister();
+            }
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                for (const key of keys) await caches.delete(key);
+            }
+            window.location.reload(true);
+        } catch (e) { window.location.reload(); }
     }
 
     showUpdateNotification() {
