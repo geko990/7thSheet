@@ -53,111 +53,22 @@ export class AdventureTab {
 
     renderAuthForm() {
         this.container.innerHTML = `
-            <div class="auth-container" style="max-width: 400px; margin: 0 auto; padding: 20px;">
-                <div class="card p-20">
-                    <h3 class="text-center mb-20" style="font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem;">Avventure Online</h3>
-                    
-                    <div class="tabs mb-20" style="display: flex; justify-content: center; gap: 10px;">
-                        <button class="btn btn-sm btn-primary active" id="tab-login">Accedi</button>
-                        <button class="btn btn-sm btn-secondary" id="tab-register">Registrati</button>
-                    </div>
-
-                    <form id="auth-form">
-                        <div class="form-group mb-15">
-                            <label style="display: block; margin-bottom: 5px; color: var(--text-faded);">Email</label>
-                            <input type="email" id="auth-email" class="input-field w-100" required>
-                        </div>
-                        
-                        <div class="form-group mb-20">
-                            <label style="display: block; margin-bottom: 5px; color: var(--text-faded);">Password</label>
-                            <input type="password" id="auth-password" class="input-field w-100" required>
-                        </div>
-                        
-                        <div class="text-right mb-20">
-                            <a href="#" id="btn-forgot-password" style="font-size: 0.8rem; color: var(--accent-gold); text-decoration: none;">Password dimenticata?</a>
-                        </div>
-
-                        <div id="auth-error" class="mb-15 text-center" style="color: red; font-size: 0.9rem; display: none;"></div>
-
-                        <button type="submit" class="btn btn-primary w-100" id="btn-submit">Accedi</button>
-                    </form>
-                    
-                    <div class="text-center mt-20" style="font-size: 0.8rem; color: var(--text-faded);">
-                        Sincronizza le tue schede e gioca online.
-                    </div>
-                </div>
+            <div class="text-center p-20" style="max-width: 400px; margin: 40px auto;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🏴‍☠️</div>
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Avventure Condivise</h3>
+                <p style="margin-bottom: 30px; line-height: 1.6;">
+                    Per lanciarti in mare verso avventure condivise, è necessario accedere dalle opzioni.
+                </p>
+                <button class="btn btn-primary" id="btn-goto-settings">Vai alle Opzioni ⚙️</button>
             </div>
         `;
 
-        this.attachAuthListeners();
-    }
-
-    attachAuthListeners() {
-        const form = this.container.querySelector('#auth-form');
-        const emailInput = this.container.querySelector('#auth-email');
-        const passwordInput = this.container.querySelector('#auth-password');
-        const btnSubmit = this.container.querySelector('#btn-submit');
-        // const errorDiv = this.container.querySelector('#auth-error'); // Removed inline error
-        const tabLogin = this.container.querySelector('#tab-login');
-        const tabRegister = this.container.querySelector('#tab-register');
-        const btnForgot = this.container.querySelector('#btn-forgot-password');
-
-        let isLogin = true;
-
-        const toggleMode = (login) => {
-            isLogin = login;
-            /* Update UI */
-            tabLogin.className = `btn btn-sm ${isLogin ? 'btn-primary active' : 'btn-secondary'}`;
-            tabRegister.className = `btn btn-sm ${!isLogin ? 'btn-primary active' : 'btn-secondary'}`;
-            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
-            // btnForgot.style.display = isLogin ? 'inline-block' : 'none'; // Optional: hide on register
-        };
-
-        tabLogin.addEventListener('click', (e) => { e.preventDefault(); toggleMode(true); });
-        tabRegister.addEventListener('click', (e) => { e.preventDefault(); toggleMode(false); });
-
-        // Forgot Password Handler
-        if (btnForgot) {
-            btnForgot.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showPasswordResetModal(emailInput.value);
-            });
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!email || !password) return;
-
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Caricamento...';
-            // errorDiv.style.display = 'none';
-
-            let result;
-            if (isLogin) {
-                result = await AuthService.signIn(email, password);
-            } else {
-                result = await AuthService.signUp(email, password, email.split('@')[0]);
-            }
-
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
-
-            if (result.error) {
-                // errorDiv.textContent = result.error.message;
-                // errorDiv.style.display = 'block';
-                this.showErrorPopup(result.error.message);
-            } else {
-                // Success
-                if (!isLogin) {
-                    // Registration success
-                    this.showSuccessPopup("Registrazione avvenuta! Controlla la tua email per confermare l'account.");
-                }
-            }
+        this.container.querySelector('#btn-goto-settings').addEventListener('click', () => {
+            window.app.router.navigate('settings');
         });
     }
+
+    // attachAuthListeners removed as it is now handled in Settings.js
 
     showErrorPopup(message) {
         const modalHtml = `

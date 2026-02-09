@@ -1,3 +1,4 @@
+
 import { CONFIG } from '../config.js';
 
 /**
@@ -11,13 +12,16 @@ export default class Settings {
     async render() {
         const div = document.createElement('div');
         div.className = 'settings-container';
-        div.innerHTML = `
-            <div class="settings-hero">
-                <div class="settings-icon">⚙️</div>
-                <h2 class="settings-title">Impostazioni</h2>
-            </div>
-            
-            <div class="settings-cards">
+
+        // Import Auth dynamically to check status
+        const { AuthService } = await import('../services/AuthService.js');
+        const user = AuthService.getUser();
+
+        let profileSectionHTML = '';
+
+        if (user) {
+            // LOGGED IN: Show Profile + Logout
+            profileSectionHTML = `
                 <!-- Profile Management Card -->
                  <div class="settings-card">
                     <div class="settings-card-header">
@@ -41,12 +45,60 @@ export default class Settings {
                         </div>
 
                         <div class="text-center mt-20">
-                            <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
+                            <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white; margin-bottom: 10px;">
                                 Salva Profilo
+                            </button>
+                             <button class="btn btn-secondary" id="btn-logout" style="width: 100%; justify-content: center; border-color: var(--accent-red); color: var(--accent-red);">
+                                Esci
                             </button>
                         </div>
                     </div>
                 </div>
+            `;
+        } else {
+            // LOGGED OUT: Show Login/Register Form
+            profileSectionHTML = `
+                <div class="settings-card" id="auth-card">
+                    <div class="settings-card-header">
+                        <span class="settings-card-icon">🔒</span>
+                        <span class="settings-card-title">Accesso Pirata</span>
+                    </div>
+                    <div class="settings-card-body">
+                         <div class="tabs mb-20" style="display: flex; justify-content: center; gap: 10px;">
+                            <button class="btn btn-sm btn-primary active" id="tab-login">Accedi</button>
+                            <button class="btn btn-sm btn-secondary" id="tab-register">Registrati</button>
+                        </div>
+
+                        <form id="auth-form">
+                            <div class="form-group mb-15">
+                                <label style="display: block; margin-bottom: 5px; color: var(--text-faded); font-size: 0.9rem;">Email</label>
+                                <input type="email" id="auth-email" class="input-field w-100" required>
+                            </div>
+                            
+                            <div class="form-group mb-20">
+                                <label style="display: block; margin-bottom: 5px; color: var(--text-faded); font-size: 0.9rem;">Password</label>
+                                <input type="password" id="auth-password" class="input-field w-100" required>
+                            </div>
+                            
+                            <div class="text-right mb-20">
+                                <a href="#" id="btn-forgot-password" style="font-size: 0.8rem; color: var(--accent-gold); text-decoration: none;">Password dimenticata?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" id="btn-submit">Accedi</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        div.innerHTML = `
+            <div class="settings-hero">
+                <div class="settings-icon">⚙️</div>
+                <h2 class="settings-title">Impostazioni</h2>
+            </div>
+            
+            <div class="settings-cards">
+                ${profileSectionHTML}
 
                 <!-- Data Management Card -->
                 <div class="settings-card">
@@ -85,7 +137,7 @@ export default class Settings {
                         <span class="settings-card-title">Informazioni</span>
                     </div>
                     <div class="settings-card-body">
-                        <div class="settings-row">
+                         <div class="settings-row">
                             <div class="settings-row-info">
                                 <span class="settings-row-label">Versione</span>
                                 <span class="settings-row-desc">7th Sea Character Sheet</span>
@@ -94,7 +146,7 @@ export default class Settings {
                         </div>
                         <div class="settings-divider"></div>
                         <div class="settings-row">
-                            <div class="settings-row-info">
+                             <div class="settings-row-info">
                                 <span class="settings-row-label">Aggiorna Cache</span>
                                 <span class="settings-row-desc">Forza aggiornamento app</span>
                             </div>
@@ -136,43 +188,43 @@ export default class Settings {
             </div>
         `;
 
-        setTimeout(() => this.attachListeners(div), 0);
+        // Async attach because dynamic imports
+        setTimeout(async () => {
+            const { AuthService } = await import('../services/AuthService.js');
+            const currentUser = AuthService.getUser();
+            if (currentUser) {
+                this.attachProfileListeners(div, currentUser);
+            } else {
+                this.attachAuthListeners(div);
+            }
+            this.attachGeneralListeners(div);
+        }, 0);
+
         return div;
     }
 
-    attachListeners(container) {
-        // --- Profile Logic ---
+    async attachProfileListeners(container, user) {
         const avatarInput = container.querySelector('#profile-avatar-input');
         const avatarPreview = container.querySelector('#settings-avatar-preview');
         const usernameInput = container.querySelector('#profile-username');
         const saveProfileBtn = container.querySelector('#btn-save-profile');
+        const logoutBtn = container.querySelector('#btn-logout');
+
         let currentAvatarUrl = null;
 
-        // Load current profile
-        import('../services/AuthService.js').then(({ AuthService }) => {
-            const user = AuthService.getUser();
-            if (user) {
-                // We need to fetch the profile data primarily, but auth metadata might have it
-                // Better to fetch from supabase directly via matching profile row
-                // Or just use what we have. Since we don't have a specific getUserProfile method, 
-                // we rely on the fact that we can fetch it or it's potentially in user_metadata if we synced it.
-                // For now, let's just fetch it via a direct query helper or assume the user knows.
-                // Actually, let's fetch it on load.
-                import('../services/SupabaseClient.js').then(({ supabaseClient }) => {
-                    supabaseClient.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
-                        if (data) {
-                            if (data.avatar_url) {
-                                currentAvatarUrl = data.avatar_url;
-                                avatarPreview.innerHTML = `<img src="${data.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                            }
-                            if (data.username) {
-                                usernameInput.value = data.username;
-                            }
-                        }
-                    });
-                });
+        // Fetch Profile Data
+        const { supabaseClient } = await import('../services/SupabaseClient.js');
+        const { data } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+
+        if (data) {
+            if (data.avatar_url) {
+                currentAvatarUrl = data.avatar_url;
+                avatarPreview.innerHTML = `<img src="${data.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">`;
             }
-        });
+            if (data.username) {
+                usernameInput.value = data.username;
+            }
+        }
 
         container.querySelector('#btn-change-avatar').addEventListener('click', () => avatarInput.click());
 
@@ -180,10 +232,8 @@ export default class Settings {
             const file = e.target.files[0];
             if (!file) return;
 
-            // Reuse CampaignService logic or similar
             const { CampaignService } = await import('../services/CampaignService.js');
 
-            // Show loading
             avatarPreview.innerHTML = '<div class="spinner"></div>';
 
             const { publicUrl, error } = await CampaignService.uploadImage(file);
@@ -215,17 +265,80 @@ export default class Settings {
 
             if (error) {
                 alert("Errore salvataggio profilo: " + error.message);
-                saveProfileBtn.innerHTML = 'Salva Profilo';
-                saveProfileBtn.disabled = false;
             } else {
                 alert("Profilo aggiornato con successo!");
-                saveProfileBtn.innerHTML = 'Salva Profilo';
-                saveProfileBtn.disabled = false;
             }
+            saveProfileBtn.innerHTML = 'Salva Profilo';
+            saveProfileBtn.disabled = false;
         });
 
-        // --- End Profile Logic ---
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm("Vuoi davvero uscire?")) {
+                const { AuthService } = await import('../services/AuthService.js');
+                await AuthService.signOut();
+                window.location.reload();
+            }
+        });
+    }
 
+    async attachAuthListeners(container) {
+        const form = container.querySelector('#auth-form');
+        const emailInput = container.querySelector('#auth-email');
+        const passwordInput = container.querySelector('#auth-password');
+        const btnSubmit = container.querySelector('#btn-submit');
+        const tabLogin = container.querySelector('#tab-login');
+        const tabRegister = container.querySelector('#tab-register');
+        const btnForgot = container.querySelector('#btn-forgot-password');
+
+        let isLogin = true;
+
+        const toggleMode = (login) => {
+            isLogin = login;
+            tabLogin.className = `btn btn-sm ${isLogin ? 'btn-primary active' : 'btn-secondary'}`;
+            tabRegister.className = `btn btn-sm ${!isLogin ? 'btn-primary active' : 'btn-secondary'}`;
+            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+        };
+
+        tabLogin.addEventListener('click', (e) => { e.preventDefault(); toggleMode(true); });
+        tabRegister.addEventListener('click', (e) => { e.preventDefault(); toggleMode(false); });
+
+        if (btnForgot) {
+            btnForgot.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert("Non ancora implementato qui!"); // Placeholder or reuse modal logic if I had access to app
+            });
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!email || !password) return;
+
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Caricamento...';
+
+            const { AuthService } = await import('../services/AuthService.js');
+            let result;
+            if (isLogin) {
+                result = await AuthService.signIn(email, password);
+            } else {
+                result = await AuthService.signUp(email, password, email.split('@')[0]);
+            }
+
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+
+            if (result.error) {
+                alert("Errore: " + result.error.message);
+            } else {
+                if (!isLogin) alert("Registrazione avvenuta! Controlla la mail.");
+                else window.location.reload(); // Reload to refresh state
+            }
+        });
+    }
+
+    attachGeneralListeners(container) {
         // Export
         container.querySelector('#btn-export').addEventListener('click', () => {
             this.exportData();
@@ -243,39 +356,29 @@ export default class Settings {
             this.importData(e.target.files[0]);
         });
 
-        // Clear cache logic - no confirmation, user clicked the button
+        // Clear cache
         const clearCacheAndReload = async () => {
-            // Execute directly
-
             const btn = container.querySelector('#btn-clear-cache');
             if (btn) btn.innerHTML = '<span class="btn-icon">⏳</span>';
-
             try {
                 if ('serviceWorker' in navigator) {
                     const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (const registration of registrations) {
-                        await registration.unregister();
-                    }
+                    for (const registration of registrations) await registration.unregister();
                 }
-
                 if ('caches' in window) {
                     const names = await caches.keys();
                     await Promise.all(names.map(name => caches.delete(name)));
                 }
-
                 window.location.reload(true);
             } catch (e) {
-                alert("Errore durante l'aggiornamento: " + e.message);
+                alert("Errore aggiornamento: " + e.message);
                 window.location.reload();
             }
         };
 
         container.querySelector('#btn-clear-cache').addEventListener('click', clearCacheAndReload);
-
-        // Version click
         const versionEl = container.querySelector('#app-version');
         versionEl.style.cursor = 'pointer';
-        versionEl.title = 'Clicca per aggiornare';
         versionEl.addEventListener('click', clearCacheAndReload);
     }
 
@@ -283,18 +386,15 @@ export default class Settings {
         const data = localStorage.getItem('7thsea_characters') || '[]';
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement('a');
         a.href = url;
         a.download = '7thsea_characters_backup.json';
         a.click();
-
         URL.revokeObjectURL(url);
     }
 
     importData(file) {
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
@@ -306,9 +406,7 @@ export default class Settings {
                 } else {
                     alert('Formato file non valido');
                 }
-            } catch (err) {
-                alert("Errore durante l'importazione");
-            }
+            } catch (err) { alert("Errore importazione"); }
         };
         reader.readAsText(file);
     }
