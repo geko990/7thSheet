@@ -245,8 +245,8 @@ export class CampaignDetail {
 
         let html = '';
 
-        // INVITE CODE Section (if GM or maybe all?) - Use a nice card
-        if (this.campaign.join_code) {
+        // INVITE CODE Section (Only GM sees it)
+        if (this.myRole === 'gm' && this.campaign.join_code) {
             html += `
                 <div class="card p-15 mb-20 text-center" style="background: rgba(var(--accent-navy-rgb), 0.05); border: 1px dashed var(--accent-navy);">
                     <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 5px;">📜 CODICE DI INVITO</div>
