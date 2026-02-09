@@ -1017,6 +1017,72 @@ export default class CharacterSheet {
         popup.onclick = (e) => { if (e.target === popup) popup.remove(); };
     }
 
+    openAvatarContextMenu() {
+        // Remove existing if any
+        const existing = document.getElementById('ctx-avatar-menu');
+        if (existing) existing.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-avatar-menu';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 280px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">Opzioni Avatar</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-primary" id="ctx-av-upload">📁 Carica Foto</button>
+                    <button class="btn btn-secondary" id="ctx-av-url">🔗 Incolla URL</button>
+                    ${this.character.image ? `<button class="btn btn-secondary" id="ctx-av-remove" style="color: var(--accent-red); border-color: var(--accent-red);">🗑️ Rimuovi Foto</button>` : ''}
+                    <button class="btn btn-secondary" id="ctx-av-cancel" style="margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#ctx-av-upload').onclick = () => {
+            menu.remove();
+            document.getElementById('sheet-image-upload')?.click();
+        };
+
+        menu.querySelector('#ctx-av-url').onclick = () => {
+            menu.remove();
+            const url = prompt("Incolla l'URL dell'immagine:");
+            if (url) {
+                // Pre-load to check validity (optional) or just crop
+                // For simplicity, we can load it into cropper directly if we want cropping, or just save.
+                // Let's pass it to cropper?
+                // The cropper expects a file reader result usually, but we can hack it.
+                // Or just set it directly. Let's set it directly for now, user can crop if they upload. 
+                // Wait, user complained about "white image" after change. Best to use cropper if possible?
+                // Let's just set it.
+                this.character.image = url;
+                Storage.saveCharacter(this.character);
+                this.render();
+            }
+        };
+
+        if (this.character.image) {
+            menu.querySelector('#ctx-av-remove').onclick = () => {
+                if (confirm("Rimuovere l'immagine attuale?")) {
+                    this.character.image = null;
+                    Storage.saveCharacter(this.character);
+                    this.render();
+                    menu.remove();
+                }
+            };
+        }
+
+        menu.querySelector('#ctx-av-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+    }
+
     attachSheetListeners(container) {
         const wealthBlock = container.querySelector('#wealth-block');
         if (wealthBlock) wealthBlock.addEventListener('click', () => {
@@ -1053,6 +1119,7 @@ export default class CharacterSheet {
         });
 
         // AVATAR        // Image Upload
+        // AVATAR INTERACTIONS
         const avatarContainer = container.querySelector('.char-sheet-avatar-container');
         const fileInput = container.querySelector('#sheet-image-upload');
 
@@ -1061,40 +1128,39 @@ export default class CharacterSheet {
             let isLongPress = false;
             let startX, startY;
 
-            const openView = () => {
+            const handleSingleTap = () => {
                 if (this.character.image) {
                     this.openViewImageModal(this.character.image);
                 } else {
-                    // If no image, click acts as upload trigger
-                    fileInput.click();
+                    this.openAvatarContextMenu(); // Or just trigger upload? Context menu is better for options
                 }
             };
 
-            const triggerUpload = () => {
-                fileInput.click();
+            const handleLongPress = () => {
+                navigator.vibrate?.(50);
+                this.openAvatarContextMenu();
             };
 
-            // MOUSE
+            // MOUSE (Desktop)
             avatarContainer.addEventListener('click', (e) => {
                 if (isLongPress) return;
-                openView();
+                handleSingleTap();
             });
 
             avatarContainer.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                triggerUpload();
+                this.openAvatarContextMenu();
             });
 
-            // TOUCH
+            // TOUCH (Mobile)
             avatarContainer.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isLongPress = false;
                 timer = setTimeout(() => {
                     isLongPress = true;
-                    navigator.vibrate?.(50);
-                    triggerUpload();
-                }, 600);
+                    handleLongPress();
+                }, 500);
             }, { passive: true });
 
             avatarContainer.addEventListener('touchmove', (e) => {
@@ -1109,9 +1175,7 @@ export default class CharacterSheet {
             });
         }
 
-        // Header paste removal - Cleaned up
-        // const header = container.querySelector('.char-header');
-        // if (header && fileInput) { ... } // Removed
+        // CROPPER LOGIC
         const cropperOverlay = container.querySelector('#sheet-cropper-overlay');
         const cropperImg = container.querySelector('#sheet-cropper-img');
         const cropperMask = container.querySelector('#sheet-cropper-mask');
@@ -1119,41 +1183,54 @@ export default class CharacterSheet {
         const btnCancel = container.querySelector('#btn-sheet-cancel-crop');
         const btnConfirm = container.querySelector('#btn-sheet-confirm-crop');
 
-        if (avatarContainer && fileInput) avatarContainer.addEventListener('click', () => fileInput.click());
-
         let cropState = { img: null, scale: 1, posX: 0, posY: 0, isDragging: false, lastX: 0, lastY: 0 };
         const updateCropperTransform = () => { if (cropperImg) cropperImg.style.transform = `translate(${cropState.posX}px, ${cropState.posY}px) scale(${cropState.scale})`; };
 
-        if (fileInput) fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    cropperImg.src = evt.target.result;
-                    cropState.img = new Image();
-                    cropState.img.src = evt.target.result;
-                    cropState.img.onload = () => {
-                        const fitScale = Math.min(300 / cropState.img.width, 300 / cropState.img.height, 1);
-                        cropState.scale = fitScale;
-                        cropState.posX = 0;
-                        cropState.posY = 0;
-                        zoomSlider.min = "0.1";
-                        zoomSlider.value = fitScale;
-                        updateCropperTransform();
-                        cropperOverlay.style.display = 'flex';
+        if (fileInput) {
+            // Removing old listeners if any to be safe (not easily possible without named functions, but standard replace avoids dupes)
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        // Create a new Image object to ensure clean state
+                        const img = new Image();
+                        img.onload = () => {
+                            // Reset state
+                            cropState.img = img;
+                            cropperImg.src = img.src; // Show in DOM
+
+                            // Calculate fit
+                            const fitScale = Math.min(300 / img.width, 300 / img.height, 1);
+                            cropState.scale = Math.max(fitScale, 0.5); // Minimum scale
+                            cropState.posX = 0;
+                            cropState.posY = 0;
+
+                            zoomSlider.min = "0.1";
+                            zoomSlider.max = "3";
+                            zoomSlider.value = cropState.scale;
+
+                            updateCropperTransform();
+                            cropperOverlay.style.display = 'flex';
+                        };
+                        img.onerror = () => alert("Errore nel caricamento dell'immagine.");
+                        img.src = evt.target.result;
                     };
-                };
-                reader.readAsDataURL(file);
-            }
-            e.target.value = '';
-        });
+                    reader.readAsDataURL(file);
+                }
+                e.target.value = ''; // Reset input
+            };
+        }
 
         if (cropperMask) {
             const startDrag = (x, y) => { cropState.isDragging = true; cropState.lastX = x; cropState.lastY = y; };
             const moveDrag = (x, y) => {
                 if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
-                    cropState.posX += x - cropState.lastX; cropState.posY += y - cropState.lastY;
-                    cropState.lastX = x; cropState.lastY = y; updateCropperTransform();
+                    cropState.posX += x - cropState.lastX;
+                    cropState.posY += y - cropState.lastY;
+                    cropState.lastX = x;
+                    cropState.lastY = y;
+                    updateCropperTransform();
                 }
             };
 
@@ -1179,22 +1256,38 @@ export default class CharacterSheet {
         }
 
         if (zoomSlider) zoomSlider.addEventListener('input', (e) => { cropState.scale = parseFloat(e.target.value); updateCropperTransform(); });
-        if (btnCancel) btnCancel.addEventListener('click', () => { cropperOverlay.style.display = 'none'; cropState.img = null; });
 
-        if (btnConfirm) btnConfirm.addEventListener('click', () => {
+        if (btnCancel) btnCancel.onclick = () => { cropperOverlay.style.display = 'none'; cropState.img = null; };
+
+        if (btnConfirm) btnConfirm.onclick = () => {
             if (!cropState.img) return;
+
             const canvas = document.createElement('canvas');
-            const size = 200; canvas.width = size; canvas.height = size;
+            const size = 300; // Increased resolution
+            canvas.width = size;
+            canvas.height = size;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-            ctx.save(); ctx.translate(size / 2, size / 2); ctx.translate(cropState.posX, cropState.posY); ctx.scale(cropState.scale, cropState.scale);
+
+            // White background (optional, but good for transparency)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.save();
+            // Center Canvas
+            ctx.translate(size / 2, size / 2);
+            // Translate Image Position
+            ctx.translate(cropState.posX, cropState.posY);
+            // Scale
+            ctx.scale(cropState.scale, cropState.scale);
+            // Draw Image Centered
             ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2);
             ctx.restore();
-            this.character.image = canvas.toDataURL('image/jpeg', 0.8);
+
+            this.character.image = canvas.toDataURL('image/jpeg', 0.85);
             Storage.saveCharacter(this.character);
             this.render(); // Re-render whole sheet to update avatar
             cropperOverlay.style.display = 'none';
-        });
+        };
     }
 
     render() {

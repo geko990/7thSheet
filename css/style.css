@@ -1064,9 +1064,16 @@ select {
    ======================================== */
 
 .wizard-container {
-    padding: 15px;
-    max-width: 600px;
-    margin: 0 auto;
+    padding: 20px 15px;
+    width: 95%;
+    max-width: 500px;
+    /* Slightly narrower per request */
+    margin: 20px auto;
+    background: #fff;
+    /* Optional: give card look if desired, but user just said "narrower" */
+    border-radius: 12px;
+    /* Smooth corners */
+    position: relative;
 }
 
 .wizard-progress {
