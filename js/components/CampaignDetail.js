@@ -1006,25 +1006,9 @@ export class CampaignDetail {
         menu.querySelector('#st-cancel').onclick = () => menu.remove();
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
     }
-                    <button id="st-cancel" class="btn btn-secondary">Annulla</button>
-                </div >
-            </div >
-    `;
 
-        document.body.appendChild(menu);
 
-        menu.querySelector('#st-open').onclick = () => {
-            menu.remove();
-            this.openViewStoryModal(story);
-        };
-        menu.querySelector('#st-toggle').onclick = async () => {
-            menu.remove();
-            await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
-            this.loadTabContent();
-        };
-        menu.querySelector('#st-cancel').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
-    }
+
 
     // MODALS (Add Link)
     openLinkCharacterModal() {
@@ -1036,8 +1020,9 @@ export class CampaignDetail {
         const localChars = JSON.parse(localStorage.getItem('7thsea_characters') || '[]');
 
         body.innerHTML = `
-    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-navy);" > Scegli il tuo Eroe</h3 >
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-navy);">Scegli il tuo Eroe</h3>
         <div id="char-selection-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; max-height: 400px; overflow-y: auto;">
+
             ${localChars.length > 0 ? localChars.map(c => `
                     <div class="card char-option" data-id="${c.id}" style="
                         padding: 10px; 
@@ -1122,7 +1107,7 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         body.innerHTML = `
-    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-gold);" > Nuovo Paragrafo</h3 >
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Paragrafo</h3>
             <div class="input-field mb-10">
                 <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;">
             </div>
@@ -1159,7 +1144,7 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         body.innerHTML = `
-    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-gold);" > Nuovo Elemento</h3 >
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Elemento</h3>
             
             <div class="mb-15 text-center">
                 <label style="margin-right: 10px;">Tipo:</label>
@@ -1226,7 +1211,7 @@ export class CampaignDetail {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     preview.style.display = 'block';
-                    preview.innerHTML = `< img src = "${ev.target.result}" style = "width: 100%; height: 100%; object-fit: cover;" > `;
+                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -1291,19 +1276,19 @@ export class CampaignDetail {
         const icons = { npc: '🎭', enemy: '⚔️', item: '💎' };
 
         body.innerHTML = `
-    < div class="text-center" >
+            <div class="text-center">
                 <div class="avatar" style="width: 120px; height: 120px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                        ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 120px; font-size: 3rem;">${icons[e.type] || '❓'}</span>`}
+                    ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 120px; font-size: 3rem;">${icons[e.type] || '❓'}</span>`}
                 </div>
                 <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${e.name}</h2>
                 
                 <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; font-size: 0.9rem;">
-                    ${e.level ? `<span style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px;">${e.level}</span>` : ''}
+                    ${e.level ? `<span style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px;">Liv. ${e.level}</span>` : ''}
                     ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded);">${e.nationality}</span>` : ''}
                 </div>
 
                 <div style="text-align: left; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; white-space: pre-wrap; line-height: 1.6;">${e.description || 'Nessuna descrizione.'}</div>
-            </div >
+            </div>
     `;
 
         btnAction.style.display = 'none';

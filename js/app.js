@@ -2,15 +2,15 @@ import { Router } from './router.js';
 import { CONFIG } from './config.js';
 import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
-import Settings from './components/Settings.js?v=0.9.61';
-import CharacterSheet from './components/CharacterSheet.js?v=0.9.61';
+import Settings from './components/Settings.js?v=0.9.62';
+import CharacterSheet from './components/CharacterSheet.js?v=0.9.62';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
-import { AuthService } from './services/AuthService.js?v=0.9.61';
-import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.61';
-import { Dice } from './dice.js?v=0.9.61';
-import { Storage } from './storage.js?v=0.9.61';
-import { CampaignService } from './services/CampaignService.js?v=0.9.61';
+import { AuthService } from './services/AuthService.js?v=0.9.62';
+import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.62';
+import { Dice } from './dice.js?v=0.9.62';
+import { Storage } from './storage.js?v=0.9.62';
+import { CampaignService } from './services/CampaignService.js?v=0.9.62';
 
 class App {
     constructor() {
@@ -20,48 +20,58 @@ class App {
     }
 
     async init() {
-        // Initialize Auth service first
-        await AuthService.init();
+        try {
+            // Initialize Auth service first
+            await AuthService.init();
 
-        // Register routes
-        this.router.register('characters', () => new CharacterList(this).render());
-        this.router.register('dice', () => new DiceRoller(this).render());
-        this.router.register('settings', () => new Settings(this).render());
-        this.router.register('adventures', async () => {
-            const div = document.createElement('div');
-            await this.adventureTab.render(div, (route, params) => this.router.navigate(route, params));
-            return div;
-        });
-        this.router.register('create-wizard', () => new CreateWizard(this).render());
-        this.router.register('character-sheet', (params) => new CharacterSheet(this).renderCharacter(params.id));
-        this.router.register('campaign-detail', (params) => {
-            const div = document.createElement('div');
-            new CampaignDetail(this).render(div, params.id);
-            return div;
-        });
+            // Register routes
+            this.router.register('characters', () => new CharacterList(this).render());
+            this.router.register('dice', () => new DiceRoller(this).render());
+            this.router.register('settings', () => new Settings(this).render());
+            this.router.register('adventures', async () => {
+                const div = document.createElement('div');
+                await this.adventureTab.render(div, (route, params) => this.router.navigate(route, params));
+                return div;
+            });
+            this.router.register('create-wizard', () => new CreateWizard(this).render());
+            this.router.register('character-sheet', (params) => new CharacterSheet(this).renderCharacter(params.id));
+            this.router.register('campaign-detail', (params) => {
+                const div = document.createElement('div');
+                new CampaignDetail(this).render(div, params.id);
+                return div;
+            });
 
-        // Initialize update handlers
-        this.initUpdateMechanisms();
+            // Initialize update mechanisms
+            this.initUpdateMechanisms();
 
-        // Initial navigation
-        this.router.initNavigation();
+            // Initial navigation
+            this.router.initNavigation();
 
-        // Load clean router state or default
-        await this.router.navigate('characters');
+            // Force navigation to characters on load to ensure content
+            await this.router.navigate('characters');
 
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            try {
-                // Determine scope based on location (GitHub Pages vs Localhost)
-                const isGitHubPages = window.location.hostname.includes('github.io');
-                const scope = isGitHubPages ? '/7thSheet/' : '/';
-                const swPath = isGitHubPages ? '/7thSheet/service-worker.js' : '/service-worker.js';
+            // Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                try {
+                    const isGitHubPages = window.location.hostname.includes('github.io');
+                    const scope = isGitHubPages ? '/7thSheet/' : '/';
+                    const swPath = isGitHubPages ? '/7thSheet/service-worker.js' : '/service-worker.js';
 
-                await navigator.serviceWorker.register(swPath, { scope });
-                console.log('ServiceWorker registered');
-            } catch (err) {
-                console.log('ServiceWorker registration failed:', err);
+                    await navigator.serviceWorker.register(swPath, { scope });
+                    console.log('ServiceWorker registered');
+                } catch (err) {
+                    console.log('ServiceWorker registration failed:', err);
+                }
             }
+        } catch (e) {
+            console.error("Critical App Init Error:", e);
+            document.getElementById('main-content').innerHTML = `
+                <div class="text-center p-20">
+                    <h3>Errore di Caricamento</h3>
+                    <p>${e.message}</p>
+                    <button onclick="window.location.reload(true)" class="btn btn-primary">Ricarica</button>
+                </div>
+            `;
         }
     }
 
