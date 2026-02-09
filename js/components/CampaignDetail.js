@@ -275,12 +275,12 @@ export class CampaignDetail {
             if (m.role === 'gm') return;
             const hasChar = !!m.character_data;
             html += `
-                <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="background: white; cursor: pointer; transition: transform 0.1s;">
+                <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="background: rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border-worn);">
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden; border: 2px solid ${hasChar ? 'var(--accent-gold)' : '#ccc'};">
                         ${m.profile.avatar_url ? `<img src="${m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
                      <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'In attesa...'}</div>
-                     <div style="font-size: 0.8rem; color: var(--text-faded);">${m.profile.username}</div>
+                     <div style="font-size: 0.8rem; color: var(--text-faded);">${m.profile.username || 'Sconosciuto'}</div>
                 </div>
             `;
         });
@@ -823,14 +823,14 @@ export class CampaignDetail {
                     ${profile.avatar_url ? `<img src="${profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
                 </div>
                 <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${char.name || 'Sconosciuto'}</h2>
-                <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 20px;">Giocato da: <strong>${profile.username}</strong></div>
+                <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 20px;">Giocato da: <strong>${profile.username || 'Sconosciuto'}</strong></div>
                 
-                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left;">
+                <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-worn); text-align: left;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>Nazione:</span> <strong>${char.nation || '-'}</strong>
                     </div>
                     ${char.concept ? `
-                        <div style="margin-top: 10px; font-style: italic; color: var(--text-faded); border-top: 1px dashed #eee; padding-top: 10px;">
+                        <div style="margin-top: 10px; font-style: italic; color: var(--text-faded); border-top: 1px dashed var(--border-worn); padding-top: 10px;">
                             "${char.concept}"
                         </div>
                     ` : ''}
