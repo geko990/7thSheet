@@ -3,6 +3,8 @@
  * Handles all localStorage operations
  */
 
+import { CampaignService } from './services/CampaignService.js';
+
 const STORAGE_KEY = '7thsea_characters';
 
 export const Storage = {
@@ -60,6 +62,10 @@ export const Storage = {
 
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(characters));
+
+            // Sync with campaigns (Fire and forget)
+            CampaignService.syncCharacterToCampaigns(character).catch(err => console.error("Sync error:", err));
+
             return { success: true, character: character };
         } catch (e) {
             console.error('Storage Error:', e);

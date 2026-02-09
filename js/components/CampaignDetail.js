@@ -144,20 +144,22 @@ export class CampaignDetail {
 
         let html = '';
 
-        if (this.myRole === 'gm') {
-            html += `
-                <div class="text-center mb-20">
-                    <button class="btn btn-primary" id="btn-add-story">➕ Scrivi Diario</button>
-                </div>
-            `;
-        }
+        html += `
+        <div class="text-center mb-20">
+            <button class="btn btn-primary" id="btn-add-story">➕ Scrivi Diario</button>
+        </div>
+        `;
+
 
         if (!stories || stories.length === 0) {
             html += '<div class="text-center italic" style="color: var(--text-faded)">Ancora nessuna pagina scritta nel diario di questa avventura...</div>';
         } else {
             html += '<div class="story-timeline" style="display: flex; flex-direction: column; gap: 15px;">';
             stories.forEach(story => {
-                if (this.myRole !== 'gm' && !story.is_visible) return;
+                const isAuthor = story.author_id === AuthService.user?.id;
+                const canSee = story.is_visible || isAuthor || this.myRole === 'gm';
+
+                if (!canSee) return;
 
                 // "Diary Entry" style
                 // Extract first 100 chars for preview
@@ -203,9 +205,7 @@ export class CampaignDetail {
     }
 
     attachStoryListeners(container, stories) {
-        if (this.myRole === 'gm') {
-            container.querySelector('#btn-add-story')?.addEventListener('click', () => this.openStoryModal());
-        }
+        container.querySelector('#btn-add-story')?.addEventListener('click', () => this.openStoryModal());
 
         const cards = container.querySelectorAll('.story-card');
         cards.forEach(card => {
@@ -1059,8 +1059,8 @@ export class CampaignDetail {
         const existingMenu = document.getElementById('ctx-menu-story');
         if (existingMenu) existingMenu.remove();
 
-        // GM Only mostly
-        if (this.myRole !== 'gm') return;
+        // OPEN for everyone to read, but actions depend on role/author
+        // if (this.myRole !== 'gm') return; // REMOVED CONSTRAINT
 
         const menu = document.createElement('div');
         menu.id = 'ctx-menu-story';
@@ -1077,9 +1077,11 @@ export class CampaignDetail {
                 <h4 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">${story.title}</h4>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button id="st-open" class="btn btn-primary" style="width: 100%;">📖 Leggi</button>
-                    <button id="st-edit" class="btn btn-secondary" style="width: 100%;">✏️ Modifica</button>
-                    <button id="st-toggle" class="btn btn-secondary" style="width: 100%;">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
-                    <button id="st-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    ${(this.myRole === 'gm' || story.author_id === AuthService.user?.id) ? `
+                        <button id="st-edit" class="btn btn-secondary" style="width: 100%;">✏️ Modifica</button>
+                        <button id="st-toggle" class="btn btn-secondary" style="width: 100%;">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                        <button id="st-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    ` : ''}
                     <button id="st-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Annulla</button>
                 </div>
             </div>
@@ -1094,24 +1096,30 @@ export class CampaignDetail {
             this.openViewStoryModal(story);
         };
 
-        menu.querySelector('#st-edit').onclick = () => {
-            menu.remove();
-            this.openStoryModal(story);
-        };
+        if (menu.querySelector('#st-delete')) {
+            menu.querySelector('#st-delete').onclick = async () => {
+                if (confirm("Sei sicuro di voler eliminare questo diario?")) {
+                    menu.remove();
+                    await CampaignService.deleteStory(story.id);
+                    this.loadTabContent();
+                }
+            };
+        }
 
-        menu.querySelector('#st-toggle').onclick = async () => {
-            menu.remove();
-            await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
-            this.loadTabContent();
-        };
-
-        menu.querySelector('#st-delete').onclick = async () => {
-            if (confirm("Sei sicuro di voler eliminare questo diario?")) {
+        if (menu.querySelector('#st-edit')) {
+            menu.querySelector('#st-edit').onclick = () => {
                 menu.remove();
-                await CampaignService.deleteStory(story.id);
+                this.openStoryModal(story);
+            };
+        }
+
+        if (menu.querySelector('#st-toggle')) {
+            menu.querySelector('#st-toggle').onclick = async () => {
+                menu.remove();
+                await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
                 this.loadTabContent();
-            }
-        };
+            };
+        }
 
         menu.querySelector('#st-cancel').onclick = () => menu.remove();
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };

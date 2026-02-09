@@ -159,7 +159,8 @@ export const CampaignService = {
                 title,
                 content,
                 is_visible: isVisible,
-                image_url: imageUrl
+                image_url: imageUrl,
+                author_id: AuthService.user?.id
             }])
             .select()
             .single();
@@ -249,7 +250,49 @@ export const CampaignService = {
             .delete()
             .eq('id', entityId);
         return { error };
-    },    // MEMBERS
+    },
+
+    // SYNC CHARACTER
+    async syncCharacterToCampaigns(character) {
+        const user = AuthService.getUser();
+        if (!user || !character || !character.id) return;
+
+        console.log("Syncing character to campaigns:", character.name);
+
+        // Find all memberships where I am the user AND the attached character ID matches
+        // Note: Supabase JSON filtering is limited. We might need to fetch all my memberships and filter in JS if JSON containment is tricky.
+        // But let's try to be efficient. 
+        // We know the user_id is mine. We just need to check if character_data->id == character.id
+
+        const { data: memberships, error } = await supabaseClient
+            .from('campaign_members')
+            .select('campaign_id, character_data')
+            .eq('user_id', user.id);
+
+        if (error || !memberships) return;
+
+        const updates = [];
+        for (const m of memberships) {
+            if (m.character_data && m.character_data.id === character.id) {
+                // Determine if we need to update
+                // (e.g. check updated_at or just force update)
+                // Let's force update to be sure
+                updates.push(
+                    supabaseClient
+                        .from('campaign_members')
+                        .update({ character_data: character })
+                        .match({ campaign_id: m.campaign_id, user_id: user.id })
+                );
+            }
+        }
+
+        if (updates.length > 0) {
+            await Promise.all(updates);
+            console.log(`Synced character ${character.name} to ${updates.length} campaigns.`);
+        }
+    },
+
+    // MEMBERS
     async linkCharacter(campaignId, characterData) {
         const user = AuthService.getUser();
         if (!user) return { error: { message: "Not logged in" } };
