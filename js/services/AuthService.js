@@ -77,5 +77,26 @@ export const AuthService = {
 
     getUser() {
         return this.user;
+    },
+
+    async updateProfile(updates) {
+        if (!this.user) return { error: { message: 'Non loggato' } };
+
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .upsert({
+                id: this.user.id,
+                ...updates,
+                updated_at: new Date()
+            })
+            .select()
+            .single();
+
+        if (data) {
+            // Update local user metadata if possible or just trigger event
+            window.dispatchEvent(new CustomEvent('auth:profile-update', { detail: data }));
+        }
+
+        return { data, error };
     }
 };

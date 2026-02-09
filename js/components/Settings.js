@@ -18,6 +18,36 @@ export default class Settings {
             </div>
             
             <div class="settings-cards">
+                <!-- Profile Management Card -->
+                 <div class="settings-card">
+                    <div class="settings-card-header">
+                        <span class="settings-card-icon">👤</span>
+                        <span class="settings-card-title">Profilo Utente</span>
+                    </div>
+                    <div class="settings-card-body">
+                         <div class="text-center mb-15">
+                            <div class="avatar-preview" id="settings-avatar-preview" style="width: 80px; height: 80px; border-radius: 50%; background: #ccc; margin: 0 auto 10px; overflow: hidden; border: 3px solid var(--accent-gold); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <span style="line-height: 80px; font-size: 2.5rem;">👤</span>
+                            </div>
+                            <button class="settings-btn" id="btn-change-avatar" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">
+                                📷 Cambia Foto
+                            </button>
+                            <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
+                        </div>
+                        
+                        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                            <label class="settings-row-label" style="font-size: 0.9rem;">Nome Pubblico</label>
+                            <input type="text" id="profile-username" class="input-field" placeholder="Es. Enrico" style="width: 100%; text-align: left; padding: 10px;">
+                        </div>
+
+                        <div class="text-center mt-20">
+                            <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
+                                Salva Profilo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Data Management Card -->
                 <div class="settings-card">
                     <div class="settings-card-header">
@@ -111,6 +141,91 @@ export default class Settings {
     }
 
     attachListeners(container) {
+        // --- Profile Logic ---
+        const avatarInput = container.querySelector('#profile-avatar-input');
+        const avatarPreview = container.querySelector('#settings-avatar-preview');
+        const usernameInput = container.querySelector('#profile-username');
+        const saveProfileBtn = container.querySelector('#btn-save-profile');
+        let currentAvatarUrl = null;
+
+        // Load current profile
+        import('../services/AuthService.js').then(({ AuthService }) => {
+            const user = AuthService.getUser();
+            if (user) {
+                // We need to fetch the profile data primarily, but auth metadata might have it
+                // Better to fetch from supabase directly via matching profile row
+                // Or just use what we have. Since we don't have a specific getUserProfile method, 
+                // we rely on the fact that we can fetch it or it's potentially in user_metadata if we synced it.
+                // For now, let's just fetch it via a direct query helper or assume the user knows.
+                // Actually, let's fetch it on load.
+                import('../services/SupabaseClient.js').then(({ supabaseClient }) => {
+                    supabaseClient.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
+                        if (data) {
+                            if (data.avatar_url) {
+                                currentAvatarUrl = data.avatar_url;
+                                avatarPreview.innerHTML = `<img src="${data.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                            }
+                            if (data.username) {
+                                usernameInput.value = data.username;
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        container.querySelector('#btn-change-avatar').addEventListener('click', () => avatarInput.click());
+
+        avatarInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Reuse CampaignService logic or similar
+            const { CampaignService } = await import('../services/CampaignService.js');
+
+            // Show loading
+            avatarPreview.innerHTML = '<div class="spinner"></div>';
+
+            const { publicUrl, error } = await CampaignService.uploadImage(file);
+            if (error) {
+                alert('Errore caricamento immagine: ' + error.message);
+                avatarPreview.innerHTML = '<span style="line-height: 80px; font-size: 2.5rem;">⚠️</span>';
+                return;
+            }
+
+            currentAvatarUrl = publicUrl;
+            avatarPreview.innerHTML = `<img src="${publicUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        });
+
+        saveProfileBtn.addEventListener('click', async () => {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert("Il nome utente non può essere vuoto.");
+                return;
+            }
+
+            saveProfileBtn.innerHTML = '<span class="spinner"></span> Salva...';
+            saveProfileBtn.disabled = true;
+
+            const { AuthService } = await import('../services/AuthService.js');
+            const { error } = await AuthService.updateProfile({
+                username: username,
+                avatar_url: currentAvatarUrl
+            });
+
+            if (error) {
+                alert("Errore salvataggio profilo: " + error.message);
+                saveProfileBtn.innerHTML = 'Salva Profilo';
+                saveProfileBtn.disabled = false;
+            } else {
+                alert("Profilo aggiornato con successo!");
+                saveProfileBtn.innerHTML = 'Salva Profilo';
+                saveProfileBtn.disabled = false;
+            }
+        });
+
+        // --- End Profile Logic ---
+
         // Export
         container.querySelector('#btn-export').addEventListener('click', () => {
             this.exportData();
