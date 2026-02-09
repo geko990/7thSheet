@@ -41,8 +41,15 @@ export class CampaignDetail {
         // Actually, let's use a nice gradient or a placeholder service if asset missing, or just a dark overlay.
         // For now, I'll rely on the style I set below.
 
-        this.container.innerHTML = `
-            <div class="campaign-detail-container" style="padding-bottom: 80px;">
+        // Background Logic
+        const bgHtml = `
+            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/Avventure.png" alt="" style="width: 100%;">
+            </div>
+        `;
+
+        this.container.innerHTML = bgHtml + `
+            <div class="campaign-detail-container" style="padding-bottom: 80px; position: relative; z-index: 1;">
                 <!-- Header with Banner -->
                 <div class="campaign-banner" style="
                     position: relative;
