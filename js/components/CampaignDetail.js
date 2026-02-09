@@ -164,9 +164,9 @@ export class CampaignDetail {
                         position: relative; 
                         border-left: 3px solid var(--accent-gold);
                         cursor: pointer;
-                        user-select: none;
+                        
                         transition: transform 0.1s;
-                    ">
+                    " class="card story-card no-select ${!story.is_visible ? 'opacity-70' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                             <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-main);">${story.title}</h3>
                             <span style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap;">${dateStr}</span>
@@ -275,7 +275,7 @@ export class CampaignDetail {
             if (m.role === 'gm') return;
             const hasChar = !!m.character_data;
             html += `
-                <div class="card p-10 text-center player-card" data-uid="${m.user_id}" style="background: white; cursor: pointer; transition: transform 0.1s;">
+                <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="background: white; cursor: pointer; transition: transform 0.1s;">
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden; border: 2px solid ${hasChar ? 'var(--accent-gold)' : '#ccc'};">
                         ${m.profile.avatar_url ? `<img src="${m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
@@ -330,7 +330,7 @@ export class CampaignDetail {
 
                     // Standard Card View - No Swipe Wrapper
                     html += `
-                        <div class="card entity-card ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%; user-select: none;" data-id="${e.id}" data-visible="${e.is_visible}">
+                        <div class="card entity-card no-select ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%;" data-id="${e.id}" data-visible="${e.is_visible}">
                              ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
                             
                             <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
@@ -448,6 +448,9 @@ export class CampaignDetail {
 
         document.body.appendChild(menu);
 
+        // Prevent props
+        menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
+
         menu.querySelector('#ctx-cancel-player').onclick = () => menu.remove();
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
@@ -561,6 +564,9 @@ export class CampaignDetail {
         `;
 
         document.body.appendChild(menu);
+
+        // Prevent props
+        menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
 
         // Listeners
         menu.querySelector('#ctx-open').onclick = () => {
@@ -983,6 +989,9 @@ export class CampaignDetail {
             </div>
         `;
         document.body.appendChild(menu);
+
+        // Prevent click inside menu from closing it (bubbling to overlay)
+        menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
 
         menu.querySelector('#st-open').onclick = () => {
             menu.remove();
