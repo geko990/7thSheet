@@ -155,7 +155,9 @@ export class CampaignDetail {
                 // "Diary Entry" style
                 // Extract first 100 chars for preview
                 const previewText = story.content.length > 100 ? story.content.substring(0, 100) + '...' : story.content;
-                const dateStr = new Date(story.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                // Use custom date OR created_at
+                const dateStr = story.story_date || new Date(story.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
 
                 html += `
                     <div class="card story-card ${!story.is_visible ? 'opacity-70' : ''}" data-id="${story.id}" style="
@@ -1067,7 +1069,7 @@ export class CampaignDetail {
                 : ''}
                 <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent-gold); padding-bottom: 15px;">
                     <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${story.title}</h2>
-                    <div style="font-size: 0.8rem; color: var(--text-faded);">${new Date(story.created_at).toLocaleDateString()}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-faded);">${story.story_date || new Date(story.created_at).toLocaleDateString()}</div>
                 </div>
                 <div class="markdown-body" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">${story.content}</div>
             </div>
@@ -1241,6 +1243,9 @@ export class CampaignDetail {
 
             <div class="input-field mb-10">
                 <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;">
+            </div>
+            <div class="input-field mb-10">
+                 <input type="text" id="story-date" placeholder="Data (es. 12 Primaverile 1668)" style="width: 100%;">
             </div>
             <div class="input-field mb-10">
                 <textarea id="story-content" placeholder="Scrivi qui cosa è successo..." style="width: 100%; height: 150px; font-family: inherit; padding: 10px;"></textarea>
