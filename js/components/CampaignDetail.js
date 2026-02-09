@@ -337,7 +337,7 @@ export class CampaignDetail {
                                  ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
                             </div>
                             <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
-                            ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">${e.level}</div>` : ''}
+                            ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">Liv. ${e.level}</div>` : ''}
                              ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
                         </div>`;
                 });
@@ -972,16 +972,44 @@ export class CampaignDetail {
         menu.style.backdropFilter = 'blur(2px)';
 
         menu.innerHTML = `
-            <div class="modal-content" style="width: 250px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
-                <h4 style="margin-bottom: 15px;">${story.title}</h4>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button id="st-open" class="btn btn-primary">📖 Leggi</button>
-                    <!-- Edit not implemented yet but could be simple -->
-                    <button id="st-toggle" class="btn btn-secondary">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
-                    <button id="st-cancel" class="btn btn-secondary">Annulla</button>
+            <div class="modal-content" style="width: 250px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                <h4 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">${story.title}</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button id="st-open" class="btn btn-primary" style="width: 100%;">📖 Leggi</button>
+                    <button id="st-toggle" class="btn btn-secondary" style="width: 100%;">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                    <button id="st-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    <button id="st-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Annulla</button>
                 </div>
             </div>
         `;
+        document.body.appendChild(menu);
+
+        menu.querySelector('#st-open').onclick = () => {
+            menu.remove();
+            this.openViewStoryModal(story);
+        };
+
+        menu.querySelector('#st-toggle').onclick = async () => {
+            menu.remove();
+            await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
+            this.loadTabContent();
+        };
+
+        menu.querySelector('#st-delete').onclick = async () => {
+            if (confirm("Sei sicuro di voler eliminare questo diario?")) {
+                menu.remove();
+                await CampaignService.deleteStory(story.id);
+                this.loadTabContent();
+            }
+        };
+
+        menu.querySelector('#st-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+    }
+                    <button id="st-cancel" class="btn btn-secondary">Annulla</button>
+                </div >
+            </div >
+    `;
 
         document.body.appendChild(menu);
 
@@ -1008,9 +1036,9 @@ export class CampaignDetail {
         const localChars = JSON.parse(localStorage.getItem('7thsea_characters') || '[]');
 
         body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-navy);">Scegli il tuo Eroe</h3>
-            <div id="char-selection-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; max-height: 400px; overflow-y: auto;">
-                ${localChars.length > 0 ? localChars.map(c => `
+    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-navy);" > Scegli il tuo Eroe</h3 >
+        <div id="char-selection-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; max-height: 400px; overflow-y: auto;">
+            ${localChars.length > 0 ? localChars.map(c => `
                     <div class="card char-option" data-id="${c.id}" style="
                         padding: 10px; 
                         display: flex; 
@@ -1039,8 +1067,8 @@ export class CampaignDetail {
                         <div style="font-size: 0.8rem; color: var(--text-faded);">${c.nation || ''}</div>
                     </div>
                 `).join('') : '<div class="text-center" style="grid-column: 1/-1;">Non hai creato nessun personaggio sul dispositivo!</div>'}
-            </div>
-        `;
+        </div>
+`;
 
         let selectedChar = null;
 
@@ -1094,7 +1122,7 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Paragrafo</h3>
+    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-gold);" > Nuovo Paragrafo</h3 >
             <div class="input-field mb-10">
                 <input type="text" id="story-title" placeholder="Titolo (es. Il Ritrovo)" style="width: 100%;">
             </div>
@@ -1105,7 +1133,7 @@ export class CampaignDetail {
                 <input type="checkbox" id="story-visible" style="width: auto;">
                 <label for="story-visible">Visibile subito ai giocatori?</label>
             </div>
-        `;
+`;
 
         btnAction.style.display = 'block';
         btnAction.textContent = "Pubblica";
@@ -1131,7 +1159,7 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Elemento</h3>
+    < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-gold);" > Nuovo Elemento</h3 >
             
             <div class="mb-15 text-center">
                 <label style="margin-right: 10px;">Tipo:</label>
@@ -1186,7 +1214,7 @@ export class CampaignDetail {
                 <input type="checkbox" id="ent-visible" style="width: auto;">
                 <label for="ent-visible">Visibile ai giocatori?</label>
             </div>
-        `;
+`;
 
         const fileInput = body.querySelector('#ent-file');
         const preview = body.querySelector('#img-preview');
@@ -1198,7 +1226,7 @@ export class CampaignDetail {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
                     preview.style.display = 'block';
-                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    preview.innerHTML = `< img src = "${ev.target.result}" style = "width: 100%; height: 100%; object-fit: cover;" > `;
                 };
                 reader.readAsDataURL(file);
             }
@@ -1263,7 +1291,7 @@ export class CampaignDetail {
         const icons = { npc: '🎭', enemy: '⚔️', item: '💎' };
 
         body.innerHTML = `
-            <div class="text-center">
+    < div class="text-center" >
                 <div class="avatar" style="width: 120px; height: 120px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
                         ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 120px; font-size: 3rem;">${icons[e.type] || '❓'}</span>`}
                 </div>
@@ -1275,8 +1303,8 @@ export class CampaignDetail {
                 </div>
 
                 <div style="text-align: left; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; white-space: pre-wrap; line-height: 1.6;">${e.description || 'Nessuna descrizione.'}</div>
-            </div>
-        `;
+            </div >
+    `;
 
         btnAction.style.display = 'none';
         modal.style.display = 'flex';

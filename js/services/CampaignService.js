@@ -160,15 +160,14 @@ export const CampaignService = {
         return { data, error };
     },
 
-    async updateStoryVisibility(storyId, isVisible) {
-        const { data, error } = await supabaseClient
+    async deleteStory(storyId) {
+        const { error } = await supabaseClient
             .from('campaign_stories')
-            .update({ is_visible: isVisible })
-            .eq('id', storyId)
-            .select()
-            .single();
-        return { data, error };
+            .delete()
+            .eq('id', storyId);
+        return { error };
     },
+
 
     // ENTITIES (NPC, Enemy, Item)
     async getEntities(campaignId) {
