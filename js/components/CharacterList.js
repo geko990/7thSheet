@@ -140,7 +140,7 @@ export default class CharacterList {
 
     renderCharacterCard(char) {
         const nationEmoji = this.getNationEmoji(char.nation);
-        let details = `Liv. ${char.level || 1} • ${char.nation || 'Apolide'}`;
+        let details = char.nation || 'Apolide';
         if (char.religion) details += ` • ${char.religion}`;
 
         const imageStyle = char.image ?

@@ -357,7 +357,7 @@ export class CampaignDetail {
                             <div style="padding: 10px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                                 <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1.1rem; line-height: 1.2; margin-bottom: 5px;">${e.name}</div>
                                 ${e.nationality ? `<div style="font-size: 0.8rem; color: var(--text-faded); font-style: italic; margin-bottom: 5px;">${e.nationality}</div>` : ''}
-                                ${e.level ? `<div style="font-size: 0.8em; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border-worn); font-weight: bold;">Liv. ${e.level}</div>` : ''}
+
                             </div>
                         </div>`;
                 });
@@ -744,7 +744,6 @@ export class CampaignDetail {
             </div>
             
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="ent-level" placeholder="Livello" class="input-field" style="flex: 1;" value="${entity.level || ''}">
                 <select id="ent-nat" class="input-field" style="flex: 1;">
                     <option value="">-- Nazionalità --</option>
                     <option value="Avalon" ${entity.nationality === 'Avalon' ? 'selected' : ''}>Avalon</option>
@@ -854,7 +853,7 @@ export class CampaignDetail {
         btnAction.onclick = async () => {
             const type = document.getElementById('ent-type').value;
             const name = document.getElementById('ent-name').value;
-            const level = document.getElementById('ent-level').value;
+
             const nationality = document.getElementById('ent-nat').value;
             const description = document.getElementById('ent-desc').value;
             const is_visible = document.getElementById('ent-visible').checked;
@@ -878,7 +877,7 @@ export class CampaignDetail {
                 image_url = publicUrl;
             }
 
-            const updates = { name, type, level, nationality, image_url, description, is_visible };
+            const updates = { name, type, nationality, image_url, description, is_visible };
 
             btnAction.textContent = "Aggiornamento...";
 
@@ -1358,7 +1357,6 @@ export class CampaignDetail {
             </div>
             
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="ent-level" placeholder="Livello (es. Eroe, 10, Ferito)" class="input-field" style="flex: 1;">
                 <select id="ent-nat" class="input-field" style="flex: 1;">
                     <option value="">-- Nazionalità --</option>
                     <option value="Avalon">Avalon</option>
@@ -1423,7 +1421,7 @@ export class CampaignDetail {
             const type = document.getElementById('ent-type').value;
             const focus = document.getElementById('ent-focus').value; // Get focus
             const name = document.getElementById('ent-name').value;
-            const level = document.getElementById('ent-level').value;
+
             const nationality = document.getElementById('ent-nat').value;
             const description = document.getElementById('ent-desc').value;
             const is_visible = document.getElementById('ent-visible').checked;
@@ -1448,7 +1446,7 @@ export class CampaignDetail {
             }
 
             const entityData = {
-                name, type, level, nationality, image_url, description, is_visible,
+                name, type, nationality, image_url, description, is_visible,
                 data: { image_focus: focus, notes: '', items: [] } // Store focus
             };
 
@@ -1490,7 +1488,7 @@ export class CampaignDetail {
                 <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px; text-align: center; font-size: 1.8rem;">${e.name}</h2>
                 
                 <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 1rem;">
-                    ${e.level ? `<span style="background: var(--accent-gold); color: white; padding: 2px 12px; border-radius: 12px; font-weight: bold;">Liv. ${e.level}</span>` : ''}
+
                     ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 12px;">${e.nationality}</span>` : ''}
                 </div>
 

@@ -187,7 +187,7 @@ export const CampaignService = {
     },
 
     async addEntity(campaignId, entityData) {
-        // entityData: { name, description, is_visible, type, level, nationality, image_url }
+        // entityData: { name, description, is_visible, type, nationality, image_url }
         const { data, error } = await supabaseClient
             .from('campaign_npcs')
             .insert([{
@@ -196,7 +196,6 @@ export const CampaignService = {
                 description: entityData.description,
                 is_visible: entityData.is_visible,
                 type: entityData.type || 'npc',
-                level: entityData.level,
                 nationality: entityData.nationality,
                 image_url: entityData.image_url,
                 data: entityData.data || {}
