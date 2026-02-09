@@ -1473,28 +1473,33 @@ export class CampaignDetail {
         const body = this.container.querySelector('#modal-body');
         const btnAction = this.container.querySelector('#modal-action-btn');
 
-        const icons = { npc: '🎭', enemy: '⚔️', item: '💎' };
+        const icons = { npc: '\uD83C\uDFAD', enemy: '\u2694\uFE0F', item: '\uD83D\uDC8E' };
+        const imageFocus = e.data?.image_focus || 'center';
+        const objectPosition = imageFocus === 'top' ? 'top' : (imageFocus === 'bottom' ? 'bottom' : 'center');
 
         body.innerHTML = `
-            <div class="entity-view-modal">
-                <div class="entity-image-large" style="width: 100%; aspect-ratio: 16/9; background: #eee; border-radius: 8px; overflow: hidden; border: 2px solid var(--accent-gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; position: relative;">
+            <div class="entity-view-modal" style="display: flex; flex-direction: column; align-items: center; padding: 10px 0;">
+                <!-- HERO IMAGE -->
+                <div style="width: 260px; height: 260px; border-radius: 20px; overflow: hidden; border: 3px solid var(--accent-gold); box-shadow: 0 8px 30px rgba(0,0,0,0.35); margin-bottom: 20px; position: relative; background: #eee; flex-shrink: 0;">
                     ${e.image_url ?
-                `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` :
-                `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--text-faded);">${icons[e.type] || '❓'}</div>`
+                `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: ${objectPosition};">` :
+                `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: var(--text-faded); background: linear-gradient(135deg, #f0ebe3 0%, #ddd5c8 100%);">${icons[e.type] || '❓'}</div>`
             }
-                    ${e.type ? `<div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">${e.type === 'item' ? 'Oggetto' : (e.type === 'enemy' ? 'Avversario' : 'NPC')}</div>` : ''}
+                    ${e.type ? `<div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">${e.type === 'item' ? 'Oggetto' : (e.type === 'enemy' ? 'Avversario' : 'NPC')}</div>` : ''}
                 </div>
                 
-                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px; text-align: center; font-size: 1.8rem;">${e.name}</h2>
+                <!-- NAME -->
+                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin: 0 0 6px; text-align: center; font-size: 1.8rem; line-height: 1.2;">${e.name}</h2>
                 
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 1rem;">
+                <!-- NATIONALITY -->
+                ${e.nationality ? `<div style="font-style: italic; color: var(--text-faded); font-size: 0.95rem; margin-bottom: 16px;">${e.nationality}</div>` : '<div style="margin-bottom: 16px;"></div>'}
 
-                    ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 12px;">${e.nationality}</span>` : ''}
+                <!-- DESCRIPTION -->
+                ${e.description ? `
+                <div style="width: 100%; text-align: left; padding: 16px; background: rgba(255,255,255,0.7); border-radius: 12px; white-space: pre-wrap; line-height: 1.6; border: 1px solid var(--border-worn); font-size: 0.95rem; color: var(--text-ink); box-shadow: inset 0 0 8px rgba(0,0,0,0.04);">
+                    ${e.description}
                 </div>
-
-                <div style="text-align: left; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 12px; white-space: pre-wrap; line-height: 1.6; border: 1px solid var(--border-worn); font-size: 1.05rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
-                    ${e.description || 'Nessuna descrizione disponibile.'}
-                </div>
+                ` : ''}
             </div>
     `;
 
