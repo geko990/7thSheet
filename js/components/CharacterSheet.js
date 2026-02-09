@@ -1585,34 +1585,53 @@ export default class CharacterSheet {
         const isEdit = idx !== null;
         const story = isEdit ? this.character.stories[idx] : { name: '', goal: '', reward: '', steps: [{ text: '', completed: false }], completed: false };
 
+        // Build options from game data
+        const skillKeys = Object.keys(this.skillMap);
+        const advantages = this.advantagesData || [];
+        const backgrounds = this.backgroundsData || [];
+        const traits = ['brawn', 'finesse', 'resolve', 'wits', 'panache'];
+        const traitNames = { brawn: 'Muscoli', finesse: 'Finezza', resolve: 'Risoluz.', wits: 'Acume', panache: 'Panache' };
+
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.style.cssText = 'display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20000; backdrop-filter: blur(4px);';
 
         modal.innerHTML = `
-            <div class="modal-content" style="width: 95%; max-width: 500px; background: #fdfaf5; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;">
-                <div style="padding: 25px;">
+            <div class="modal-content" style="width: 95%; max-width: 500px; max-height: 85vh; background: #fdfaf5; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                <div style="padding: 25px; overflow-y: auto; flex: 1;">
                     <h3 style="text-align: center; color: var(--accent-gold); margin-bottom: 20px; font-family: var(--font-display);">${isEdit ? 'Modifica' : 'Nuova'} Storia</h3>
                     
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">Nome Storia</label>
-                        <input type="text" id="gs-name" value="${story.name}" placeholder="Es. Vendetta contro il Conte" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                        <input type="text" id="gs-name" value="${story.name}" placeholder="Es. Vendetta contro il Conte" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
                     </div>
                     
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🎯 Obiettivo</label>
-                        <input type="text" id="gs-goal" value="${story.goal}" placeholder="Cosa vuoi ottenere?" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                        <input type="text" id="gs-goal" value="${story.goal}" placeholder="Cosa vuoi ottenere?" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
                     </div>
                     
+                    <!-- REWARD PICKER -->
                     <div style="margin-bottom: 12px;">
-                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🏆 Ricompensa</label>
-                        <input type="text" id="gs-reward" value="${story.reward}" placeholder="Es. +1 Mischia, Vantaggio: Duellante" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🏆 Tipo Ricompensa</label>
+                        <select id="gs-reward-type" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: white;">
+                            <option value="">-- Scegli tipo --</option>
+                            <option value="skill">⚔️ Abilità (+1)</option>
+                            <option value="advantage">🎭 Nuovo Vantaggio</option>
+                            <option value="trait">💪 Tratto (+1)</option>
+                            <option value="background">📜 Nuovo Background</option>
+                        </select>
                     </div>
-                    
+                    <div id="gs-reward-detail-container" style="margin-bottom: 12px; display: none;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🏆 Ricompensa</label>
+                        <select id="gs-reward-detail" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: white;">
+                        </select>
+                    </div>
+
                     ${!isEdit ? `
                     <div style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">Primo Passo</label>
-                        <input type="text" id="gs-step1" placeholder="Es. Trovare dove si nasconde" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                        <input type="text" id="gs-step1" placeholder="Es. Trovare dove si nasconde" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
                     </div>
                     ` : ''}
                     
@@ -1627,13 +1646,82 @@ export default class CharacterSheet {
 
         document.body.appendChild(modal);
 
+        // Reward type change handler
+        const rewardTypeSelect = modal.querySelector('#gs-reward-type');
+        const rewardDetailContainer = modal.querySelector('#gs-reward-detail-container');
+        const rewardDetailSelect = modal.querySelector('#gs-reward-detail');
+
+        rewardTypeSelect.addEventListener('change', () => {
+            const type = rewardTypeSelect.value;
+            rewardDetailSelect.innerHTML = '';
+
+            if (!type) {
+                rewardDetailContainer.style.display = 'none';
+                return;
+            }
+
+            rewardDetailContainer.style.display = 'block';
+
+            if (type === 'skill') {
+                skillKeys.forEach(key => {
+                    const opt = document.createElement('option');
+                    opt.value = `+1 ${this.skillMap[key]}`;
+                    opt.textContent = this.skillMap[key];
+                    rewardDetailSelect.appendChild(opt);
+                });
+            } else if (type === 'advantage') {
+                advantages.forEach(adv => {
+                    const opt = document.createElement('option');
+                    opt.value = `Vantaggio: ${adv.name} (${adv.cost} pt)`;
+                    opt.textContent = `${adv.name} (${adv.cost} pt)`;
+                    rewardDetailSelect.appendChild(opt);
+                });
+            } else if (type === 'trait') {
+                traits.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = `+1 ${traitNames[t]}`;
+                    opt.textContent = traitNames[t];
+                    rewardDetailSelect.appendChild(opt);
+                });
+            } else if (type === 'background') {
+                backgrounds.forEach(bg => {
+                    const opt = document.createElement('option');
+                    opt.value = `Background: ${bg.name}`;
+                    opt.textContent = bg.name;
+                    rewardDetailSelect.appendChild(opt);
+                });
+            }
+        });
+
+        // Pre-populate reward if editing
+        if (isEdit && story.reward) {
+            // Try to detect reward type and pre-select
+            if (story.reward.startsWith('+1 ') && !story.reward.includes('Vantaggio')) {
+                // Check if it's a trait
+                const traitMatch = traits.find(t => story.reward === `+1 ${traitNames[t]}`);
+                if (traitMatch) { rewardTypeSelect.value = 'trait'; }
+                else { rewardTypeSelect.value = 'skill'; }
+            } else if (story.reward.startsWith('Vantaggio:')) {
+                rewardTypeSelect.value = 'advantage';
+            } else if (story.reward.startsWith('Background:')) {
+                rewardTypeSelect.value = 'background';
+            }
+            rewardTypeSelect.dispatchEvent(new Event('change'));
+            // Try to select the matching option
+            const opts = rewardDetailSelect.options;
+            for (let i = 0; i < opts.length; i++) {
+                if (opts[i].value === story.reward) { rewardDetailSelect.value = story.reward; break; }
+            }
+        }
+
         modal.querySelector('#gs-cancel').onclick = () => modal.remove();
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 
         modal.querySelector('#gs-save').onclick = () => {
             const name = modal.querySelector('#gs-name').value.trim();
             const goal = modal.querySelector('#gs-goal').value.trim();
-            const reward = modal.querySelector('#gs-reward').value.trim();
+            const rewardType = rewardTypeSelect.value;
+            const reward = rewardType ? rewardDetailSelect.value : '';
 
             if (!name) return alert('Inserisci un nome per la storia.');
 
@@ -1668,10 +1756,14 @@ export default class CharacterSheet {
         const skillOptions = skillKeys.map(key => {
             const currentRank = this.character.skills[key] || 0;
             const nextRank = currentRank + 1;
-            if (nextRank > 5) return null; // Max rank
-            const cost = nextRank; // Cost = target rank (1→2 costs 2, etc.)
+            if (nextRank > 5) return null;
+            const cost = nextRank;
             return { key, name: this.skillMap[key], currentRank, nextRank, cost };
         }).filter(Boolean);
+
+        // Build advantage options from game data
+        const advantages = (this.advantagesData || []).filter(a => a.cost > 0);
+        const backgrounds = this.backgroundsData || [];
 
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -1698,15 +1790,39 @@ export default class CharacterSheet {
                         `).join('')}
                     </div>
 
-                    <!-- Free Text Advantage -->
+                    <!-- Advantages List -->
                     <div style="font-family: var(--font-display); font-size: 1rem; color: var(--accent-navy); margin: 20px 0 10px; border-bottom: 1px solid var(--border-worn); padding-bottom: 5px;">🎭 Nuovo Vantaggio</div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" id="spend-adv-name" placeholder="Nome vantaggio..." style="flex: 1; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 0.95rem;">
-                        <select id="spend-adv-cost" style="padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px;">
-                            ${[1, 2, 3, 4, 5].map(c => `<option value="${c}" ${c > available ? 'disabled' : ''}>${c} p.</option>`).join('')}
-                        </select>
-                        <button id="btn-buy-adv" class="btn btn-primary" style="padding: 10px 15px; white-space: nowrap;">Compra</button>
+                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border-worn); border-radius: 6px; padding: 6px;">
+                        ${advantages.map(adv => `
+                        <button class="spend-adv-btn" data-name="${adv.name}" data-cost="${adv.cost}"
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid var(--border-worn); border-radius: 6px; background: white; cursor: pointer; transition: all 0.15s; text-align: left; ${adv.cost > available ? 'opacity: 0.4; pointer-events: none;' : ''}"
+                            ${adv.cost > available ? 'disabled' : ''}>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 0.9rem; font-weight: 600;">${adv.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${adv.description || ''}</div>
+                            </div>
+                            <span style="background: var(--accent-gold); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; flex-shrink: 0; margin-left: 8px;">${adv.cost} pt</span>
+                        </button>
+                        `).join('')}
                     </div>
+
+                    <!-- Backgrounds List -->
+                    ${backgrounds.length > 0 ? `
+                    <div style="font-family: var(--font-display); font-size: 1rem; color: var(--accent-navy); margin: 20px 0 10px; border-bottom: 1px solid var(--border-worn); padding-bottom: 5px;">📜 Nuovo Background</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border-worn); border-radius: 6px; padding: 6px;">
+                        ${backgrounds.map(bg => `
+                        <button class="spend-bg-btn" data-name="${bg.name}" data-id="${bg.id}"
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid var(--border-worn); border-radius: 6px; background: white; cursor: pointer; transition: all 0.15s; text-align: left; ${2 > available ? 'opacity: 0.4; pointer-events: none;' : ''}"
+                            ${2 > available ? 'disabled' : ''}>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 0.9rem; font-weight: 600;">${bg.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${bg.quirk || ''}</div>
+                            </div>
+                            <span style="background: var(--accent-navy); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; flex-shrink: 0; margin-left: 8px;">2 pt</span>
+                        </button>
+                        `).join('')}
+                    </div>
+                    ` : ''}
                 </div>
 
                 <div style="padding: 15px 20px; background: rgba(0,0,0,0.03); border-top: 1px solid var(--border-worn); flex-shrink: 0;">
@@ -1741,27 +1857,52 @@ export default class CharacterSheet {
             });
         });
 
-        // Buy Advantage
-        modal.querySelector('#btn-buy-adv')?.addEventListener('click', () => {
-            const name = modal.querySelector('#spend-adv-name').value.trim();
-            const cost = parseInt(modal.querySelector('#spend-adv-cost').value);
+        // Buy Advantage from list
+        modal.querySelectorAll('.spend-adv-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.dataset.name;
+                const cost = parseInt(btn.dataset.cost);
 
-            if (!name) return alert('Inserisci il nome del vantaggio.');
-            if (cost > this.character.stepsBank) return alert('Passi insufficienti.');
+                if (cost > this.character.stepsBank) return alert('Passi insufficienti.');
 
-            if (confirm(`Acquistare "${name}" per ${cost} passi?`)) {
-                if (!this.character.advantages) this.character.advantages = [];
-                this.character.advantages.push(name);
-                this.character.stepsBank -= cost;
-                this.character.growthLog.push({
-                    icon: '🎭',
-                    text: `Nuovo Vantaggio: ${name}`,
-                    date: new Date().toLocaleDateString()
-                });
-                Storage.saveCharacter(this.character);
-                modal.remove();
-                this.renderTabContent(document.querySelector('#tab-content'), 'growth');
-            }
+                if (confirm(`Acquistare "${name}" per ${cost} passi?`)) {
+                    if (!this.character.advantages) this.character.advantages = [];
+                    this.character.advantages.push(name);
+                    this.character.stepsBank -= cost;
+                    this.character.growthLog.push({
+                        icon: '🎭',
+                        text: `Nuovo Vantaggio: ${name}`,
+                        date: new Date().toLocaleDateString()
+                    });
+                    Storage.saveCharacter(this.character);
+                    modal.remove();
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
+        });
+
+        // Buy Background from list
+        modal.querySelectorAll('.spend-bg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.dataset.name;
+                const cost = 2; // Backgrounds cost 2 steps
+
+                if (cost > this.character.stepsBank) return alert('Passi insufficienti.');
+
+                if (confirm(`Acquistare il background "${name}" per ${cost} passi?`)) {
+                    if (!this.character.backgrounds) this.character.backgrounds = [];
+                    this.character.backgrounds.push(name);
+                    this.character.stepsBank -= cost;
+                    this.character.growthLog.push({
+                        icon: '📜',
+                        text: `Nuovo Background: ${name}`,
+                        date: new Date().toLocaleDateString()
+                    });
+                    Storage.saveCharacter(this.character);
+                    modal.remove();
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
         });
 
         // Close
