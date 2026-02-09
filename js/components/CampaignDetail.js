@@ -840,13 +840,17 @@ export class CampaignDetail {
             </div>
             
             <div class="text-center mb-10">Oppure incolla URL:</div>
-            <input type="text" id="banner-url" class="input-field w-100 mb-20" placeholder="https://..." value="${this.campaign.image_url || ''}">
+            <div style="position: relative; width: 100%; margin-bottom: 20px;">
+                <input type="text" id="banner-url" class="input-field w-100" placeholder="https://..." value="${this.campaign.image_url || ''}" style="padding-right: 30px;">
+                <button id="btn-clear-url" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-faded); cursor: pointer; font-size: 1.2rem; display: ${this.campaign.image_url ? 'block' : 'none'};">✕</button>
+            </div>
             
             <div id="banner-preview" style="width: 100%; height: 120px; background: #eee; margin-bottom: 20px; background-size: cover; background-position: center; border: 2px solid var(--border-color);"></div>
         `;
 
         const fileInput = body.querySelector('#banner-file');
         const urlInput = body.querySelector('#banner-url');
+        const clearBtn = body.querySelector('#btn-clear-url');
         const preview = body.querySelector('#banner-preview');
 
         if (this.campaign.image_url) preview.style.backgroundImage = `url('${this.campaign.image_url}')`;
@@ -855,13 +859,25 @@ export class CampaignDetail {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => preview.style.backgroundImage = `url('${ev.target.result}')`;
+                reader.onload = (ev) => {
+                    preview.style.backgroundImage = `url('${ev.target.result}')`;
+                    urlInput.value = ''; // Update UI
+                    clearBtn.style.display = 'none';
+                };
                 reader.readAsDataURL(file);
             }
         });
 
         urlInput.addEventListener('input', (e) => {
             preview.style.backgroundImage = `url('${e.target.value}')`;
+            clearBtn.style.display = e.target.value ? 'block' : 'none';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            urlInput.value = '';
+            preview.style.backgroundImage = 'none';
+            clearBtn.style.display = 'none';
+            fileInput.value = '';
         });
 
         btnAction.style.display = 'block';
