@@ -1,6 +1,6 @@
 import { AuthService } from '../services/AuthService.js';
 import { CampaignService } from '../services/CampaignService.js';
-import { PasteHandler } from '../utils/PasteHandler.js';
+
 
 export class CampaignDetail {
     constructor(app) {
@@ -800,22 +800,7 @@ export class CampaignDetail {
         });
 
         // Paste Handler (CTRL+V)
-        PasteHandler.attach(urlInput, (file) => {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
 
-            const reader = new FileReader();
-            reader.onload = (ev) => updatePreview(ev.target.result);
-            reader.readAsDataURL(file);
-
-            pasteHint.textContent = "Immagine incollata!";
-            pasteHint.style.color = "var(--accent-green)";
-            setTimeout(() => {
-                pasteHint.textContent = "Puoi anche incollare un'immagine (CTRL+V)";
-                pasteHint.style.color = "var(--text-faded)";
-            }, 2000);
-        });
 
         // Manual Paste Button (Mobile)
         const pasteBtn = body.querySelector('#btn-paste-clipboard');
@@ -853,21 +838,7 @@ export class CampaignDetail {
         }
 
         // Also attach to the whole modal body for better UX
-        PasteHandler.attach(body, (file) => {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
-            const reader = new FileReader();
-            reader.onload = (ev) => updatePreview(ev.target.result);
-            reader.readAsDataURL(file);
 
-            pasteHint.textContent = "Immagine incollata!";
-            pasteHint.style.color = "var(--accent-green)";
-            setTimeout(() => {
-                pasteHint.textContent = "Puoi anche incollare un'immagine (CTRL+V)";
-                pasteHint.style.color = "var(--text-faded)";
-            }, 2000);
-        });
 
         btnAction.style.display = 'block';
         btnAction.textContent = "Salva";
@@ -1380,7 +1351,7 @@ export class CampaignDetail {
                     <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="flex: 1;">
                     <button id="btn-paste-clipboard" class="btn btn-secondary btn-sm" style="padding: 5px 10px;" title="Incolla da Appunti">📋</button>
                 </div>
-                <div id="paste-hint" style="font-size: 0.75rem; color: var(--text-faded); margin-top: 5px; font-style: italic;">Puoi anche incollare un'immagine (CTRL+V)</div>
+                <div id="paste-hint" style="font-size: 0.75rem; color: var(--text-faded); margin-top: 5px; font-style: italic;"></div>
             </div>
 
             <div class="input-field mb-10">

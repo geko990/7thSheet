@@ -2,7 +2,7 @@ import { Storage } from '../storage.js';
 import { Dice } from '../dice.js';
 import { AuthService } from '../services/AuthService.js';
 import { CampaignService } from '../services/CampaignService.js';
-import { PasteHandler } from '../utils/PasteHandler.js';
+
 
 export default class CharacterSheet {
     constructor(app) {
@@ -248,7 +248,7 @@ export default class CharacterSheet {
                         `}
                         <div class="avatar-edit-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;">
                             <span style="color: white; font-size: 1.5rem;">✏️</span>
-                            <span style="color: white; font-size: 0.6rem; margin-top: 2px;">Incolla (CTRL+V)</span>
+                            <span style="color: white; font-size: 0.6rem; margin-top: 2px;">Clicca per cambiare</span>
                             <button id="btn-avatar-paste-mobile" style="pointer-events: auto; background: var(--bg-parchment); border: 1px solid white; border-radius: 50%; width: 30px; height: 30px; font-size: 1rem; margin-top: 5px; display: none;">📋</button>
                         </div>
                     </div>
@@ -1296,7 +1296,7 @@ export default class CharacterSheet {
             // Draw logic matching visual transform
             ctx.translate(size / 2, size / 2);
 
-            const ratio = size / 300;
+            const ratio = size / 200;
             ctx.translate(cropState.posX * ratio, cropState.posY * ratio);
 
             ctx.scale(cropState.scale * ratio, cropState.scale * ratio);
