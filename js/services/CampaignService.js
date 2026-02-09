@@ -116,9 +116,8 @@ export const CampaignService = {
             .from('campaigns')
             .update(updates)
             .eq('id', campaignId)
-            .select()
-            .single();
-        return { data, error };
+            .select();
+        return { data: data?.[0] || null, error };
     },
 
     // Delete Campaign
