@@ -92,6 +92,12 @@ export default class CharacterList {
                         <label>Religione</label>
                         <input type="text" id="edit-religion" class="input-field center-input">
 
+                        <label>Virtù</label>
+                        <input type="text" id="edit-virtue" class="input-field center-input" placeholder="Es. Coraggio">
+
+                        <label>Hubris</label>
+                        <input type="text" id="edit-hubris" class="input-field center-input" placeholder="Es. Arroganza">
+
                         <label>Arcano</label>
                         <input type="text" id="edit-arcana" class="input-field center-input" placeholder="Es: Il Folle">
                     
@@ -333,6 +339,8 @@ export default class CharacterList {
         modal.querySelector('#edit-concept').value = char.concept || '';
         modal.querySelector('#edit-nation').value = char.nation || 'Avalon';
         modal.querySelector('#edit-religion').value = char.religion || '';
+        modal.querySelector('#edit-virtue').value = char.virtue || '';
+        modal.querySelector('#edit-hubris').value = char.hubris || '';
         modal.querySelector('#edit-arcana').value = char.arcana || '';
 
         modal.style.display = 'flex';
@@ -346,6 +354,8 @@ export default class CharacterList {
             char.concept = modal.querySelector('#edit-concept').value;
             char.nation = modal.querySelector('#edit-nation').value;
             char.religion = modal.querySelector('#edit-religion').value;
+            char.virtue = modal.querySelector('#edit-virtue').value;
+            char.hubris = modal.querySelector('#edit-hubris').value;
             char.arcana = modal.querySelector('#edit-arcana').value;
 
             Storage.saveCharacter(char);

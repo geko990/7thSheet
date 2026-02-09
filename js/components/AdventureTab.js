@@ -283,31 +283,98 @@ export class AdventureTab {
         }
     }
 
-    openEditCampaignModal(campaign) {
-        const newTitle = prompt("Nuovo titolo:", campaign.title);
-        if (newTitle && newTitle !== campaign.title) {
-            CampaignService.updateCampaign(campaign.id, { title: newTitle }).then(() => this.render());
-        }
-    }
-
     // MODALS (Create/Join)
     openCreateCampaignModal() {
-        const title = prompt("Nome della nuova Avventura:");
-        if (title) {
-            CampaignService.createCampaign(title).then(res => {
-                if (res.error) this.showErrorPopup(res.error.message);
-                else this.render();
-            });
-        }
+        const modalHtml = `
+            <div class="text-center">
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Nuova Avventura</h3>
+                <input type="text" id="new-campaign-title" class="input-field w-100 mb-20" placeholder="Titolo dell'avventura">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary w-50" id="btn-cancel-create">Annulla</button>
+                    <button class="btn btn-primary w-50" id="btn-confirm-create">Crea</button>
+                </div>
+            </div>
+        `;
+        window.app.showModal(modalHtml);
+
+        setTimeout(() => {
+            const input = document.getElementById('new-campaign-title');
+            if (input) input.focus();
+
+            document.getElementById('btn-cancel-create').onclick = () => window.app.closeModal();
+            document.getElementById('btn-confirm-create').onclick = () => {
+                const title = input.value.trim();
+                if (title) {
+                    CampaignService.createCampaign(title).then(res => {
+                        window.app.closeModal();
+                        if (res.error) this.showErrorPopup(res.error.message);
+                        else this.render();
+                    });
+                }
+            };
+        }, 100);
     }
 
     openJoinCampaignModal() {
-        const code = prompt("Inserisci codice invito:");
-        if (code) {
-            CampaignService.joinCampaign(code).then(res => {
-                if (res.error) this.showErrorPopup(res.error.message);
-                else this.render();
-            });
-        }
+        const modalHtml = `
+            <div class="text-center">
+                <h3 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 15px;">Unisciti ad Avventura</h3>
+                <input type="text" id="join-campaign-code" class="input-field w-100 mb-20" placeholder="Codice invito (es. ABC-123)">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary w-50" id="btn-cancel-join">Annulla</button>
+                    <button class="btn btn-primary w-50" id="btn-confirm-join">Unisciti</button>
+                </div>
+            </div>
+        `;
+        window.app.showModal(modalHtml);
+
+        setTimeout(() => {
+            const input = document.getElementById('join-campaign-code');
+            if (input) input.focus();
+
+            document.getElementById('btn-cancel-join').onclick = () => window.app.closeModal();
+            document.getElementById('btn-confirm-join').onclick = () => {
+                const code = input.value.trim();
+                if (code) {
+                    CampaignService.joinCampaign(code).then(res => {
+                        window.app.closeModal();
+                        if (res.error) this.showErrorPopup(res.error.message);
+                        else this.render();
+                    });
+                }
+            };
+        }, 100);
+    }
+
+    openEditCampaignModal(campaign) {
+        const modalHtml = `
+            <div class="text-center">
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Modifica Titolo</h3>
+                <input type="text" id="edit-campaign-title" class="input-field w-100 mb-20" value="${campaign.title}" placeholder="Titolo">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary w-50" id="btn-cancel-edit">Annulla</button>
+                    <button class="btn btn-primary w-50" id="btn-confirm-edit">Salva</button>
+                </div>
+            </div>
+        `;
+        window.app.showModal(modalHtml);
+
+        setTimeout(() => {
+            const input = document.getElementById('edit-campaign-title');
+            if (input) input.focus();
+
+            document.getElementById('btn-cancel-edit').onclick = () => window.app.closeModal();
+            document.getElementById('btn-confirm-edit').onclick = () => {
+                const newTitle = input.value.trim();
+                if (newTitle && newTitle !== campaign.title) {
+                    CampaignService.updateCampaign(campaign.id, { title: newTitle }).then(() => {
+                        window.app.closeModal();
+                        this.render();
+                    });
+                } else {
+                    window.app.closeModal();
+                }
+            };
+        }, 100);
     }
 }

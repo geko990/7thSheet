@@ -323,22 +323,27 @@ export class CampaignDetail {
                 if (visibleList.length === 0 && this.myRole !== 'gm') continue;
 
                 html += `<h4 style="color: ${categories[type].color}; margin: 20px 0 10px; display: flex; align-items: center; gap: 5px;">${categories[type].icon} ${categories[type].title}</h4>`;
-                html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+
+                // Use a standard grid but content will be card-based
+                html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
 
                 visibleList.forEach(e => {
                     const isHidden = !e.is_visible;
 
-                    // Standard Card View - No Swipe Wrapper
+                    // Expanded Card View - Image Priority
                     html += `
-                        <div class="card entity-card no-select ${isHidden ? 'opacity-70' : ''}" style="padding: 10px; text-align: center; position: relative; border-top: 3px solid ${categories[type].color}; height: 100%;" data-id="${e.id}" data-visible="${e.is_visible}">
-                             ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; font-size: 0.8rem;" title="Nascosto">🔒</div>' : ''}
+                        <div class="card entity-card no-select ${isHidden ? 'opacity-70' : ''}" style="padding: 0; overflow: hidden; position: relative; border-top: 4px solid ${categories[type].color}; height: 100%; display: flex; flex-direction: column; background: #fff;" data-id="${e.id}" data-visible="${e.is_visible}">
+                             ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; z-index: 2;" title="Nascosto">🔒</div>' : ''}
                             
-                            <div class="avatar" style="width: 60px; height: 60px; border-radius: 50%; background: #eee; margin: 0 auto 10px; overflow: hidden; border: 1px solid #ddd;">
-                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 60px; font-size: 1.5rem;">${categories[type].icon}</span>`}
+                            <div class="entity-image-container" style="width: 100%; aspect-ratio: 4/3; background: #eee; position: relative; border-bottom: 1px solid var(--border-color);">
+                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: top;">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-faded);">${categories[type].icon}</div>`}
                             </div>
-                            <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1rem;">${e.name}</div>
-                            ${e.level ? `<div style="font-size: 0.8rem; background: rgba(0,0,0,0.05); display: inline-block; padding: 2px 6px; border-radius: 4px; margin: 3px 0;">Liv. ${e.level}</div>` : ''}
-                             ${e.nationality ? `<div style="font-size: 0.75rem; color: var(--text-faded); font-style: italic;">${e.nationality}</div>` : ''}
+                            
+                            <div style="padding: 10px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1.1rem; line-height: 1.2; margin-bottom: 5px;">${e.name}</div>
+                                ${e.nationality ? `<div style="font-size: 0.8rem; color: var(--text-faded); font-style: italic; margin-bottom: 5px;">${e.nationality}</div>` : ''}
+                                ${e.level ? `<div style="font-size: 0.8em; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border-worn); font-weight: bold;">Liv. ${e.level}</div>` : ''}
+                            </div>
                         </div>`;
                 });
                 html += '</div>';
@@ -358,6 +363,9 @@ export class CampaignDetail {
             const member = members.find(m => m.user_id === uid);
             if (!member) return;
 
+            // My interactions
+            const isMe = member.user_id === AuthService.user?.id;
+
             let timer = null;
             let isLongPress = false;
             let startX, startY;
@@ -370,9 +378,8 @@ export class CampaignDetail {
                 timer = setTimeout(() => {
                     isLongPress = true;
                     if (navigator.vibrate) navigator.vibrate(50);
-                    // Only open context menu if I'm GM and target is player (or maybe even other GM?)
-                    // The request says: "I create the adventure, I am Admin... long press on another player... assign Master"
-                    if (this.myRole === 'gm') {
+                    // Open context menu for ME or if I am GM
+                    if (isMe || this.myRole === 'gm') {
                         this.openPlayerContextMenu(member);
                     }
                 }, 500);
@@ -408,7 +415,7 @@ export class CampaignDetail {
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 // Allow if GM OR if it's me
-                if (this.myRole === 'gm' || member.user_id === this.userId) {
+                if (this.myRole === 'gm' || isMe) {
                     this.openPlayerContextMenu(member);
                 }
             });

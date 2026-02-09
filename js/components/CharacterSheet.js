@@ -633,6 +633,35 @@ export default class CharacterSheet {
         overlay.querySelector('#btn-close-view').onclick = close;
     }
 
+    openViewImageModal(imageUrl) {
+        const close = () => {
+            const overlay = document.getElementById('view-image-overlay');
+            if (overlay) overlay.remove();
+        };
+
+        const overlay = document.createElement('div');
+        overlay.id = 'view-image-overlay';
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.background = 'rgba(0,0,0,0.9)'; // Darker background for image view
+        overlay.style.zIndex = '20000';
+        overlay.style.backdropFilter = 'blur(5px)';
+        overlay.onclick = (e) => { if (e.target === overlay) close(); };
+
+        overlay.innerHTML = `
+            <div class="modal-content" style="background: transparent; box-shadow: none; padding: 0; max-width: 90%; max-height: 90%; position: relative; animation: zoomIn 0.2s ease-out;">
+                <img src="${imageUrl}" style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;">
+                <button id="btn-close-image" style="position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
+            </div>
+            <style> @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } } </style>
+        `;
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('#btn-close-image').onclick = close;
+    }
+
     openItemModal(type, idx = null) {
         const list = type === 'equipment' ? this.character.equipment : this.character.inventory;
         const item = idx !== null ? list[idx] : { name: '', qty: 1, notes: '', image: '' };
@@ -1027,79 +1056,62 @@ export default class CharacterSheet {
         const avatarContainer = container.querySelector('.char-sheet-avatar-container');
         const fileInput = container.querySelector('#sheet-image-upload');
 
-        if (avatarContainer && fileInput) avatarContainer.addEventListener('click', () => fileInput.click());
-
         if (avatarContainer && fileInput) {
-            // Mobile Paste Button Logic
-            const mobileBtn = avatarContainer.querySelector('#btn-avatar-paste-mobile');
-            if (mobileBtn) {
-                // Check clipboard support
-                if (navigator.clipboard && navigator.clipboard.read) {
-                    mobileBtn.style.display = 'block';
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            const openView = () => {
+                if (this.character.image) {
+                    this.openViewImageModal(this.character.image);
+                } else {
+                    // If no image, click acts as upload trigger
+                    fileInput.click();
                 }
+            };
 
-                mobileBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
+            const triggerUpload = () => {
+                fileInput.click();
+            };
 
-                    try {
-                        const clipboardItems = await navigator.clipboard.read();
-                        for (const item of clipboardItems) {
-                            // Find image type
-                            const imageType = item.types.find(type => type.startsWith('image/'));
-                            if (imageType) {
-                                const blob = await item.getType(imageType);
-                                const file = new File([blob], "avatar-paste.png", { type: imageType });
+            // MOUSE
+            avatarContainer.addEventListener('click', (e) => {
+                if (isLongPress) return;
+                openView();
+            });
 
-                                const dt = new DataTransfer();
-                                dt.items.add(file);
-                                fileInput.files = dt.files;
-                                // Trigger change
-                                fileInput.dispatchEvent(new Event('change'));
-                                return;
-                            }
-                        }
-                        alert("Nessuna immagine trovata negli appunti.");
-                    } catch (err) {
-                        console.error('Clipboard Error:', err);
-                        alert("Impossibile accedere agli appunti. Assicurati di aver dato i permessi.");
-                    }
-                });
-            }
+            avatarContainer.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                triggerUpload();
+            });
 
-            PasteHandler.attach(avatarContainer, (file) => {
-                // Create a DataTransfer to set the file input
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                fileInput.files = dt.files;
+            // TOUCH
+            avatarContainer.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    navigator.vibrate?.(50);
+                    triggerUpload();
+                }, 600);
+            }, { passive: true });
 
-                // Trigger change event manually
-                fileInput.dispatchEvent(new Event('change'));
+            avatarContainer.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
 
-                // Visual feedback
-                const overlay = avatarContainer.querySelector('.avatar-edit-overlay');
-                if (overlay) {
-                    overlay.style.opacity = '1';
-                    overlay.innerHTML = '<span style="color: var(--accent-green); font-size: 1.5rem;">✨</span>';
-                    setTimeout(() => {
-                        overlay.style.opacity = '';
-                        overlay.innerHTML = '<span style="color: white; font-size: 1.5rem;">✏️</span><span style="color: white; font-size: 0.6rem; margin-top: 2px;">Incolla (CTRL+V)</span>';
-                    }, 1000);
-                }
+            avatarContainer.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) e.preventDefault();
             });
         }
 
-        // Also global paste when sheet is active? Maybe too aggressive.
-        // Let's stick to container for now, but maybe the whole sheet header?
-        const header = container.querySelector('.char-header');
-        if (header && fileInput) {
-            PasteHandler.attach(header, (file) => {
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                fileInput.files = dt.files;
-                fileInput.dispatchEvent(new Event('change'));
-            });
-        }
+        // Header paste removal - Cleaned up
+        // const header = container.querySelector('.char-header');
+        // if (header && fileInput) { ... } // Removed
         const cropperOverlay = container.querySelector('#sheet-cropper-overlay');
         const cropperImg = container.querySelector('#sheet-cropper-img');
         const cropperMask = container.querySelector('#sheet-cropper-mask');

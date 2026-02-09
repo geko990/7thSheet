@@ -129,27 +129,7 @@ class App {
 
         if (isFreshLaunch) {
             sessionStorage.setItem('app_session_active', 'true');
-            console.log('Fresh launch detected. Starting idle update timer...');
-
-            let idleTimer = setTimeout(() => {
-                console.log('User inactive for 10s on fresh launch. Updating...');
-                this.forceAppUpdate();
-            }, 10000); // 10 seconds
-
-            const clearIdleTimer = () => {
-                if (idleTimer) {
-                    clearTimeout(idleTimer);
-                    idleTimer = null;
-                    console.log('User interaction detected. Auto-update cancelled.');
-                    ['click', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
-                        document.removeEventListener(evt, clearIdleTimer, { capture: true })
-                    );
-                }
-            };
-
-            ['click', 'touchstart', 'scroll', 'keydown'].forEach(evt =>
-                document.addEventListener(evt, clearIdleTimer, { capture: true, once: true })
-            );
+            // Logic removed to prevent unwanted reloads
         }
     }
 

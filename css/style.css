@@ -1135,6 +1135,12 @@ select {
     margin-top: 15px;
 }
 
+@media (max-width: 600px) {
+    .edition-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .edition-card-box {
     background: linear-gradient(145deg, #fdfaf5 0%, #f5edd8 100%);
     border: 2px solid var(--accent-gold);
