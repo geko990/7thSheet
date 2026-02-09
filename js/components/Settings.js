@@ -21,6 +21,9 @@ export default class Settings {
 
         if (user) {
             // LOGGED IN: Show Profile + Logout
+            const currentUsername = user.user_metadata?.username || '';
+            const currentAvatar = user.user_metadata?.avatar_url || '';
+
             profileSectionHTML = `
                 <!-- Profile Management Card -->
                  <div class="settings-card">
@@ -29,24 +32,30 @@ export default class Settings {
                         <span class="settings-card-title">Profilo Utente</span>
                     </div>
                     <div class="settings-card-body">
-                         <div class="text-center mb-15">
-                            <div class="avatar-preview" id="settings-avatar-preview" style="width: 80px; height: 80px; border-radius: 50%; background: #ccc; margin: 0 auto 10px; overflow: hidden; border: 3px solid var(--accent-gold); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                <span style="line-height: 80px; font-size: 2.5rem;">👤</span>
+                         <!-- Clickable Avatar -->
+                         <div class="text-center mb-20" style="position: relative;">
+                            <div class="avatar-preview" id="settings-avatar-preview" style="width: 100px; height: 100px; border-radius: 50%; background: #ccc; margin: 0 auto; overflow: hidden; border: 3px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; position: relative;">
+                                ${currentAvatar ? `<img src="${currentAvatar}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; font-size: 0.7rem; padding: 2px;">📷</div>
                             </div>
-                            <button class="settings-btn" id="btn-change-avatar" style="width: auto; padding: 5px 15px; font-size: 0.8rem;">
-                                📷 Cambia Foto
-                            </button>
                             <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
                         </div>
                         
-                        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 5px;">
-                            <label class="settings-row-label" style="font-size: 0.9rem;">Nome Pubblico</label>
-                            <input type="text" id="profile-username" class="input-field" placeholder="Es. Enrico" style="width: 100%; text-align: left; padding: 10px;">
+                        <!-- Account Info Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px 15px; align-items: center; margin-bottom: 25px; padding: 0 10px;">
+                            <!-- Row 1 -->
+                            <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Account</span>
+                            <span style="text-align: right; color: var(--text-faded); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</span>
+
+                            <!-- Row 2 -->
+                            <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Nome Pubblico</span>
+                            <input type="text" id="profile-username" placeholder="Il tuo nick..." style="text-align: right; background: transparent; border: none; border-bottom: 1px solid var(--border-worn); padding: 5px; color: var(--text-color); font-family: var(--font-main); width: 100%; font-size: 1rem;" value="${currentUsername}">
                         </div>
 
-                        <div class="text-center mt-20">
-                            <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white; margin-bottom: 10px;">
-                                Salva Profilo
+                        <!-- Actions -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                             <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
+                                Salva Modifiche
                             </button>
                              <button class="btn btn-secondary" id="btn-logout" style="width: 100%; justify-content: center; border-color: var(--accent-red); color: var(--accent-red);">
                                 Esci
@@ -219,14 +228,18 @@ export default class Settings {
         if (data) {
             if (data.avatar_url) {
                 currentAvatarUrl = data.avatar_url;
-                avatarPreview.innerHTML = `<img src="${data.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                avatarPreview.innerHTML = `
+                    <img src="${data.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; font-size: 0.7rem; padding: 2px;">📷</div>
+                `;
             }
             if (data.username) {
                 usernameInput.value = data.username;
             }
         }
 
-        container.querySelector('#btn-change-avatar').addEventListener('click', () => avatarInput.click());
+        // Avatar Click Listener
+        avatarPreview.addEventListener('click', () => avatarInput.click());
 
         avatarInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
@@ -234,17 +247,21 @@ export default class Settings {
 
             const { CampaignService } = await import('../services/CampaignService.js');
 
+            const originalContent = avatarPreview.innerHTML;
             avatarPreview.innerHTML = '<div class="spinner"></div>';
 
             const { publicUrl, error } = await CampaignService.uploadImage(file);
             if (error) {
                 alert('Errore caricamento immagine: ' + error.message);
-                avatarPreview.innerHTML = '<span style="line-height: 80px; font-size: 2.5rem;">⚠️</span>';
+                avatarPreview.innerHTML = originalContent; // Restore
                 return;
             }
 
             currentAvatarUrl = publicUrl;
-            avatarPreview.innerHTML = `<img src="${publicUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            avatarPreview.innerHTML = `
+                <img src="${publicUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5); color: white; font-size: 0.7rem; padding: 2px;">📷</div>
+            `;
         });
 
         saveProfileBtn.addEventListener('click', async () => {

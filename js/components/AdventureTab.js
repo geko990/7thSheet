@@ -136,12 +136,6 @@ export class AdventureTab {
 
         this.container.innerHTML = `
             <div class="settings-container">
-                <div class="char-header text-center" style="position: relative;">
-                    <div style="font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">ACCOUNT</div>
-                    <div style="font-family: var(--font-display); font-size: 1.2rem;">${user.email.split('@')[0]}</div>
-                    <button class="btn btn-xs btn-secondary" id="btn-logout" style="margin-top: 10px;">Esci</button>
-                </div>
-
                 <div class="sheet-section">
                     <div class="sheet-section-title">Le mie Campagne</div>
                     
@@ -174,10 +168,8 @@ export class AdventureTab {
         // Create/Join Buttons
         this.container.querySelector('#btn-create-campaign')?.addEventListener('click', () => this.openCreateCampaignModal());
         this.container.querySelector('#btn-join-campaign')?.addEventListener('click', () => this.openJoinCampaignModal());
-        this.container.querySelector('#btn-logout')?.addEventListener('click', async () => {
-            await AuthService.signOut();
-            window.location.reload();
-        });
+
+        // Logout listener removed as button is gone
 
         // Campaign Cards
         const cards = this.container.querySelectorAll('.campaign-card');
