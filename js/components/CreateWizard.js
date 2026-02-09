@@ -17,15 +17,16 @@ export default class CreateWizard {
             concept: '',
             nation: '',
             religion: '',
-            image: null, // New image field
+            image: null,
             traits: { brawn: 2, finesse: 2, resolve: 2, wits: 2, panache: 2 },
             skills: {},
             backgrounds: [],
             advantages: [],
             arcana: null,
             stories: [],
-            edition: null, // Track edition in character data
-            level: 1 // Default Level 1
+            stepsBank: 0,
+            growthLog: [],
+            edition: null
         };
         this.tempPoints = {
             traits: 2,
@@ -1191,7 +1192,7 @@ export default class CreateWizard {
         // Character schema has `stories: []`.
         // We'll create/update the first story object.
         if (this.character.stories.length === 0) {
-            this.character.stories.push({ name: '', goal: '', reward: '', steps: [''] });
+            this.character.stories.push({ name: '', goal: '', reward: '', steps: [{ text: '', completed: false }], completed: false });
         }
         const story = this.character.stories[0];
 
@@ -1203,12 +1204,15 @@ export default class CreateWizard {
         sName.value = story.name;
         sGoal.value = story.goal;
         sReward.value = story.reward;
-        sStep1.value = story.steps[0] || '';
+        sStep1.value = (story.steps[0] && typeof story.steps[0] === 'object') ? story.steps[0].text : (story.steps[0] || '');
 
         sName.addEventListener('input', (e) => story.name = e.target.value);
         sGoal.addEventListener('input', (e) => story.goal = e.target.value);
         sReward.addEventListener('input', (e) => story.reward = e.target.value);
-        sStep1.addEventListener('input', (e) => story.steps[0] = e.target.value);
+        sStep1.addEventListener('input', (e) => {
+            if (typeof story.steps[0] === 'object') story.steps[0].text = e.target.value;
+            else story.steps[0] = { text: e.target.value, completed: false };
+        });
     }
 
     renderStep5V1(container) {

@@ -110,10 +110,22 @@ export default class CharacterSheet {
         if (!this.character.inventory) this.character.inventory = [];
         if (!this.character.equipment) this.character.equipment = [];
         if (!this.character.journal) this.character.journal = [];
+        if (!this.character.stories) this.character.stories = [];
+        if (this.character.stepsBank === undefined) this.character.stepsBank = 0;
+        if (!this.character.growthLog) this.character.growthLog = [];
         // Wealth Migration: Number -> Object
         if (typeof this.character.wealth !== 'object') {
             this.character.wealth = { gold: 0, silver: 0, copper: this.character.wealth || 0 };
         }
+        // Story Steps Migration: string[] -> {text, completed}[]
+        this.character.stories.forEach(story => {
+            if (!story.steps) story.steps = [];
+            story.steps = story.steps.map(s => {
+                if (typeof s === 'string') return { text: s, completed: false };
+                return s;
+            });
+            if (story.completed === undefined) story.completed = false;
+        });
 
         // Load Data for Tooltips
         await this.loadAdvantagesData(this.character.edition);
@@ -137,6 +149,7 @@ export default class CharacterSheet {
                     <button class="tab-btn" data-tab="equipment">Equip.</button>
                     <button class="tab-btn" data-tab="inventory">Borsa</button>
                     <button class="tab-btn" data-tab="journal">Diario</button>
+                    <button class="tab-btn" data-tab="growth">Crescita</button>
                 </div>
 
                 <!-- Content Area -->
@@ -223,12 +236,14 @@ export default class CharacterSheet {
         if (tabName === 'equipment') this.renderEquipmentTab(container);
         if (tabName === 'inventory') this.renderInventoryTab(container);
         if (tabName === 'journal') this.renderJournalTab(container);
+        if (tabName === 'growth') this.renderGrowthTab(container);
 
         // Re-attach listeners for the new content
         if (tabName === 'sheet') this.attachSheetListeners(container);
         if (tabName === 'equipment') this.attachListListeners(container, 'equipment');
         if (tabName === 'inventory') this.attachListListeners(container, 'inventory');
         if (tabName === 'journal') this.attachListListeners(container, 'journal');
+        if (tabName === 'growth') this.attachGrowthListeners(container);
     }
 
     renderSheetTab(container) {
@@ -254,7 +269,7 @@ export default class CharacterSheet {
                     </div>
                     <h2 class="page-title" style="margin-bottom: 0;">${this.character.name}</h2>
                     <div style="font-style: italic; color: var(--text-faded); margin-bottom: 15px;">
-                        ${this.character.nation} • Livello <span id="lvl-display">${this.character.level || 1}</span>
+                        ${this.character.nation}
                     </div>
                     
                     <!-- Cropper Modal -->
@@ -353,9 +368,7 @@ export default class CharacterSheet {
                     </div>
                 </div>
                 
-                <div class="text-center mt-20">
-                     <button id="btn-lvl-up" style="background: linear-gradient(135deg, var(--accent-gold), #8a6d3b); color: white; border: none; padding: 12px 24px; font-family: var(--font-display); font-size: 1.1rem; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">⚡ Level Up</button>
-                </div>
+
         `;
     }
 
@@ -1093,11 +1106,6 @@ export default class CharacterSheet {
         const detailsTrigger = container.querySelector('#details-trigger');
         if (detailsTrigger) detailsTrigger.addEventListener('click', () => this.showDetailsPopup());
 
-        const lvlBtn = container.querySelector('#btn-lvl-up');
-        if (lvlBtn) lvlBtn.addEventListener('click', () => {
-            const l = prompt("Nuovo Livello:", this.character.level || 1);
-            if (l) { this.character.level = parseInt(l); document.querySelector('#lvl-display').textContent = l; Storage.saveCharacter(this.character); }
-        });
 
         const hpVal = container.querySelector('#hp-val');
         if (hpVal) {
@@ -1312,6 +1320,453 @@ export default class CharacterSheet {
             cropperOverlay.style.display = 'none';
         };
 
+    }
+
+    // ============ GROWTH TAB ============
+
+    renderGrowthTab(container) {
+        const activeStories = this.character.stories.filter(s => !s.completed);
+        const completedStories = this.character.stories.filter(s => s.completed);
+
+        container.innerHTML = `
+            <div class="sheet-section">
+                <!-- Steps Bank -->
+                <div class="growth-steps-bank" style="text-align: center; padding: 20px; margin-bottom: 20px; background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05)); border: 2px solid var(--accent-gold); border-radius: 8px;">
+                    <div style="font-family: var(--font-display); font-size: 0.9rem; color: var(--text-faded); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Passi Disponibili</div>
+                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent-gold); font-family: var(--font-display);">${this.character.stepsBank || 0}</div>
+                    ${this.character.stepsBank > 0 ? `
+                    <button id="btn-spend-steps" class="btn btn-primary" style="margin-top: 12px; padding: 10px 24px;">
+                        💰 Spendi Passi
+                    </button>` : ''}
+                </div>
+
+                <!-- Active Stories -->
+                <div class="sheet-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>📖 Storie Attive</span>
+                </div>
+
+                ${activeStories.length === 0 ? `
+                <p style="font-style: italic; color: var(--text-faded); text-align: center; margin: 15px 0;">Nessuna storia attiva. Crea la tua prima storia!</p>
+                ` : activeStories.map((story, realIdx) => {
+            const idx = this.character.stories.indexOf(story);
+            const completedSteps = story.steps.filter(s => s.completed).length;
+            const totalSteps = story.steps.length;
+            const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+            return `
+                    <div class="growth-story-card" data-story-idx="${idx}" style="border: 1px solid var(--border-worn); border-radius: 8px; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.4); box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                            <div style="font-family: var(--font-display); font-size: 1.15rem; color: var(--accent-navy); flex: 1;">${story.name || 'Storia senza nome'}</div>
+                            <button class="btn-story-menu" data-idx="${idx}" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0 5px;">⋮</button>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-faded); margin-bottom: 5px;">🎯 ${story.goal || '-'}</div>
+                        <div style="font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 12px;">🏆 ${story.reward || '-'}</div>
+
+                        <!-- Progress Bar -->
+                        <div style="background: rgba(0,0,0,0.08); border-radius: 10px; height: 6px; margin-bottom: 12px; overflow: hidden;">
+                            <div style="background: var(--accent-gold); height: 100%; width: ${progress}%; border-radius: 10px; transition: width 0.3s;"></div>
+                        </div>
+
+                        <!-- Steps List -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${story.steps.map((step, stepIdx) => `
+                            <div class="growth-step-item" style="display: flex; align-items: center; gap: 10px; padding: 6px 0; ${step.completed ? 'opacity: 0.6;' : ''}">
+                                <button class="btn-toggle-step" data-story="${idx}" data-step="${stepIdx}" 
+                                    style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid ${step.completed ? 'var(--accent-gold)' : 'var(--border-worn)'}; background: ${step.completed ? 'var(--accent-gold)' : 'transparent'}; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem;">
+                                    ${step.completed ? '✓' : ''}
+                                </button>
+                                <span style="font-size: 0.95rem; ${step.completed ? 'text-decoration: line-through;' : ''}">${step.text || '...'}</span>
+                            </div>
+                            `).join('')}
+                        </div>
+
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-secondary btn-add-step" data-idx="${idx}" style="flex: 1; font-size: 0.85rem; padding: 8px;">+ Passo</button>
+                            ${completedSteps === totalSteps && totalSteps > 0 ? `
+                            <button class="btn btn-primary btn-complete-story" data-idx="${idx}" style="flex: 1; font-size: 0.85rem; padding: 8px;">✓ Completa Storia</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    `;
+        }).join('')}
+
+                <button id="btn-new-story" class="btn btn-primary w-100" style="border-radius: 4px; padding: 12px; margin-bottom: 25px;">
+                    📝 Nuova Storia
+                </button>
+
+                ${completedStories.length > 0 ? `
+                <!-- Completed Stories (Collapsed) -->
+                <div class="sheet-section-title" style="cursor: pointer; user-select: none;" id="toggle-completed-stories">
+                    <span>✅ Storie Completate (${completedStories.length})</span>
+                    <span id="completed-arrow" style="float: right; transition: transform 0.2s;">▸</span>
+                </div>
+                <div id="completed-stories-list" style="display: none;">
+                    ${completedStories.map(story => {
+            const idx = this.character.stories.indexOf(story);
+            return `
+                        <div style="border: 1px solid var(--border-worn); border-radius: 8px; padding: 12px; margin-bottom: 10px; background: rgba(0,0,0,0.02); opacity: 0.7;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-family: var(--font-display); color: var(--text-faded);">${story.name}</div>
+                                <button class="btn-delete-story" data-idx="${idx}" style="background: none; border: none; cursor: pointer; color: var(--accent-red); font-size: 1rem;">🗑️</button>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-faded);">🏆 ${story.reward || '-'}</div>
+                        </div>
+                        `;
+        }).join('')}
+                </div>
+                ` : ''}
+
+                ${this.character.growthLog.length > 0 ? `
+                <!-- Growth History -->
+                <div class="sheet-section-title" style="margin-top: 20px;">📜 Storico Crescita</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${this.character.growthLog.slice().reverse().map(entry => `
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(0,0,0,0.02); border-radius: 6px; border-left: 3px solid var(--accent-gold);">
+                        <span style="font-size: 1rem;">${entry.icon || '⬆️'}</span>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.9rem; font-weight: 500;">${entry.text}</div>
+                            ${entry.via ? `<div style="font-size: 0.75rem; color: var(--text-faded);">via "${entry.via}"</div>` : ''}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-faded);">${entry.date || ''}</div>
+                    </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    attachGrowthListeners(container) {
+        // New Story
+        container.querySelector('#btn-new-story')?.addEventListener('click', () => this.openGrowthStoryModal());
+
+        // Spend Steps
+        container.querySelector('#btn-spend-steps')?.addEventListener('click', () => this.openSpendStepsModal());
+
+        // Toggle Completed Stories
+        const toggleBtn = container.querySelector('#toggle-completed-stories');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const list = container.querySelector('#completed-stories-list');
+                const arrow = container.querySelector('#completed-arrow');
+                if (list.style.display === 'none') {
+                    list.style.display = 'block';
+                    arrow.style.transform = 'rotate(90deg)';
+                } else {
+                    list.style.display = 'none';
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
+
+        // Step Toggle Buttons
+        container.querySelectorAll('.btn-toggle-step').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const storyIdx = parseInt(btn.dataset.story);
+                const stepIdx = parseInt(btn.dataset.step);
+                const story = this.character.stories[storyIdx];
+                if (!story) return;
+
+                const step = story.steps[stepIdx];
+                if (!step) return;
+
+                step.completed = !step.completed;
+
+                // Update stepsBank
+                if (step.completed) {
+                    this.character.stepsBank = (this.character.stepsBank || 0) + 1;
+                } else {
+                    this.character.stepsBank = Math.max(0, (this.character.stepsBank || 0) - 1);
+                }
+
+                Storage.saveCharacter(this.character);
+                this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+            });
+        });
+
+        // Add Step Buttons
+        container.querySelectorAll('.btn-add-step').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                const story = this.character.stories[idx];
+                if (!story) return;
+
+                const text = prompt('Descrivi il nuovo passo:');
+                if (text && text.trim()) {
+                    story.steps.push({ text: text.trim(), completed: false });
+                    Storage.saveCharacter(this.character);
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
+        });
+
+        // Complete Story Buttons
+        container.querySelectorAll('.btn-complete-story').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                const story = this.character.stories[idx];
+                if (!story) return;
+
+                if (confirm(`Completare la storia "${story.name}"?\n\nRicompensa: ${story.reward || 'Nessuna'}`)) {
+                    story.completed = true;
+                    this.character.growthLog.push({
+                        icon: '📖',
+                        text: `Storia completata: ${story.name}`,
+                        via: story.reward,
+                        date: new Date().toLocaleDateString()
+                    });
+                    Storage.saveCharacter(this.character);
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
+        });
+
+        // Story Menu Buttons
+        container.querySelectorAll('.btn-story-menu').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.dataset.idx);
+                this.openStoryContextMenu(idx);
+            });
+        });
+
+        // Delete Story (Completed)
+        container.querySelectorAll('.btn-delete-story').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx);
+                if (confirm('Eliminare questa storia completata?')) {
+                    this.character.stories.splice(idx, 1);
+                    Storage.saveCharacter(this.character);
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
+        });
+    }
+
+    openStoryContextMenu(storyIdx) {
+        const story = this.character.stories[storyIdx];
+        if (!story) return;
+
+        const existingMenu = document.getElementById('story-ctx-menu');
+        if (existingMenu) existingMenu.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'story-ctx-menu';
+        menu.className = 'modal-overlay';
+        menu.style.cssText = 'display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 10000; backdrop-filter: blur(2px);';
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.2rem; color: var(--accent-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${story.name || 'Storia'}</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-secondary" id="sctx-edit" style="width: 100%;">✏️ Modifica</button>
+                    <button class="btn btn-secondary" id="sctx-delete" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    <button class="btn btn-secondary" id="sctx-cancel" style="width: 100%; margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+            <style> @keyframes popIn { to { transform: scale(1); } } </style>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#sctx-edit').onclick = () => { menu.remove(); this.openGrowthStoryModal(storyIdx); };
+        menu.querySelector('#sctx-delete').onclick = () => {
+            menu.remove();
+            if (confirm('Eliminare questa storia?')) {
+                this.character.stories.splice(storyIdx, 1);
+                Storage.saveCharacter(this.character);
+                this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+            }
+        };
+        menu.querySelector('#sctx-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+    }
+
+    openGrowthStoryModal(idx = null) {
+        const isEdit = idx !== null;
+        const story = isEdit ? this.character.stories[idx] : { name: '', goal: '', reward: '', steps: [{ text: '', completed: false }], completed: false };
+
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.cssText = 'display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20000; backdrop-filter: blur(4px);';
+
+        modal.innerHTML = `
+            <div class="modal-content" style="width: 95%; max-width: 500px; background: #fdfaf5; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;">
+                <div style="padding: 25px;">
+                    <h3 style="text-align: center; color: var(--accent-gold); margin-bottom: 20px; font-family: var(--font-display);">${isEdit ? 'Modifica' : 'Nuova'} Storia</h3>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">Nome Storia</label>
+                        <input type="text" id="gs-name" value="${story.name}" placeholder="Es. Vendetta contro il Conte" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🎯 Obiettivo</label>
+                        <input type="text" id="gs-goal" value="${story.goal}" placeholder="Cosa vuoi ottenere?" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">🏆 Ricompensa</label>
+                        <input type="text" id="gs-reward" value="${story.reward}" placeholder="Es. +1 Mischia, Vantaggio: Duellante" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                    </div>
+                    
+                    ${!isEdit ? `
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; color: var(--text-faded); display: block; margin-bottom: 4px;">Primo Passo</label>
+                        <input type="text" id="gs-step1" placeholder="Es. Trovare dove si nasconde" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 1rem;">
+                    </div>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-secondary" id="gs-cancel" style="flex: 1;">Annulla</button>
+                        <button class="btn btn-primary" id="gs-save" style="flex: 1;">Salva</button>
+                    </div>
+                </div>
+            </div>
+            <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector('#gs-cancel').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+        modal.querySelector('#gs-save').onclick = () => {
+            const name = modal.querySelector('#gs-name').value.trim();
+            const goal = modal.querySelector('#gs-goal').value.trim();
+            const reward = modal.querySelector('#gs-reward').value.trim();
+
+            if (!name) return alert('Inserisci un nome per la storia.');
+
+            if (isEdit) {
+                story.name = name;
+                story.goal = goal;
+                story.reward = reward;
+            } else {
+                const step1Text = modal.querySelector('#gs-step1').value.trim();
+                const newStory = {
+                    name,
+                    goal,
+                    reward,
+                    steps: step1Text ? [{ text: step1Text, completed: false }] : [],
+                    completed: false
+                };
+                this.character.stories.push(newStory);
+            }
+
+            Storage.saveCharacter(this.character);
+            modal.remove();
+            this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+        };
+    }
+
+    openSpendStepsModal() {
+        const available = this.character.stepsBank || 0;
+        if (available <= 0) return alert('Non hai passi disponibili da spendere.');
+
+        // Build skill options
+        const skillKeys = Object.keys(this.skillMap);
+        const skillOptions = skillKeys.map(key => {
+            const currentRank = this.character.skills[key] || 0;
+            const nextRank = currentRank + 1;
+            if (nextRank > 5) return null; // Max rank
+            const cost = nextRank; // Cost = target rank (1→2 costs 2, etc.)
+            return { key, name: this.skillMap[key], currentRank, nextRank, cost };
+        }).filter(Boolean);
+
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.cssText = 'display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20000; backdrop-filter: blur(4px);';
+
+        modal.innerHTML = `
+            <div class="modal-content" style="width: 95%; max-width: 500px; max-height: 85vh; background: #fdfaf5; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out; display: flex; flex-direction: column;">
+                <div style="padding: 20px 20px 10px; flex-shrink: 0;">
+                    <h3 style="text-align: center; color: var(--accent-gold); margin-bottom: 5px; font-family: var(--font-display);">💰 Spendi Passi</h3>
+                    <div style="text-align: center; font-size: 0.9rem; color: var(--text-faded);">Passi disponibili: <strong style="color: var(--accent-gold); font-size: 1.1rem;">${available}</strong></div>
+                </div>
+
+                <div style="padding: 10px 20px 20px; overflow-y: auto; flex: 1;">
+                    <!-- Skills Section -->
+                    <div style="font-family: var(--font-display); font-size: 1rem; color: var(--accent-navy); margin: 15px 0 10px; border-bottom: 1px solid var(--border-worn); padding-bottom: 5px;">⚔️ Migliora Abilità</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        ${skillOptions.map(opt => `
+                        <button class="spend-skill-btn" data-key="${opt.key}" data-cost="${opt.cost}"
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid var(--border-worn); border-radius: 6px; background: white; cursor: pointer; transition: all 0.15s; ${opt.cost > available ? 'opacity: 0.4; pointer-events: none;' : ''}"
+                            ${opt.cost > available ? 'disabled' : ''}>
+                            <span style="font-size: 0.95rem;"><strong>${opt.name}</strong> ${opt.currentRank} → ${opt.nextRank}</span>
+                            <span style="background: var(--accent-gold); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">${opt.cost} passi</span>
+                        </button>
+                        `).join('')}
+                    </div>
+
+                    <!-- Free Text Advantage -->
+                    <div style="font-family: var(--font-display); font-size: 1rem; color: var(--accent-navy); margin: 20px 0 10px; border-bottom: 1px solid var(--border-worn); padding-bottom: 5px;">🎭 Nuovo Vantaggio</div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="spend-adv-name" placeholder="Nome vantaggio..." style="flex: 1; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px; font-size: 0.95rem;">
+                        <select id="spend-adv-cost" style="padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px;">
+                            ${[1, 2, 3, 4, 5].map(c => `<option value="${c}" ${c > available ? 'disabled' : ''}>${c} p.</option>`).join('')}
+                        </select>
+                        <button id="btn-buy-adv" class="btn btn-primary" style="padding: 10px 15px; white-space: nowrap;">Compra</button>
+                    </div>
+                </div>
+
+                <div style="padding: 15px 20px; background: rgba(0,0,0,0.03); border-top: 1px solid var(--border-worn); flex-shrink: 0;">
+                    <button id="spend-close" class="btn btn-secondary w-100">Chiudi</button>
+                </div>
+            </div>
+            <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Skill Upgrade
+        modal.querySelectorAll('.spend-skill-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.key;
+                const cost = parseInt(btn.dataset.cost);
+                const skillName = this.skillMap[key];
+                const currentRank = this.character.skills[key] || 0;
+
+                if (confirm(`Migliorare ${skillName} da ${currentRank} a ${currentRank + 1}?\nCosto: ${cost} passi`)) {
+                    this.character.skills[key] = currentRank + 1;
+                    this.character.stepsBank -= cost;
+                    this.character.growthLog.push({
+                        icon: '⬆️',
+                        text: `${skillName} → Rango ${currentRank + 1}`,
+                        date: new Date().toLocaleDateString()
+                    });
+                    Storage.saveCharacter(this.character);
+                    modal.remove();
+                    this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+                }
+            });
+        });
+
+        // Buy Advantage
+        modal.querySelector('#btn-buy-adv')?.addEventListener('click', () => {
+            const name = modal.querySelector('#spend-adv-name').value.trim();
+            const cost = parseInt(modal.querySelector('#spend-adv-cost').value);
+
+            if (!name) return alert('Inserisci il nome del vantaggio.');
+            if (cost > this.character.stepsBank) return alert('Passi insufficienti.');
+
+            if (confirm(`Acquistare "${name}" per ${cost} passi?`)) {
+                if (!this.character.advantages) this.character.advantages = [];
+                this.character.advantages.push(name);
+                this.character.stepsBank -= cost;
+                this.character.growthLog.push({
+                    icon: '🎭',
+                    text: `Nuovo Vantaggio: ${name}`,
+                    date: new Date().toLocaleDateString()
+                });
+                Storage.saveCharacter(this.character);
+                modal.remove();
+                this.renderTabContent(document.querySelector('#tab-content'), 'growth');
+            }
+        });
+
+        // Close
+        modal.querySelector('#spend-close').onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
 
     render() {
