@@ -24,7 +24,9 @@
 
     /* Border Radius System */
     --radius-main: 4px;
+    /* Standard buttons/inputs */
     --radius-lg: 8px;
+    /* Cards/Modals */
     --radius-sm: 2px;
 }
 
@@ -262,7 +264,7 @@ select {
     color: white;
     border: none;
     padding: 15px 25px;
-    border-radius: 30px;
+    border-radius: var(--radius-lg);
     font-size: 1.1rem;
     font-family: var(--font-display);
     box-shadow: 0 4px 15px var(--shadow-strong);
@@ -769,14 +771,14 @@ select {
     gap: 8px;
     background: rgba(184, 134, 11, 0.1);
     padding: 6px 10px;
-    border-radius: 30px;
+    border-radius: var(--radius-main);
     border: 1px solid var(--accent-gold);
 }
 
 .counter-btn {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: var(--radius-main);
     border: none;
     background: var(--accent-gold);
     color: white;

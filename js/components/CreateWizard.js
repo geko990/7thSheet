@@ -702,14 +702,14 @@ export default class CreateWizard {
                     ${this.data.skills.map(skill => {
             const isBought = this.character.v1_purchased_skills.includes(skill.id);
             return `
-                        <div class="skill-item-v1" style="border: 1px solid var(--border-worn); border-radius: 6px; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.3);">
+                        <div class="skill-item-v1" style="border: 1px solid var(--border-worn); border-radius: 8px; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.3);">
                             <div class="skill-header" style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <strong>${skill.name}</strong> <span style="font-size: 0.8em; color: var(--text-faded);">(${this.translateTrait(skill.trait)})</span>
                                 </div>
                                 <button class="btn btn-sm ${isBought ? 'btn-danger' : 'btn-secondary'}" 
                                         onclick="window.toggleSkillV1('${skill.id}')"
-                                        style="font-size: 0.8rem; padding: 4px 8px;">
+                                        style="font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;">
                                     ${isBought ? 'Rimuovi (2 PE)' : 'Acquista (2 PE)'}
                                 </button>
                             </div>

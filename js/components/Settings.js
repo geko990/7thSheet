@@ -69,131 +69,135 @@ export default class Settings {
             profileSectionHTML = `
                 <div class="settings-card" id="auth-card">
                     <div class="settings-card-header">
-                        <span class="settings-card-icon">🔒</span>
-                        <span class="settings-card-title">Accesso Pirata</span>
+                        <span class="settings-card-icon">⚓</span>
+                        <span class="settings-card-title">Salpiamo</span>
                     </div>
                     <div class="settings-card-body">
-                         <div class="tabs mb-20" style="display: flex; justify-content: center; gap: 10px;">
-                            <button class="btn btn-sm btn-primary active" id="tab-login">Accedi</button>
-                            <button class="btn btn-sm btn-secondary" id="tab-register">Registrati</button>
-                        </div>
-
                         <form id="auth-form">
-                            <div class="form-group mb-15">
-                                <label style="display: block; margin-bottom: 5px; color: var(--text-faded); font-size: 0.9rem;">Email</label>
-                                <input type="email" id="auth-email" class="input-field w-100" required>
+                            <!-- Email Row -->
+                            <div class="form-group mb-15" style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 5px;">
+                                <label style="color: var(--text-faded); font-size: 0.95rem; font-weight: bold;">Email</label>
+                                <input type="email" id="auth-email" class="input-field" required style="text-align: right; background: rgba(255, 255, 255, 0.5); border: 1px solid var(--border-worn); border-radius: 4px; padding: 5px 10px; width: 60%; color: var(--text-ink);">
                             </div>
                             
-                            <div class="form-group mb-20">
-                                <label style="display: block; margin-bottom: 5px; color: var(--text-faded); font-size: 0.9rem;">Password</label>
-                                <input type="password" id="auth-password" class="input-field w-100" required>
+                            <!-- Password Row -->
+                            <div class="form-group mb-20" style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 5px;">
+                                <label style="color: var(--text-faded); font-size: 0.95rem; font-weight: bold;">Password</label>
+                                <input type="password" id="auth-password" class="input-field" required style="text-align: right; background: rgba(255, 255, 255, 0.5); border: 1px solid var(--border-worn); border-radius: 4px; padding: 5px 10px; width: 60%; color: var(--text-ink);">
                             </div>
                             
                             <div class="text-right mb-20">
                                 <a href="#" id="btn-forgot-password" style="font-size: 0.8rem; color: var(--accent-gold); text-decoration: none;">Password dimenticata?</a>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100" id="btn-submit">Accedi</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn btn-primary" id="btn-login" style="flex: 1;">Accedi</button>
+                                <button type="button" class="btn btn-secondary" id="btn-register" style="flex: 1;">Registrati</button>
+                            </div>
                         </form>
                     </div>
                 </div>
             `;
         }
 
-        div.innerHTML = `
-            <div class="settings-hero">
-                <div class="settings-icon">⚙️</div>
-                <h2 class="settings-title">Impostazioni</h2>
+        const bgHtml = `
+            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/opzioni.png" alt="" style="width: 100%;">
             </div>
-            
-            <div class="settings-cards">
-                ${profileSectionHTML}
+        `;
 
-                <!-- Data Management Card -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <span class="settings-card-icon">📦</span>
-                        <span class="settings-card-title">Gestione Dati</span>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="settings-row">
-                            <div class="settings-row-info">
-                                <span class="settings-row-label">Esporta</span>
-                                <span class="settings-row-desc">Salva backup dei personaggi</span>
-                            </div>
-                            <button class="settings-btn" id="btn-export">
-                                <span class="btn-icon">📤</span>
-                            </button>
+        div.innerHTML = bgHtml + `
+            <div style="position: relative; z-index: 1;">
+                
+                <div class="settings-cards" style="margin-top: 20px;">
+                    ${profileSectionHTML}
+
+                    <!-- Data Management Card -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">📦</span>
+                            <span class="settings-card-title">Gestione Dati</span>
                         </div>
-                        <div class="settings-divider"></div>
-                        <div class="settings-row">
-                            <div class="settings-row-info">
-                                <span class="settings-row-label">Importa</span>
-                                <span class="settings-row-desc">Carica backup esistente</span>
+                        <div class="settings-card-body">
+                            <div class="settings-row">
+                                <div class="settings-row-info">
+                                    <span class="settings-row-label">Esporta</span>
+                                    <span class="settings-row-desc">Salva backup dei personaggi</span>
+                                </div>
+                                <button class="settings-btn" id="btn-export">
+                                    <span class="btn-icon">📤</span>
+                                </button>
                             </div>
-                            <button class="settings-btn" id="btn-import">
-                                <span class="btn-icon">📥</span>
-                            </button>
-                            <input type="file" id="import-file" accept=".json" style="display: none;">
+                            <div class="settings-divider"></div>
+                            <div class="settings-row">
+                                <div class="settings-row-info">
+                                    <span class="settings-row-label">Importa</span>
+                                    <span class="settings-row-desc">Carica backup esistente</span>
+                                </div>
+                                <button class="settings-btn" id="btn-import">
+                                    <span class="btn-icon">📥</span>
+                                </button>
+                                <input type="file" id="import-file" accept=".json" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- App Info Card -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">ℹ️</span>
+                            <span class="settings-card-title">Informazioni</span>
+                        </div>
+                        <div class="settings-card-body">
+                             <div class="settings-row">
+                                <div class="settings-row-info">
+                                    <span class="settings-row-label">Versione</span>
+                                    <span class="settings-row-desc">7th Sea Character Sheet</span>
+                                </div>
+                                <span class="settings-version" id="app-version">${CONFIG.APP_VERSION}</span>
+                            </div>
+                            <div class="settings-divider"></div>
+                            <div class="settings-row">
+                                 <div class="settings-row-info">
+                                    <span class="settings-row-label">Aggiornamenti</span>
+                                    <span class="settings-row-desc">Forza aggiornamento all'ultima versione</span>
+                                </div>
+                                <button class="settings-btn settings-btn-refresh" id="btn-clear-cache">
+                                    <span class="btn-icon">🔄</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Installation Card -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">📱</span>
+                            <span class="settings-card-title">Installazione</span>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="install-steps">
+                                <div class="install-step">
+                                    <span class="step-num">1</span>
+                                    <span class="step-text">Apri il menu del browser (⋮ o ☐)</span>
+                                </div>
+                                <div class="install-step">
+                                    <span class="step-num">2</span>
+                                    <span class="step-text">Seleziona "Aggiungi a Home"</span>
+                                </div>
+                                <div class="install-step">
+                                    <span class="step-num">3</span>
+                                    <span class="step-text">Conferma l'installazione</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- App Info Card -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <span class="settings-card-icon">ℹ️</span>
-                        <span class="settings-card-title">Informazioni</span>
-                    </div>
-                    <div class="settings-card-body">
-                         <div class="settings-row">
-                            <div class="settings-row-info">
-                                <span class="settings-row-label">Versione</span>
-                                <span class="settings-row-desc">7th Sea Character Sheet</span>
-                            </div>
-                            <span class="settings-version" id="app-version">${CONFIG.APP_VERSION}</span>
-                        </div>
-                        <div class="settings-divider"></div>
-                        <div class="settings-row">
-                             <div class="settings-row-info">
-                                <span class="settings-row-label">Aggiornamenti</span>
-                                <span class="settings-row-desc">Forza aggiornamento all'ultima versione</span>
-                            </div>
-                            <button class="settings-btn settings-btn-refresh" id="btn-clear-cache">
-                                <span class="btn-icon">🔄</span>
-                            </button>
-                        </div>
-                    </div>
+                <div class="settings-footer">
+                    <div class="footer-anchor">⚓</div>
+                    <div class="footer-text">7th Sea v${CONFIG.APP_VERSION}</div>
                 </div>
-
-                <!-- Installation Card -->
-                <div class="settings-card">
-                    <div class="settings-card-header">
-                        <span class="settings-card-icon">📱</span>
-                        <span class="settings-card-title">Installazione</span>
-                    </div>
-                    <div class="settings-card-body">
-                        <div class="install-steps">
-                            <div class="install-step">
-                                <span class="step-num">1</span>
-                                <span class="step-text">Apri il menu del browser (⋮ o ☐)</span>
-                            </div>
-                            <div class="install-step">
-                                <span class="step-num">2</span>
-                                <span class="step-text">Seleziona "Aggiungi a Home"</span>
-                            </div>
-                            <div class="install-step">
-                                <span class="step-num">3</span>
-                                <span class="step-text">Conferma l'installazione</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-footer">
-                <div class="footer-anchor">⚓</div>
-                <div class="footer-text">7th Sea v${CONFIG.APP_VERSION}</div>
             </div>
         `;
 
@@ -302,49 +306,47 @@ export default class Settings {
         const form = container.querySelector('#auth-form');
         const emailInput = container.querySelector('#auth-email');
         const passwordInput = container.querySelector('#auth-password');
-        const btnSubmit = container.querySelector('#btn-submit');
-        const tabLogin = container.querySelector('#tab-login');
-        const tabRegister = container.querySelector('#tab-register');
+        const btnLogin = container.querySelector('#btn-login');
+        const btnRegister = container.querySelector('#btn-register');
         const btnForgot = container.querySelector('#btn-forgot-password');
-
-        let isLogin = true;
-
-        const toggleMode = (login) => {
-            isLogin = login;
-            tabLogin.className = `btn btn-sm ${isLogin ? 'btn-primary active' : 'btn-secondary'}`;
-            tabRegister.className = `btn btn-sm ${!isLogin ? 'btn-primary active' : 'btn-secondary'}`;
-            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
-        };
-
-        tabLogin.addEventListener('click', (e) => { e.preventDefault(); toggleMode(true); });
-        tabRegister.addEventListener('click', (e) => { e.preventDefault(); toggleMode(false); });
 
         if (btnForgot) {
             btnForgot.addEventListener('click', (e) => {
                 e.preventDefault();
-                alert("Non ancora implementato qui!"); // Placeholder or reuse modal logic if I had access to app
+                alert("Non ancora implementato qui!");
             });
         }
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        const handleAuth = async (isLogin) => {
             const email = emailInput.value.trim();
             const password = passwordInput.value.trim();
-            if (!email || !password) return;
 
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Caricamento...';
+            if (!email || !password) {
+                alert("Inserisci Email e Password.");
+                return;
+            }
+
+            const btn = isLogin ? btnLogin : btnRegister;
+            const originalText = btn.textContent;
+
+            // Disable interactions
+            btnLogin.disabled = true;
+            btnRegister.disabled = true;
+            btn.textContent = 'Caricamento...';
 
             const { AuthService } = await import('../services/AuthService.js');
             let result;
+
             if (isLogin) {
                 result = await AuthService.signIn(email, password);
             } else {
                 result = await AuthService.signUp(email, password, email.split('@')[0]);
             }
 
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = isLogin ? 'Accedi' : 'Registrati';
+            // Re-enable
+            btnLogin.disabled = false;
+            btnRegister.disabled = false;
+            btn.textContent = originalText;
 
             if (result.error) {
                 alert("Errore: " + result.error.message);
@@ -357,6 +359,16 @@ export default class Settings {
                 // Navigate to Characters (Profile)
                 this.app.router.navigate('characters');
             }
+        };
+
+        btnLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleAuth(true);
+        });
+
+        btnRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleAuth(false);
         });
     }
 

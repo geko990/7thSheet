@@ -83,7 +83,7 @@ export class CampaignDetail {
 
             <!-- Generic Modal -->
             <div id="generic-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; backdrop-filter: blur(2px); background: rgba(0,0,0,0.6);">
-                <div class="modal-content" style="width: 90%; max-width: 500px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.8); border-radius: 16px; background: #fdfaf5; max-height: 90vh; overflow-y: auto;">
+                <div class="modal-content" style="width: 90%; max-width: 500px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.8); border-radius: 8px; background: #fdfaf5; max-height: 90vh; overflow-y: auto;">
                     <div id="modal-body"></div>
                     <div class="text-center mt-20" style="display: flex; gap: 10px; justify-content: center;">
                         <button id="modal-cancel-btn" class="btn btn-secondary">Chiudi</button>
@@ -493,7 +493,7 @@ export class CampaignDetail {
         }
 
         menu.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
+            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
                 <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     ${actionButtons}
@@ -660,7 +660,7 @@ export class CampaignDetail {
 
         // Modal Content - Centered
         menu.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
                 <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${entity.name}</h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">📜 Apri</button>
@@ -725,7 +725,7 @@ export class CampaignDetail {
             
             <div class="mb-15 text-center">
                 <label style="margin-right: 10px;">Tipo:</label>
-                <select id="ent-type" style="padding: 5px; border-radius: 5px;">
+                <select id="ent-type" style="padding: 5px; border-radius: 4px;">
                     <option value="npc" ${entity.type === 'npc' ? 'selected' : ''}>🎭 NPC (Alleato/Neutrale)</option>
                     <option value="enemy" ${entity.type === 'enemy' ? 'selected' : ''}>⚔️ Avversario (Nemico)</option>
                     <option value="item" ${entity.type === 'item' ? 'selected' : ''}>💎 Oggetto / Indizio</option>

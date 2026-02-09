@@ -52,8 +52,14 @@ export class AdventureTab {
     }
 
     renderAuthForm() {
-        this.container.innerHTML = `
-            <div class="text-center p-20" style="max-width: 400px; margin: 40px auto;">
+        const bgHtml = `
+            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/avventure.png" alt="" style="width: 100%;">
+            </div>
+        `;
+
+        this.container.innerHTML = bgHtml + `
+            <div class="text-center p-20" style="max-width: 400px; margin: 40px auto; position: relative; z-index: 1;">
                 <div style="font-size: 4rem; margin-bottom: 20px;">🏴‍☠️</div>
                 <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Avventure Condivise</h3>
                 <p style="margin-bottom: 30px; line-height: 1.6;">
@@ -134,8 +140,14 @@ export class AdventureTab {
     async renderDashboard(user) {
         const { data: campaigns } = await CampaignService.getMyCampaigns();
 
-        this.container.innerHTML = `
-            <div class="settings-container">
+        const bgHtml = `
+            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+                <img src="assets/avventure.png" alt="" style="width: 100%;">
+            </div>
+        `;
+
+        this.container.innerHTML = bgHtml + `
+            <div class="settings-container" style="position: relative; z-index: 1;">
                 <div class="sheet-section">
                     <div class="sheet-section-title">Le mie Campagne</div>
                     
@@ -146,7 +158,7 @@ export class AdventureTab {
 
                     <div id="campaign-list" style="display: flex; flex-direction: column; gap: 15px;">
                         ${campaigns && campaigns.length > 0 ? campaigns.map(c => `
-                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s; user-select: none;">
+                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s; user-select: none; background: #fdfaf5;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem;">${c.title}</h3>
                                     <span class="badge" style="background: ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">${c.my_role === 'gm' ? 'GM' : 'PLAYER'}</span>

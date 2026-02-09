@@ -45,7 +45,7 @@ export default class CharacterList {
                 <div class="search-bar" style="position: relative;">
                     <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.5;">🔍</span>
                     <input type="text" id="char-search" placeholder="Cerca personaggio..." 
-                           style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1px solid var(--border-worn); background: rgba(255,255,255,0.5);">
+                           style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid var(--border-worn); background: rgba(255,255,255,0.5);">
                 </div>
             </div>
 
@@ -151,8 +151,8 @@ export default class CharacterList {
 
         // NO SWIPE - Box removed
         return `
-            <div class="card character-card" data-id="${char.id}" style="position: relative; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-worn); background: #fdfaf5; box-shadow: 0 2px 5px rgba(0,0,0,0.05); user-select: none;">
-                <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
+            <div class="card character-card" data-id="${char.id}" style="position: relative; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-worn); background: #fdfaf5; box-shadow: 0 2px 5px rgba(0,0,0,0.05); user-select: none;">
+                <div class="character-avatar" style="width: 60px; height: 60px; border-radius: 8px; flex-shrink: 0; border: 2px solid var(--accent-gold); overflow: hidden; ${imageStyle}">
                     ${content}
                 </div>
                 <div class="character-info" style="flex: 1; overflow: hidden; text-align: left;">

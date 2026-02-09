@@ -354,7 +354,7 @@ export default class CharacterSheet {
                 </div>
                 
                 <div class="text-center mt-20">
-                     <button id="btn-lvl-up" style="background: linear-gradient(135deg, var(--accent-gold), #8a6d3b); color: white; border: none; padding: 12px 24px; font-family: var(--font-display); font-size: 1.1rem; border-radius: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">⚡ Level Up</button>
+                     <button id="btn-lvl-up" style="background: linear-gradient(135deg, var(--accent-gold), #8a6d3b); color: white; border: none; padding: 12px 24px; font-family: var(--font-display); font-size: 1.1rem; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">⚡ Level Up</button>
                 </div>
         `;
     }
@@ -404,7 +404,7 @@ export default class CharacterSheet {
                         </div>
                     `).join('')}
                 </div>
-                <button class="btn btn-primary w-100" id="btn-add-${type}" style="border-radius: 25px; padding: 12px;">
+                <button class="btn btn-primary w-100" id="btn-add-${type}" style="border-radius: 4px; padding: 12px;">
                     ${isJournal ? '✍️ Scrivi Pagina' : '➕ Aggiungi Oggetto'}
                 </button>
             </div>
@@ -489,7 +489,7 @@ export default class CharacterSheet {
         const item = list[idx];
 
         menu.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
                 <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name || item.title || 'Opzioni'}</h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <button class="btn btn-primary" id="ctx-view" style="width: 100%; padding: 12px;">👁️ Mostra</button>
@@ -528,20 +528,20 @@ export default class CharacterSheet {
         modal.style.backdropFilter = 'blur(4px)';
 
         const createSelect = (curr, max) => {
-            let html = `<select class="wealth-select" style="font-size: 1.2rem; padding: 10px; border-radius: 8px; border: 1px solid var(--accent-gold); background: #fdfaf5; width: 100%;">`;
+            let html = `<select class="wealth-select" style="font-size: 1.2rem; padding: 10px; border-radius: 4px; border: 1px solid var(--accent-gold); background: #fdfaf5; width: 100%;">`;
             for (let i = 0; i <= max; i++) html += `<option value="${i}" ${i === curr ? 'selected' : ''}>${i}</option>`;
             html += `</select>`;
             return html;
         };
 
         modal.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 350px; background: #fdfaf5; border-radius: 16px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;">
+            <div class="modal-content" style="width: 90%; max-width: 350px; background: #fdfaf5; border-radius: 8px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;">
                 <h3 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">Gestione Ricchezza</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
                     <div style="display: flex; flex-direction: column; align-items: center;">
                         <span style="color: #FFD700; font-size: 1.5rem; margin-bottom: 5px;">●</span>
-                        <input type="number" id="w-gold" value="${this.character.wealth.gold}" min="0" max="1000" style="width: 100%; border-radius: 8px; border: 1px solid var(--accent-gold); padding: 10px; font-size: 1.2rem; text-align: center; background: #fff;">
+                        <input type="number" id="w-gold" value="${this.character.wealth.gold}" min="0" max="1000" style="width: 100%; border-radius: 4px; border: 1px solid var(--accent-gold); padding: 10px; font-size: 1.2rem; text-align: center; background: #fff;">
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: center;">
                         <span style="color: #C0C0C0; font-size: 1.5rem; margin-bottom: 5px;">●</span>
@@ -617,13 +617,13 @@ export default class CharacterSheet {
         `;
 
         overlay.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 450px; background: #fdfaf5; border-radius: 16px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;">
+            <div class="modal-content" style="width: 90%; max-width: 450px; background: #fdfaf5; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;">
                 ${imageHtml}
                 <div style="padding: 30px; max-height: 60vh; overflow-y: auto;">
                     ${contentHtml}
                 </div>
                 <div style="padding: 15px; background: rgba(0,0,0,0.03); text-align: center; border-top: 1px solid var(--border-worn);">
-                    <button id="btn-close-view" class="btn btn-primary" style="padding: 10px 40px; border-radius: 25px;">Chiudi</button>
+                    <button id="btn-close-view" class="btn btn-primary" style="padding: 10px 40px; border-radius: 4px;">Chiudi</button>
                 </div>
             </div>
             <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
