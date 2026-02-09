@@ -285,7 +285,7 @@ export class CampaignDetail {
             html += `
                 <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="background: rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border-worn);">
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden; border: 2px solid ${hasChar ? 'var(--accent-gold)' : '#ccc'};">
-                        ${(m.character_data?.image_url || m.profile.avatar_url) ? `<img src="${m.character_data?.image_url || m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
+                        ${(m.character_data?.image || m.character_data?.image_url || m.profile.avatar_url) ? `<img src="${m.character_data?.image || m.character_data?.image_url || m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
                      <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'In attesa...'}</div>
                      <div style="font-size: 0.8rem; color: var(--text-faded);">${m.profile.username || 'Sconosciuto'}</div>

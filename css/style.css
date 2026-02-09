@@ -1064,15 +1064,17 @@ select {
    ======================================== */
 
 .wizard-container {
-    padding: 20px 15px;
-    width: 95%;
-    max-width: 500px;
-    /* Slightly narrower per request */
-    margin: 20px auto;
-    background: #fff;
-    /* Optional: give card look if desired, but user just said "narrower" */
-    border-radius: 12px;
-    /* Smooth corners */
+    padding: 20px 0;
+    /* Removed side padding to use full width of container */
+    width: 100%;
+    /* Use full width */
+    max-width: 550px;
+    /* Wider as requested */
+    margin: 30px auto;
+    /* More vertical space */
+    background: transparent;
+    /* Removed white background */
+    border-radius: 0;
     position: relative;
 }
 
