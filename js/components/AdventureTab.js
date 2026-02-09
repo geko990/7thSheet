@@ -241,115 +241,170 @@ export class AdventureTab {
 
                     <div id="campaign-list" style="display: flex; flex-direction: column; gap: 15px;">
                         ${campaigns && campaigns.length > 0 ? campaigns.map(c => `
-                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s;">
+                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s; user-select: none;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <h3 style="margin: 0; font-size: 1.1rem;">${c.title}</h3>
-                                    <span class="badge" style="background: ${c.role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">${c.role === 'gm' ? 'GM' : 'PLAYER'}</span>
+                                    <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem;">${c.title}</h3>
+                                    <span class="badge" style="background: ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">${c.my_role === 'gm' ? 'GM' : 'PLAYER'}</span>
                                 </div>
                                 <div style="font-size: 0.9rem; color: var(--text-faded); margin-top: 5px;">
                                     Codice: <span style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${c.join_code}</span>
                                 </div>
                             </div>
-                        `).join('') : `
-                            <div class="text-center" style="color: var(--text-faded); font-style: italic;">
-                                Nessuna campagna attiva.
-                            </div>
-                        `}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Campaign Modal -->
-            <div id="campaign-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; backdrop-filter: blur(2px); background: rgba(0,0,0,0.4);">
-                <div class="modal-content" style="width: 90%; max-width: 350px; padding: 25px; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.6); border-radius: 16px; background: #fdfaf5;">
-                    <h3 id="modal-title" style="text-align: center; margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-gold); font-size: 1.5rem;"></h3>
-                    <input type="text" id="modal-input" class="input-field mb-20" style="width: 100%; text-align: center;">
-                    <div style="display: flex; gap: 10px;">
-                        <button id="modal-cancel" class="btn btn-secondary w-50">Annulla</button>
-                        <button id="modal-confirm" class="btn btn-primary w-50">Conferma</button>
+                        `).join('') : '<div class="text-center italic" style="color: var(--text-faded)">Nessuna campagna attiva.</div>'}
                     </div>
                 </div>
             </div>
         `;
 
-        this.attachDashboardListeners();
+        this.attachDashboardListeners(campaigns);
+    }
 
-        // Add click listeners to cards
-        this.container.querySelectorAll('.campaign-card').forEach(card => {
+    attachDashboardListeners(campaigns) {
+        // Create/Join Buttons
+        this.container.querySelector('#btn-create-campaign')?.addEventListener('click', () => this.openCreateCampaignModal());
+        this.container.querySelector('#btn-join-campaign')?.addEventListener('click', () => this.openJoinCampaignModal());
+        this.container.querySelector('#btn-logout')?.addEventListener('click', async () => {
+            await AuthService.signOut();
+            window.location.reload();
+        });
+
+        // Campaign Cards
+        const cards = this.container.querySelectorAll('.campaign-card');
+        cards.forEach(card => {
+            const id = card.dataset.id;
+            const campaign = campaigns.find(c => c.id === id);
+
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            // TOUCH
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    this.openCampaignContextMenu(campaign);
+                }, 500);
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) e.preventDefault();
+            });
+
+            // CLICK
             card.addEventListener('click', () => {
-                if (this.navigateCallback) {
-                    this.navigateCallback('campaign-detail', { id: card.dataset.id });
-                }
+                if (isLongPress) return;
+                // Navigate
+                if (this.navigateCallback) this.navigateCallback('campaign-detail', { id });
+            });
+
+            // CONTEXT MENU
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.openCampaignContextMenu(campaign);
             });
         });
     }
 
-    attachDashboardListeners() {
-        // Logout
-        this.container.querySelector('#btn-logout').addEventListener('click', async () => {
-            await AuthService.signOut();
-        });
+    openCampaignContextMenu(campaign) {
+        const existingMenu = document.getElementById('ctx-menu-modal');
+        if (existingMenu) existingMenu.remove();
 
-        const modal = this.container.querySelector('#campaign-modal');
-        const modalTitle = this.container.querySelector('#modal-title');
-        const modalInput = this.container.querySelector('#modal-input');
-        const btnConfirm = this.container.querySelector('#modal-confirm');
-        const btnCancel = this.container.querySelector('#modal-cancel');
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-modal';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
 
-        let currentAction = null; // 'create' or 'join'
+        const isGm = campaign.my_role === 'gm';
 
-        const openModal = (action) => {
-            currentAction = action;
-            modal.style.display = 'flex';
-            modalInput.value = '';
-            if (action === 'create') {
-                modalTitle.textContent = "Nuova Campagna";
-                modalInput.placeholder = "Nome della campagna";
-            } else {
-                modalTitle.textContent = "Unisciti";
-                modalInput.placeholder = "Codice invito";
-            }
-            modalInput.focus();
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${campaign.title}</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">Desidera Entrare</button>
+                    ${isGm ? `
+                        <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica Titolo</button>
+                        <button class="btn btn-secondary" id="ctx-dup" style="width: 100%; padding: 12px;">👯 Duplica</button>
+                        <button class="btn btn-secondary" id="ctx-del" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                    ` : ''}
+                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+            <style>@keyframes popIn { to { transform: scale(1); } }</style>
+        `;
+
+        document.body.appendChild(menu);
+
+        // Actions
+        menu.querySelector('#ctx-open').onclick = () => {
+            menu.remove();
+            if (this.navigateCallback) this.navigateCallback('campaign-detail', { id: campaign.id });
         };
+        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
-        const closeModal = () => {
-            modal.style.display = 'none';
-            currentAction = null;
-        };
+        if (isGm) {
+            menu.querySelector('#ctx-edit').onclick = () => {
+                menu.remove();
+                this.openEditCampaignModal(campaign);
+            };
+            menu.querySelector('#ctx-dup').onclick = async () => {
+                menu.remove();
+                if (!confirm("Duplicare la campagna?")) return;
+                const { error } = await CampaignService.duplicateCampaign(campaign.id);
+                if (error) this.showErrorPopup(error.message);
+                else this.render();
+            };
+            menu.querySelector('#ctx-del').onclick = async () => {
+                menu.remove();
+                if (!confirm("SEI SICURO? Questa azione è irreversibile e cancellerà tutto.")) return;
+                const { error } = await CampaignService.deleteCampaign(campaign.id);
+                if (error) this.showErrorPopup(error.message);
+                else this.render();
+            };
+        }
+    }
 
-        // Modal triggers
-        this.container.querySelector('#btn-create-campaign').addEventListener('click', () => openModal('create'));
-        this.container.querySelector('#btn-join-campaign').addEventListener('click', () => openModal('join'));
+    openEditCampaignModal(campaign) {
+        const newTitle = prompt("Nuovo titolo:", campaign.title);
+        if (newTitle && newTitle !== campaign.title) {
+            CampaignService.updateCampaign(campaign.id, { title: newTitle }).then(() => this.render());
+        }
+    }
 
-        // Modal Actions
-        btnCancel.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
+    // MODALS (Create/Join)
+    openCreateCampaignModal() {
+        const title = prompt("Nome della nuova Avventura:");
+        if (title) {
+            CampaignService.createCampaign(title).then(res => {
+                if (res.error) this.showErrorPopup(res.error.message);
+                else this.render();
+            });
+        }
+    }
 
-        btnConfirm.addEventListener('click', async () => {
-            const value = modalInput.value.trim();
-            if (!value) return;
-
-            btnConfirm.disabled = true;
-            btnConfirm.textContent = "...";
-
-            let result;
-            if (currentAction === 'create') {
-                result = await CampaignService.createCampaign(value);
-            } else {
-                result = await CampaignService.joinCampaign(value);
-            }
-
-            btnConfirm.disabled = false;
-            btnConfirm.textContent = "Conferma";
-
-            if (result.error) {
-                alert("Errore: " + result.error.message);
-            } else {
-                closeModal();
-                this.render(); // Refresh list
-            }
-        });
+    openJoinCampaignModal() {
+        const code = prompt("Inserisci codice invito:");
+        if (code) {
+            CampaignService.joinCampaign(code).then(res => {
+                if (res.error) this.showErrorPopup(res.error.message);
+                else this.render();
+            });
+        }
     }
 }

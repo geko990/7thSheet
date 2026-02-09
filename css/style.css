@@ -1624,3 +1624,89 @@ select {
     background-color: rgba(253, 250, 245, 0.9) !important;
     backdrop-filter: blur(2px);
 }
+
+/* =========================================
+   ADVENTURE TAB OVERHAUL STYLES
+   ========================================= */
+
+.campaign-banner {
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: background-image 0.5s ease;
+}
+
+.campaign-banner::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    pointer-events: none;
+}
+
+.campaign-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.campaign-card:active {
+    transform: scale(0.98);
+}
+
+.story-card:active,
+.player-card:active,
+.entity-card:active {
+    transform: scale(0.98);
+    background-color: #f9f9f9 !important;
+}
+
+.story-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    /* Show only 3 lines in preview */
+    -webkit-box-orient: vertical;
+}
+
+.markdown-body {
+    font-family: 'Times New Roman', serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.markdown-body p {
+    margin-bottom: 1em;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    font-family: var(--font-display);
+    color: var(--accent-navy);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.markdown-body strong {
+    color: var(--accent-gold);
+}
+
+.markdown-body em {
+    color: var(--accent-red);
+    font-style: italic;
+}
+
+/* Context Menu Animation */
+@keyframes popIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

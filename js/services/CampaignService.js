@@ -110,6 +110,38 @@ export const CampaignService = {
         return { data };
     },
 
+    // Update Campaign (Title, Image/Banner, etc.)
+    async updateCampaign(campaignId, updates) {
+        const { data, error } = await supabaseClient
+            .from('campaigns')
+            .update(updates)
+            .eq('id', campaignId)
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    // Delete Campaign
+    async deleteCampaign(campaignId) {
+        // RLS should handle cascading deletes usually, but good to be safe
+        const { error } = await supabaseClient
+            .from('campaigns')
+            .delete()
+            .eq('id', campaignId);
+        return { error };
+    },
+
+    // Duplicate Campaign (Basic: Copies Title + ' (Copia)', Settings)
+    // Does NOT copy stories/npcs/members for simplicity unless requested
+    async duplicateCampaign(campaignId) {
+        // 1. Get original
+        const { data: original, error: getError } = await this.getCampaignDetails(campaignId);
+        if (getError) return { error: getError };
+
+        // 2. Create new
+        return this.createCampaign(`${original.title} (Copia)`);
+    },
+
     // STORIES
     async getStories(campaignId) {
         const { data, error } = await supabaseClient
@@ -272,5 +304,23 @@ export const CampaignService = {
                 reader.readAsDataURL(file);
             });
         }
+    },
+
+    async updateMemberRole(campaignId, userId, newRole) {
+        const { error } = await supabaseClient
+            .from('campaign_members')
+            .update({ role: newRole })
+            .match({ campaign_id: campaignId, user_id: userId });
+
+        return { error };
+    },
+
+    async removeMember(campaignId, userId) {
+        const { error } = await supabaseClient
+            .from('campaign_members')
+            .delete()
+            .match({ campaign_id: campaignId, user_id: userId });
+
+        return { error };
     }
 };

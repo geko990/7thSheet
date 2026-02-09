@@ -36,21 +36,37 @@ export class CampaignDetail {
     renderView() {
         if (!this.campaign) return;
 
+        // Banner Image Logic (Fallback to a default if none)
+        const bannerUrl = this.campaign.image_url || 'assets/banners/default_campaign.jpg'; // We'll need to ensure this asset exists or use a web placeholder
+        // Actually, let's use a nice gradient or a placeholder service if asset missing, or just a dark overlay.
+        // For now, I'll rely on the style I set below.
+
         this.container.innerHTML = `
             <div class="campaign-detail-container" style="padding-bottom: 80px;">
-                <!-- Header -->
-                <div class="campaign-header text-center" style="padding: 20px; background: rgba(0,0,0,0.1); border-bottom: 1px solid var(--border-color);">
-                    <button id="btn-back" class="btn btn-secondary btn-sm" style="position: absolute; left: 15px; top: 15px;">⬅ Torna</button>
-                    <h2 class="page-title" style="margin-top: 20px;">${this.campaign.title}</h2>
+                <!-- Header with Banner -->
+                <div class="campaign-banner" style="
+                    position: relative;
+                    height: 200px;
+                    background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('${bannerUrl}');
+                    background-size: cover;
+                    background-position: center;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: center;
+                    color: white;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+                ">
                     ${this.myRole === 'gm' ? `
-                        <div style="font-size: 0.9rem; color: var(--text-faded); margin-top: 5px;">
-                            Codice Invito: <span style="font-family: monospace; background: rgba(255,255,255,0.2); padding: 2px 5px; border-radius: 4px;">${this.campaign.join_code}</span>
-                        </div>
+                        <button id="btn-change-banner" class="btn btn-xs btn-secondary" style="position: absolute; right: 15px; top: 15px; background: rgba(0,0,0,0.5); border: none; font-size: 1.2rem;">📷</button>
                     ` : ''}
+                    
+                    <div style="text-align: center; padding-bottom: 20px; width: 100%;">
+                        <h2 class="page-title" style="margin: 0; font-size: 1.8rem; color: var(--accent-gold);">${this.campaign.title}</h2>
+                    </div>
                 </div>
 
                 <!-- Tabs -->
-                <div class="tabs-nav" style="display: flex; justify-content: space-around; padding: 10px; border-bottom: 1px solid var(--border-color);">
+                <div class="tabs-nav" style="display: flex; justify-content: space-around; padding: 10px; border-bottom: 1px solid var(--border-color); background: var(--bg-main);">
                     <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
                         📖 Storia
                     </button>
@@ -75,6 +91,9 @@ export class CampaignDetail {
                     </div>
                 </div>
             </div>
+            
+            <!-- Context Menu (Dynamic) -->
+            <!-- Will be created on fly -->
         `;
 
         this.attachListeners();
@@ -82,14 +101,14 @@ export class CampaignDetail {
     }
 
     attachListeners() {
-        this.container.querySelector('#btn-back').addEventListener('click', () => {
-            window.location.hash = 'adventures';
-        });
+        if (this.myRole === 'gm') {
+            this.container.querySelector('#btn-change-banner')?.addEventListener('click', () => this.openChangeBannerModal());
+        }
 
         this.container.querySelectorAll('.nav-tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.currentTab = btn.dataset.tab;
-                this.renderView(); // Re-render to update classes and content
+                this.renderView(); // Re-render logic to update UI state
             });
         });
 
@@ -121,37 +140,43 @@ export class CampaignDetail {
         if (this.myRole === 'gm') {
             html += `
                 <div class="text-center mb-20">
-                    <button class="btn btn-primary" id="btn-add-story">➕ Nuovo Capitolo</button>
+                    <button class="btn btn-primary" id="btn-add-story">➕ Scrivi Diario</button>
                 </div>
             `;
         }
 
         if (!stories || stories.length === 0) {
-            html += '<div class="text-center italic" style="color: var(--text-faded)">Nessuna storia scritta ancora...</div>';
+            html += '<div class="text-center italic" style="color: var(--text-faded)">Ancora nessuna pagina scritta nel diario di questa avventura...</div>';
         } else {
-            html += '<div class="story-timeline" style="display: flex; flex-direction: column; gap: 20px;">';
+            html += '<div class="story-timeline" style="display: flex; flex-direction: column; gap: 15px;">';
             stories.forEach(story => {
                 if (this.myRole !== 'gm' && !story.is_visible) return;
 
-                html += `
-                    <div class="card story-card ${!story.is_visible ? 'opacity-70' : ''}" style="border-left: 4px solid var(--accent-gold); padding: 15px; background: white; position: relative;">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.2rem;">${story.title}</h3>
-                            <span style="font-size: 0.7rem; color: var(--text-faded);">
-                                ${new Date(story.created_at).toLocaleDateString()}
-                            </span>
-                        </div>
-                        ${!story.is_visible ? '<div style="font-size: 0.7rem; color: var(--accent-red); margin-bottom: 5px;">🔧 BOZZA (Nascosto ai giocatori)</div>' : ''}
-                        
-                        <div class="story-content markdown-body" style="font-size: 0.95rem; line-height: 1.5; margin-top: 10px; white-space: pre-wrap;">${story.content}</div>
+                // "Diary Entry" style
+                // Extract first 100 chars for preview
+                const previewText = story.content.length > 100 ? story.content.substring(0, 100) + '...' : story.content;
+                const dateStr = new Date(story.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
 
-                        ${this.myRole === 'gm' ? `
-                            <div class="mt-10 pt-10" style="border-top: 1px dashed var(--border-color); display: flex; justify-content: flex-end; gap: 10px;">
-                                <button class="btn-icon toggle-visibility" data-id="${story.id}" data-visible="${story.is_visible}">
-                                    ${story.is_visible ? '👁️ Visibile' : '🔒 Nascosto'}
-                                </button>
-                            </div>
-                        ` : ''}
+                html += `
+                    <div class="card story-card ${!story.is_visible ? 'opacity-70' : ''}" data-id="${story.id}" style="
+                        padding: 15px; 
+                        background: white; 
+                        position: relative; 
+                        border-left: 3px solid var(--accent-gold);
+                        cursor: pointer;
+                        user-select: none;
+                        transition: transform 0.1s;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-main);">${story.title}</h3>
+                            <span style="font-size: 0.75rem; color: var(--text-faded); white-space: nowrap;">${dateStr}</span>
+                        </div>
+                        
+                        ${!story.is_visible ? '<div style="font-size: 0.7rem; color: var(--accent-red); margin-bottom: 5px;">🔒 NASCOSTO</div>' : ''}
+                        
+                        <div style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.4;">
+                            ${previewText}
+                        </div>
                     </div>
                 `;
             });
@@ -159,21 +184,58 @@ export class CampaignDetail {
         }
 
         container.innerHTML = html;
+        this.attachStoryListeners(container, stories);
+    }
 
-        // Listeners for Story Actions
+    attachStoryListeners(container, stories) {
         if (this.myRole === 'gm') {
             container.querySelector('#btn-add-story')?.addEventListener('click', () => this.openAddStoryModal());
-
-            container.querySelectorAll('.toggle-visibility').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation(); // prevent modal opening if card click
-                    const id = btn.dataset.id;
-                    const isVisible = btn.dataset.visible === 'true';
-                    await CampaignService.updateStoryVisibility(id, !isVisible);
-                    this.loadTabContent();
-                });
-            });
         }
+
+        const cards = container.querySelectorAll('.story-card');
+        cards.forEach(card => {
+            const id = card.dataset.id;
+            const story = stories.find(s => s.id === id);
+
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            // TOUCH
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    navigator.vibrate?.(50);
+                    this.openStoryContextMenu(story);
+                }, 500);
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) e.preventDefault();
+            });
+
+            // CLICK
+            card.addEventListener('click', () => {
+                if (isLongPress) return;
+                this.openViewStoryModal(story);
+            });
+
+            // CONTEXT MENU
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                this.openStoryContextMenu(story);
+            });
+        });
     }
 
     async renderCharactersTab(container) {
@@ -183,12 +245,23 @@ export class CampaignDetail {
 
         let html = '';
 
+        // INVITE CODE Section (if GM or maybe all?) - Use a nice card
+        if (this.campaign.join_code) {
+            html += `
+                <div class="card p-15 mb-20 text-center" style="background: rgba(var(--accent-navy-rgb), 0.05); border: 1px dashed var(--accent-navy);">
+                    <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 5px;">📜 CODICE DI INVITO</div>
+                    <div style="font-family: monospace; font-size: 1.5rem; letter-spacing: 2px; font-weight: bold; user-select: text;">${this.campaign.join_code}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-faded); margin-top: 5px;">Condividi questo codice per far unire altri giocatori.</div>
+                </div>
+            `;
+        }
+
         // PLAYERS Section
         html += '<h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px;">Protagonisti</h3>';
 
         // Check if I need to link my character
         const myMember = members.find(m => m.user_id === AuthService.user.id);
-        if (myMember && !myMember.character_data) {
+        if (myMember && !myMember.character_data && this.myRole !== 'gm') {
             html += `
                 <div class="alert alert-info text-center mb-20" style="background: rgba(var(--accent-navy-rgb), 0.1); border: 1px solid var(--accent-navy); padding: 15px; border-radius: 8px;">
                     <div>Non hai ancora scelto chi interpretare!</div>
@@ -200,9 +273,10 @@ export class CampaignDetail {
         html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px;">';
         members.forEach(m => {
             if (m.role === 'gm') return;
+            const hasChar = !!m.character_data;
             html += `
-                <div class="card p-10 text-center" style="background: white;">
-                     <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden;">
+                <div class="card p-10 text-center player-card" data-uid="${m.user_id}" style="background: white; cursor: pointer; transition: transform 0.1s;">
+                     <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden; border: 2px solid ${hasChar ? 'var(--accent-gold)' : '#ccc'};">
                         ${m.profile.avatar_url ? `<img src="${m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
                      <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'In attesa...'}</div>
@@ -278,10 +352,124 @@ export class CampaignDetail {
 
         if (this.myRole === 'gm') container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
 
+        // Player Click & Long Press Listeners
+        container.querySelectorAll('.player-card').forEach(card => {
+            const uid = card.dataset.uid;
+            const member = members.find(m => m.user_id === uid);
+            if (!member) return;
+
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            // TOUCH
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    // Only open context menu if I'm GM and target is player (or maybe even other GM?)
+                    // The request says: "I create the adventure, I am Admin... long press on another player... assign Master"
+                    if (this.myRole === 'gm') {
+                        this.openPlayerContextMenu(member);
+                    }
+                }, 500);
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+                if (isLongPress) e.preventDefault();
+            });
+
+            // CLICK
+            card.addEventListener('click', () => {
+                if (isLongPress) return;
+                if (member.character_data) {
+                    this.openPlayerPopup(member);
+                }
+            });
+
+            // CONTEXT MENU
+            card.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                if (this.myRole === 'gm') {
+                    this.openPlayerContextMenu(member);
+                }
+            });
+        });
         // Attach Long Press Listeners to Entities
         this.attachEntityInteractionListeners(container, entities);
     }
 
+    openPlayerContextMenu(member) {
+        const existingMenu = document.getElementById('ctx-menu-player');
+        if (existingMenu) existingMenu.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-player';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
+
+        const targetName = member.character_data?.name || member.profile.username;
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
+                <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    ${member.role !== 'gm' ? `
+                        <button class="btn btn-primary" id="ctx-promote">⭐ Promuovi a Master</button>
+                    ` : `
+                        <button class="btn btn-secondary" id="ctx-demote">⬇️ Retrocedi a Player</button>
+                    `}
+                    <button class="btn btn-secondary" id="ctx-cancel-player" style="margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#ctx-cancel-player').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+
+        const promoteBtn = menu.querySelector('#ctx-promote');
+        if (promoteBtn) {
+            promoteBtn.onclick = async () => {
+                if (confirm(`Rendere ${targetName} un Game Master? Potrà modificare la campagna.`)) {
+                    promoteBtn.textContent = '...';
+                    const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'gm');
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+
+        const demoteBtn = menu.querySelector('#ctx-demote');
+        if (demoteBtn) {
+            demoteBtn.onclick = async () => {
+                if (confirm(`Rimuovere i permessi da GM a ${targetName}?`)) {
+                    demoteBtn.textContent = '...';
+                    const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'player');
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+    }
     attachEntityInteractionListeners(container, entities) {
         const cards = container.querySelectorAll('.entity-card');
         cards.forEach(card => {
@@ -575,7 +763,6 @@ export class CampaignDetail {
             btnAction.textContent = "Aggiornamento...";
 
             const { error } = await CampaignService.updateEntity(entity.id, updates);
-
             if (error) {
                 console.error(error);
                 alert("Errore salvataggio: " + error.message);
@@ -589,6 +776,188 @@ export class CampaignDetail {
         };
 
         modal.style.display = 'flex';
+    }
+
+    // --- NEW MODALS ---
+
+    openPlayerPopup(member) {
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+        btnAction.style.display = 'none';
+
+        const char = member.character_data || {};
+        const profile = member.profile || {};
+
+        body.innerHTML = `
+            <div class="text-center">
+                <div class="avatar" style="width: 100px; height: 100px; border-radius: 50%; background: #ccc; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                    ${profile.avatar_url ? `<img src="${profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
+                </div>
+                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${char.name || 'Sconosciuto'}</h2>
+                <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 20px;">Giocato da: <strong>${profile.username}</strong></div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); text-align: left;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Nazione:</span> <strong>${char.nation || '-'}</strong>
+                    </div>
+                    ${char.concept ? `
+                        <div style="margin-top: 10px; font-style: italic; color: var(--text-faded); border-top: 1px dashed #eee; padding-top: 10px;">
+                            "${char.concept}"
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        modal.style.display = 'flex';
+    }
+
+    openChangeBannerModal() {
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+
+        // Predefined banners (using placeholder colors/gradients if real assets missing, or assume assets exist)
+        // I will use some online placeholders or gradients for now if assets don't exist.
+        // Or I can use the existing `assets/dadi.png` type things? No.
+        // Let's use simple gradients/solid colors as a gallery for now + Upload.
+        const gallery = [
+            'assets/banners/sea.jpg', // Assumption
+            'assets/banners/map.jpg',
+            'assets/banners/ship.jpg',
+            'assets/banners/tavern.jpg'
+        ]; // I don't validly have these.
+
+        // I will just use colors for the gallery demo, or upload.
+
+        body.innerHTML = `
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Cambia Banner</h3>
+            
+            <div class="mb-20">
+                <label>Carica Immagine:</label>
+                <input type="file" id="banner-file" accept="image/*" style="display: block; width: 100%; margin-top: 5px;">
+            </div>
+            
+            <div class="text-center mb-10">Oppure incolla URL:</div>
+            <input type="text" id="banner-url" class="input-field w-100 mb-20" placeholder="https://..." value="${this.campaign.image_url || ''}">
+            
+            <div id="banner-preview" style="width: 100%; height: 120px; background: #eee; margin-bottom: 20px; background-size: cover; background-position: center; border: 2px solid var(--border-color);"></div>
+        `;
+
+        const fileInput = body.querySelector('#banner-file');
+        const urlInput = body.querySelector('#banner-url');
+        const preview = body.querySelector('#banner-preview');
+
+        if (this.campaign.image_url) preview.style.backgroundImage = `url('${this.campaign.image_url}')`;
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => preview.style.backgroundImage = `url('${ev.target.result}')`;
+                reader.readAsDataURL(file);
+            }
+        });
+
+        urlInput.addEventListener('input', (e) => {
+            preview.style.backgroundImage = `url('${e.target.value}')`;
+        });
+
+        btnAction.style.display = 'block';
+        btnAction.textContent = "Salva Banner";
+        btnAction.onclick = async () => {
+            let imageUrl = urlInput.value;
+            const file = fileInput.files[0];
+
+            btnAction.disabled = true;
+            btnAction.textContent = "Caricamento...";
+
+            if (file) {
+                const { publicUrl, error } = await CampaignService.uploadImage(file);
+                if (error) {
+                    alert("Errore upload: " + error.message);
+                    btnAction.disabled = false;
+                    return;
+                }
+                imageUrl = publicUrl;
+            }
+
+            const { error } = await CampaignService.updateCampaign(this.campaignId, { image_url: imageUrl });
+            if (error) {
+                alert("Errore salvataggio: " + error.message);
+                btnAction.disabled = false;
+            } else {
+                this.campaign.image_url = imageUrl; // Optimistic update
+                modal.style.display = 'none';
+                this.renderView(); // Refresh header
+            }
+        };
+
+        modal.style.display = 'flex';
+    }
+
+    openViewStoryModal(story) {
+        // Full screen reading mode
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+        btnAction.style.display = 'none'; // Only Close button needed
+
+        body.innerHTML = `
+            <div style="font-family: 'Times New Roman', serif; color: #333;">
+                <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent-gold); padding-bottom: 15px;">
+                    <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${story.title}</h2>
+                    <div style="font-size: 0.8rem; color: var(--text-faded);">${new Date(story.created_at).toLocaleDateString()}</div>
+                </div>
+                <div class="markdown-body" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">${story.content}</div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    openStoryContextMenu(story) {
+        const existingMenu = document.getElementById('ctx-menu-story');
+        if (existingMenu) existingMenu.remove();
+
+        // GM Only mostly
+        if (this.myRole !== 'gm') return;
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-story';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 250px; background: #fdfaf5; border-radius: 12px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
+                <h4 style="margin-bottom: 15px;">${story.title}</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="st-open" class="btn btn-primary">📖 Leggi</button>
+                    <!-- Edit not implemented yet but could be simple -->
+                    <button id="st-toggle" class="btn btn-secondary">${story.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                    <button id="st-cancel" class="btn btn-secondary">Annulla</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#st-open').onclick = () => {
+            menu.remove();
+            this.openViewStoryModal(story);
+        };
+        menu.querySelector('#st-toggle').onclick = async () => {
+            menu.remove();
+            await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
+            this.loadTabContent();
+        };
+        menu.querySelector('#st-cancel').onclick = () => menu.remove();
+        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
     }
 
     // MODALS (Add Link)
@@ -795,7 +1164,16 @@ export class CampaignDetail {
             const entityData = { name, type, level, nationality, image_url, description, is_visible };
 
             btnAction.textContent = "Salvataggio...";
-            await CampaignService.addEntity(this.campaignId, entityData);
+            const { error: addError } = await CampaignService.addEntity(this.campaignId, entityData);
+
+            if (addError) {
+                console.error("Add Entity Error:", addError);
+                alert("Errore durante la creazione: " + (addError.message || addError));
+                btnAction.textContent = "Crea";
+                btnAction.disabled = false;
+                return;
+            }
+
             modal.style.display = 'none';
             this.loadTabContent(); // Refresh
         };
