@@ -648,13 +648,13 @@ export default class CharacterSheet {
         const close = () => overlay.remove();
 
         const imgStyle = isAvatar
-            ? 'max-width: 80vw; max-height: 80vw; border-radius: 50%; box-shadow: 0 0 30px rgba(255, 215, 0, 0.3); border: 4px solid var(--accent-gold); object-fit: cover; aspect-ratio: 1/1;'
+            ? 'width: 90vw; height: 90vw; max-width: 500px; max-height: 500px; border-radius: 50%; box-shadow: 0 0 40px rgba(255, 215, 0, 0.4); border: 4px solid var(--accent-gold); object-fit: cover; aspect-ratio: 1/1;'
             : 'max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); object-fit: contain;';
 
         overlay.innerHTML = `
-            <div class="modal-content" style="background: transparent; box-shadow: none; padding: 0; max-width: 100%; max-height: 100%; position: relative; animation: zoomIn 0.2s ease-out; display: flex; justify-content: center; align-items: center;">
+            <div style="background: transparent !important; border: none !important; box-shadow: none !important; padding: 0; position: relative; animation: zoomIn 0.2s ease-out; display: flex; justify-content: center; align-items: center;">
                 <img src="${imageUrl}" style="${imgStyle}">
-                <button id="btn-close-image" style="position: absolute; top: -50px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">&times;</button>
+                <button id="btn-close-image" style="position: absolute; top: -50px; right: 0; background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 50%; width: 40px; height: 40px; color: white; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">&times;</button>
             </div>
             <style> @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } } </style>
         `;
