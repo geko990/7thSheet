@@ -57,6 +57,12 @@ export default class Settings {
                              <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
                                 Salva Modifiche
                             </button>
+                             <a href="#" id="btn-change-password" style="text-align: center; font-size: 0.8rem; color: var(--text-faded); text-decoration: none;">Cambia password</a>
+                             <div id="change-password-area" style="display: none; margin-top: 5px;">
+                                <input type="password" id="new-password" placeholder="Nuova password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
+                                <input type="password" id="confirm-password" placeholder="Conferma password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
+                                <button class="btn btn-secondary btn-sm" id="btn-confirm-password" style="width: 100%; font-size: 0.85rem;">Aggiorna Password</button>
+                             </div>
                              <button class="btn btn-secondary" id="btn-logout" style="width: 100%; justify-content: center; border-color: var(--accent-red); color: var(--accent-red);">
                                 Esci
                             </button>
@@ -292,6 +298,40 @@ export default class Settings {
             saveProfileBtn.innerHTML = 'Salva Profilo';
             saveProfileBtn.disabled = false;
         });
+
+        // Change password toggle
+        const changePwLink = container.querySelector('#btn-change-password');
+        const changePwArea = container.querySelector('#change-password-area');
+        if (changePwLink) {
+            changePwLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                changePwArea.style.display = changePwArea.style.display === 'none' ? 'block' : 'none';
+            });
+        }
+
+        const confirmPwBtn = container.querySelector('#btn-confirm-password');
+        if (confirmPwBtn) {
+            confirmPwBtn.addEventListener('click', async () => {
+                const newPw = container.querySelector('#new-password').value;
+                const confirmPw = container.querySelector('#confirm-password').value;
+                if (!newPw || newPw.length < 6) return alert('La password deve avere almeno 6 caratteri.');
+                if (newPw !== confirmPw) return alert('Le password non coincidono.');
+                confirmPwBtn.disabled = true;
+                confirmPwBtn.textContent = 'Aggiornamento...';
+                const { supabaseClient } = await import('../services/SupabaseClient.js');
+                const { error } = await supabaseClient.auth.updateUser({ password: newPw });
+                if (error) {
+                    alert('Errore: ' + error.message);
+                } else {
+                    alert('Password aggiornata con successo!');
+                    changePwArea.style.display = 'none';
+                    container.querySelector('#new-password').value = '';
+                    container.querySelector('#confirm-password').value = '';
+                }
+                confirmPwBtn.disabled = false;
+                confirmPwBtn.textContent = 'Aggiorna Password';
+            });
+        }
 
         logoutBtn.addEventListener('click', async () => {
             if (confirm("Vuoi davvero uscire?")) {
