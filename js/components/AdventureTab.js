@@ -54,7 +54,7 @@ export class AdventureTab {
     renderAuthForm() {
         const bgHtml = `
             <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
-                <img src="assets/avventure.png" alt="" style="width: 100%;">
+                <img src="assets/Avventure.png" alt="" style="width: 100%;">
             </div>
         `;
 
@@ -142,7 +142,7 @@ export class AdventureTab {
 
         const bgHtml = `
             <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
-                <img src="assets/avventure.png" alt="" style="width: 100%;">
+                <img src="assets/Avventure.png" alt="" style="width: 100%;">
             </div>
         `;
 
