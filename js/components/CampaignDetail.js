@@ -351,7 +351,7 @@ export class CampaignDetail {
                              ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; z-index: 2;" title="Nascosto">🔒</div>' : ''}
                             
                             <div class="entity-image-container" style="width: 100%; aspect-ratio: 4/3; background: #eee; position: relative; border-bottom: 1px solid var(--border-color);">
-                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: top;">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-faded);">${categories[type].icon}</div>`}
+                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center ${typeof e.data?.image_focus === 'number' ? e.data.image_focus : 50}%;">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-faded);">${categories[type].icon}</div>`}
                             </div>
                             
                             <div style="padding: 10px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -765,9 +765,11 @@ export class CampaignDetail {
             <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
                 <label for="ent-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Cambia Immagine</label>
                 <input type="file" id="ent-file" style="display: none;" accept="image/*">
-                <div id="img-preview" style="width: 100px; height: 100px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: block; border: 2px solid var(--accent-gold);">
-                    ${entity.image_url ? `<img src="${entity.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : ''}
+                <div id="img-positioner" style="width: 100%; max-width: 280px; height: 180px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 12px; border: 2px solid var(--accent-gold); position: relative; cursor: grab; display: ${entity.image_url ? 'block' : 'none'}; touch-action: none;">
+                    <img id="img-positioner-img" src="${entity.image_url || ''}" style="width: 100%; position: absolute; left: 0; user-select: none; pointer-events: none;">
+                    <div style="position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; pointer-events: none;">↕ Trascina per riposizionare</div>
                 </div>
+                <input type="hidden" id="ent-focus" value="${entity.data?.image_focus ?? 50}">
                 <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
                 <div style="display: flex; gap: 5px;">
                     <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="flex: 1;" value="${entity.image_url || ''}">
@@ -787,20 +789,47 @@ export class CampaignDetail {
         `;
 
         const fileInput = body.querySelector('#ent-file');
-        const preview = body.querySelector('#img-preview');
+        const positioner = body.querySelector('#img-positioner');
+        const positionerImg = body.querySelector('#img-positioner-img');
+        const focusInput = body.querySelector('#ent-focus');
         const urlInput = body.querySelector('#ent-img');
         const pasteHint = body.querySelector('#paste-hint');
 
-        // Helper to update preview
-        const updatePreview = (src) => {
-            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        // Drag-to-reposition logic
+        const setupPositioner = (src) => {
+            positioner.style.display = 'block';
+            positionerImg.src = src;
+            positionerImg.onload = () => {
+                const imgH = positionerImg.naturalHeight * (positioner.offsetWidth / positionerImg.naturalWidth);
+                const containerH = positioner.offsetHeight;
+                const maxOffset = Math.max(0, imgH - containerH);
+                const savedFocus = parseFloat(focusInput.value) || 50;
+                positionerImg.style.top = `-${(savedFocus / 100) * maxOffset}px`;
+
+                let startY = 0, startTop = 0, dragging = false;
+                const onStart = (clientY) => { dragging = true; startY = clientY; startTop = parseFloat(positionerImg.style.top) || 0; positioner.style.cursor = 'grabbing'; };
+                const onMove = (clientY) => { if (!dragging) return; const dy = clientY - startY; let newTop = startTop + dy; newTop = Math.min(0, Math.max(-maxOffset, newTop)); positionerImg.style.top = newTop + 'px'; focusInput.value = maxOffset > 0 ? Math.round((-newTop / maxOffset) * 100) : 50; };
+                const onEnd = () => { dragging = false; positioner.style.cursor = 'grab'; };
+
+                positioner.onmousedown = (ev) => { ev.preventDefault(); onStart(ev.clientY); };
+                document.addEventListener('mousemove', (ev) => onMove(ev.clientY));
+                document.addEventListener('mouseup', onEnd);
+                positioner.ontouchstart = (ev) => onStart(ev.touches[0].clientY);
+                positioner.ontouchmove = (ev) => { ev.preventDefault(); onMove(ev.touches[0].clientY); };
+                positioner.ontouchend = onEnd;
+            };
         };
+
+        // Init positioner if image exists
+        if (entity.image_url) {
+            setupPositioner(entity.image_url);
+        }
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => updatePreview(ev.target.result);
+                reader.onload = (ev) => { focusInput.value = 50; setupPositioner(ev.target.result); };
                 reader.readAsDataURL(file);
             }
         });
@@ -827,7 +856,7 @@ export class CampaignDetail {
                             fileInput.files = dt.files;
 
                             const reader = new FileReader();
-                            reader.onload = (ev) => updatePreview(ev.target.result);
+                            reader.onload = (ev) => { focusInput.value = 50; setupPositioner(ev.target.result); };
                             reader.readAsDataURL(file);
 
                             pasteHint.textContent = "Immagine incollata dagli appunti!";
@@ -877,7 +906,10 @@ export class CampaignDetail {
                 image_url = publicUrl;
             }
 
-            const updates = { name, type, nationality, image_url, description, is_visible };
+            const focus = parseInt(document.getElementById('ent-focus').value) || 50;
+            const existingData = entity.data || {};
+            const data = { ...existingData, image_focus: focus };
+            const updates = { name, type, nationality, image_url, description, is_visible, data };
 
             btnAction.textContent = "Aggiornamento...";
 
@@ -1333,23 +1365,13 @@ export class CampaignDetail {
         body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Elemento</h3>
             
-            <div class="mb-15 text-center" style="display: flex; gap: 10px; justify-content: center;">
-                <div>
-                    <label style="margin-right: 5px;">Tipo:</label>
-                    <select id="ent-type" style="padding: 5px; border-radius: 5px;">
-                        <option value="npc">🎭 NPC</option>
-                        <option value="enemy">⚔️ Nemico</option>
-                        <option value="item">💎 Oggetto</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="margin-right: 5px;">Focus:</label>
-                    <select id="ent-focus" style="padding: 5px; border-radius: 5px;">
-                        <option value="top">⬆️ Alto</option>
-                        <option value="center" selected>⏺️ Centro</option>
-                        <option value="bottom">⬇️ Basso</option>
-                    </select>
-                </div>
+            <div class="mb-15 text-center">
+                <label style="margin-right: 10px;">Tipo:</label>
+                <select id="ent-type" style="padding: 5px; border-radius: 5px;">
+                    <option value="npc">🎭 NPC</option>
+                    <option value="enemy">⚔️ Nemico</option>
+                    <option value="item">💎 Oggetto</option>
+                </select>
             </div>
 
             <div class="input-field mb-10">
@@ -1378,7 +1400,11 @@ export class CampaignDetail {
             <div class="input-field mb-10" style="text-align: center; border: 1px dashed var(--border-color); padding: 10px; border-radius: 8px;">
                 <label for="ent-file" class="btn btn-secondary btn-sm" style="display: block; width: 100%; margin-bottom: 5px; cursor: pointer;">📷 Carica Immagine</label>
                 <input type="file" id="ent-file" style="display: none;" accept="image/*">
-                <div id="img-preview" style="width: 100px; height: 100px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 8px; display: none; border: 2px solid var(--accent-gold);"></div>
+                <div id="img-positioner" style="width: 100%; max-width: 280px; height: 180px; background: #eee; margin: 10px auto; overflow: hidden; border-radius: 12px; border: 2px solid var(--accent-gold); position: relative; cursor: grab; display: none; touch-action: none;">
+                    <img id="img-positioner-img" src="" style="width: 100%; position: absolute; left: 0; user-select: none; pointer-events: none;">
+                    <div style="position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.7rem; pointer-events: none;">↕ Trascina per riposizionare</div>
+                </div>
+                <input type="hidden" id="ent-focus" value="50">
                 <div style="font-size: 0.8rem; color: var(--text-faded); margin: 5px 0;">OPPURE</div>
                 <div style="display: flex; gap: 5px;">
                     <input type="text" id="ent-img" placeholder="Incolla URL immagine..." style="flex: 1;">
@@ -1398,17 +1424,41 @@ export class CampaignDetail {
 `;
 
         const fileInput = body.querySelector('#ent-file');
-        const preview = body.querySelector('#img-preview');
+        const positioner = body.querySelector('#img-positioner');
+        const positionerImg = body.querySelector('#img-positioner-img');
+        const focusInput = body.querySelector('#ent-focus');
         const urlInput = body.querySelector('#ent-img');
+
+        // Drag-to-reposition logic
+        const setupPositioner = (src) => {
+            positioner.style.display = 'block';
+            positionerImg.src = src;
+            positionerImg.onload = () => {
+                const imgH = positionerImg.naturalHeight * (positioner.offsetWidth / positionerImg.naturalWidth);
+                const containerH = positioner.offsetHeight;
+                const maxOffset = Math.max(0, imgH - containerH);
+                const savedFocus = parseFloat(focusInput.value) || 50;
+                positionerImg.style.top = `-${(savedFocus / 100) * maxOffset}px`;
+
+                let startY = 0, startTop = 0, dragging = false;
+                const onStart = (clientY) => { dragging = true; startY = clientY; startTop = parseFloat(positionerImg.style.top) || 0; positioner.style.cursor = 'grabbing'; };
+                const onMove = (clientY) => { if (!dragging) return; const dy = clientY - startY; let newTop = startTop + dy; newTop = Math.min(0, Math.max(-maxOffset, newTop)); positionerImg.style.top = newTop + 'px'; focusInput.value = maxOffset > 0 ? Math.round((-newTop / maxOffset) * 100) : 50; };
+                const onEnd = () => { dragging = false; positioner.style.cursor = 'grab'; };
+
+                positioner.onmousedown = (ev) => { ev.preventDefault(); onStart(ev.clientY); };
+                document.addEventListener('mousemove', (ev) => onMove(ev.clientY));
+                document.addEventListener('mouseup', onEnd);
+                positioner.ontouchstart = (ev) => onStart(ev.touches[0].clientY);
+                positioner.ontouchmove = (ev) => { ev.preventDefault(); onMove(ev.touches[0].clientY); };
+                positioner.ontouchend = onEnd;
+            };
+        };
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    preview.style.display = 'block';
-                    preview.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                };
+                reader.onload = (ev) => { focusInput.value = 50; setupPositioner(ev.target.result); };
                 reader.readAsDataURL(file);
             }
         });
@@ -1419,9 +1469,8 @@ export class CampaignDetail {
 
         btnAction.onclick = async () => {
             const type = document.getElementById('ent-type').value;
-            const focus = document.getElementById('ent-focus').value; // Get focus
+            const focus = parseInt(document.getElementById('ent-focus').value) || 50;
             const name = document.getElementById('ent-name').value;
-
             const nationality = document.getElementById('ent-nat').value;
             const description = document.getElementById('ent-desc').value;
             const is_visible = document.getElementById('ent-visible').checked;
@@ -1447,7 +1496,7 @@ export class CampaignDetail {
 
             const entityData = {
                 name, type, nationality, image_url, description, is_visible,
-                data: { image_focus: focus, notes: '', items: [] } // Store focus
+                data: { image_focus: focus, notes: '', items: [] }
             };
 
             btnAction.textContent = "Salvataggio...";
@@ -1474,8 +1523,8 @@ export class CampaignDetail {
         const btnAction = this.container.querySelector('#modal-action-btn');
 
         const icons = { npc: '\uD83C\uDFAD', enemy: '\u2694\uFE0F', item: '\uD83D\uDC8E' };
-        const imageFocus = e.data?.image_focus || 'center';
-        const objectPosition = imageFocus === 'top' ? 'top' : (imageFocus === 'bottom' ? 'bottom' : 'center');
+        const rawFocus = e.data?.image_focus;
+        const objectPosition = typeof rawFocus === 'number' ? `center ${rawFocus}%` : (rawFocus === 'top' ? 'top' : (rawFocus === 'bottom' ? 'bottom' : 'center'));
 
         body.innerHTML = `
             <div class="entity-view-modal" style="display: flex; flex-direction: column; align-items: center; padding: 10px 0;">
