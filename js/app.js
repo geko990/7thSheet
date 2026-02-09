@@ -2,15 +2,15 @@ import { Router } from './router.js';
 import { CONFIG } from './config.js';
 import CharacterList from './components/CharacterList.js';
 import DiceRoller from './components/DiceRoller.js';
-import Settings from './components/Settings.js?v=0.9.72';
-import CharacterSheet from './components/CharacterSheet.js?v=0.9.72';
+import Settings from './components/Settings.js?v=0.9.73';
+import CharacterSheet from './components/CharacterSheet.js?v=0.9.73';
 import CreateWizard from './components/CreateWizard.js';
 import { AdventureTab } from './components/AdventureTab.js';
-import { AuthService } from './services/AuthService.js?v=0.9.72';
-import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.72';
-import { Dice } from './dice.js?v=0.9.72';
-import { Storage } from './storage.js?v=0.9.72';
-import { CampaignService } from './services/CampaignService.js?v=0.9.72';
+import { AuthService } from './services/AuthService.js?v=0.9.73';
+import { CampaignDetail } from './components/CampaignDetail.js?v=0.9.73';
+import { Dice } from './dice.js?v=0.9.73';
+import { Storage } from './storage.js?v=0.9.73';
+import { CampaignService } from './services/CampaignService.js?v=0.9.73';
 
 class App {
     constructor() {
