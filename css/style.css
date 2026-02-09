@@ -1064,18 +1064,28 @@ select {
    ======================================== */
 
 .wizard-container {
-    padding: 20px 0;
-    /* Removed side padding to use full width of container */
+    padding: 0 0 20px 0;
+    /* Removed top padding, kept bottom */
     width: 100%;
     /* Use full width */
     max-width: 550px;
     /* Wider as requested */
-    margin: 30px auto;
-    /* More vertical space */
+    margin: 0 auto;
+    /* Reduced vertical space */
     background: transparent;
     /* Removed white background */
     border-radius: 0;
     position: relative;
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--text-ink);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .wizard-progress {
