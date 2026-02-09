@@ -1184,117 +1184,134 @@ export default class CharacterSheet {
         const btnConfirm = container.querySelector('#btn-sheet-confirm-crop');
 
         let cropState = { img: null, scale: 1, posX: 0, posY: 0, isDragging: false, lastX: 0, lastY: 0 };
-        const updateCropperTransform = () => { if (cropperImg) cropperImg.style.transform = `translate(${cropState.posX}px, ${cropState.posY}px) scale(${cropState.scale})`; };
+
+        // CSS uses translate(-50%, -50%) to center by default. We add our offsets to that.
+        const updateCropperTransform = () => {
+            if (cropperImg) {
+                // We combine the centering translate with the user's drag offset
+                cropperImg.style.transform = `translate(calc(-50% + ${cropState.posX}px), calc(-50% + ${cropState.posY}px)) scale(${cropState.scale})`;
+            }
+        };
 
         if (fileInput) {
-            // Removing old listeners if any to be safe (not easily possible without named functions, but standard replace avoids dupes)
             fileInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (evt) => {
-                        // Create a new Image object to ensure clean state
                         const img = new Image();
                         img.onload = () => {
-                            // Reset state
                             cropState.img = img;
-                            cropperImg.src = img.src; // Show in DOM
+                            cropperImg.src = img.src;
 
-                            // Calculate fit
-                            const fitScale = Math.min(300 / img.width, 300 / img.height, 1);
-                            cropState.scale = Math.max(fitScale, 0.5); // Minimum scale
+                            // Initialize logic: fit shortest side to container (COVER strategy)
+                            const containerSize = 300;
+                            const scaleX = containerSize / img.width;
+                            const scaleY = containerSize / img.height;
+                            let startScale = Math.max(scaleX, scaleY);
+
+                            if (startScale < 0.1) startScale = 0.1;
+
+                            cropState.scale = startScale;
                             cropState.posX = 0;
                             cropState.posY = 0;
 
-                            zoomSlider.min = "0.1";
-                            zoomSlider.max = "3";
-                            zoomSlider.value = cropState.scale;
+                            // Setup Slider
+                            zoomSlider.min = (startScale * 0.5).toString();
+                            zoomSlider.max = (startScale * 3).toString();
+                            zoomSlider.step = (startScale * 0.1).toString();
+                            zoomSlider.value = startScale;
 
                             updateCropperTransform();
                             cropperOverlay.style.display = 'flex';
                         };
-                        img.onerror = () => alert("Errore nel caricamento dell'immagine.");
+                        img.onerror = () => alert("Errore caricamento immagine.");
                         img.src = evt.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
+                e.target.value = '';
+            };
+        }
+        reader.readAsDataURL(file);
+    }
                 e.target.value = ''; // Reset input
-            };
+};
         }
 
-        if (cropperMask) {
-            const startDrag = (x, y) => { cropState.isDragging = true; cropState.lastX = x; cropState.lastY = y; };
-            const moveDrag = (x, y) => {
-                if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
-                    cropState.posX += x - cropState.lastX;
-                    cropState.posY += y - cropState.lastY;
-                    cropState.lastX = x;
-                    cropState.lastY = y;
-                    updateCropperTransform();
-                }
-            };
-
-            cropperMask.addEventListener('mousedown', (e) => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
-            window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-            window.addEventListener('mouseup', () => cropState.isDragging = false);
-
-            cropperMask.addEventListener('touchstart', (e) => {
-                if (cropperOverlay.style.display === 'flex') {
-                    startDrag(e.touches[0].clientX, e.touches[0].clientY);
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            window.addEventListener('touchmove', (e) => {
-                if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
-                    moveDrag(e.touches[0].clientX, e.touches[0].clientY);
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            window.addEventListener('touchend', () => cropState.isDragging = false);
+if (cropperMask) {
+    const startDrag = (x, y) => { cropState.isDragging = true; cropState.lastX = x; cropState.lastY = y; };
+    const moveDrag = (x, y) => {
+        if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
+            cropState.posX += x - cropState.lastX;
+            cropState.posY += y - cropState.lastY;
+            cropState.lastX = x;
+            cropState.lastY = y;
+            updateCropperTransform();
         }
+    };
 
-        if (zoomSlider) zoomSlider.addEventListener('input', (e) => { cropState.scale = parseFloat(e.target.value); updateCropperTransform(); });
+    cropperMask.addEventListener('mousedown', (e) => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', () => cropState.isDragging = false);
 
-        if (btnCancel) btnCancel.onclick = () => { cropperOverlay.style.display = 'none'; cropState.img = null; };
+    cropperMask.addEventListener('touchstart', (e) => {
+        if (cropperOverlay.style.display === 'flex') {
+            startDrag(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
 
-        if (btnConfirm) btnConfirm.onclick = () => {
-            if (!cropState.img) return;
+    window.addEventListener('touchmove', (e) => {
+        if (cropState.isDragging && cropperOverlay.style.display === 'flex') {
+            moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
 
-            const canvas = document.createElement('canvas');
-            const size = 300; // Increased resolution
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
+    window.addEventListener('touchend', () => cropState.isDragging = false);
+}
 
-            // White background (optional, but good for transparency)
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, size, size);
+if (zoomSlider) zoomSlider.addEventListener('input', (e) => { cropState.scale = parseFloat(e.target.value); updateCropperTransform(); });
 
-            ctx.save();
-            // Center Canvas
-            ctx.translate(size / 2, size / 2);
-            // Translate Image Position
-            ctx.translate(cropState.posX, cropState.posY);
-            // Scale
-            ctx.scale(cropState.scale, cropState.scale);
-            // Draw Image Centered
-            ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2);
-            ctx.restore();
+if (btnCancel) btnCancel.onclick = () => { cropperOverlay.style.display = 'none'; cropState.img = null; };
 
-            this.character.image = canvas.toDataURL('image/jpeg', 0.85);
-            Storage.saveCharacter(this.character);
-            this.render(); // Re-render whole sheet to update avatar
-            cropperOverlay.style.display = 'none';
-        };
+if (btnConfirm) btnConfirm.onclick = () => {
+    if (!cropState.img) return;
+
+    const canvas = document.createElement('canvas');
+    const size = 300; // Increased resolution
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // White background (optional, but good for transparency)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    ctx.save();
+    // Center Canvas
+    ctx.translate(size / 2, size / 2);
+    // Translate Image Position
+    ctx.translate(cropState.posX, cropState.posY);
+    // Scale
+    ctx.scale(cropState.scale, cropState.scale);
+    // Draw Image Centered
+    ctx.drawImage(cropState.img, -cropState.img.width / 2, -cropState.img.height / 2);
+    ctx.restore();
+
+    this.character.image = canvas.toDataURL('image/jpeg', 0.85);
+    Storage.saveCharacter(this.character);
+    this.render(); // Re-render whole sheet to update avatar
+    cropperOverlay.style.display = 'none';
+};
     }
 
-    render() {
-        this.renderCharacter(this.character.id).then(div => {
-            const old = document.querySelector('.character-sheet-container');
-            if (old && old.parentNode) old.parentNode.replaceChild(div, old);
-            else this.app.container.appendChild(div);
-        });
-    }
+render() {
+    this.renderCharacter(this.character.id).then(div => {
+        const old = document.querySelector('.character-sheet-container');
+        if (old && old.parentNode) old.parentNode.replaceChild(div, old);
+        else this.app.container.appendChild(div);
+    });
+}
 }
