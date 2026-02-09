@@ -30,7 +30,7 @@ export const AuthService = {
     },
 
     async signUp(email, password, username) {
-        if (!supabaseClient) return { error: { message: 'Supabase not configured' } };
+        if (!supabaseClient) return { error: { message: 'Supabase non configurato o SDK non caricato. Controlla la connessione.' } };
 
         const { data, error } = await supabaseClient.auth.signUp({
             email,
@@ -46,7 +46,7 @@ export const AuthService = {
     },
 
     async signIn(email, password) {
-        if (!supabaseClient) return { error: { message: 'Supabase not configured' } };
+        if (!supabaseClient) return { error: { message: 'Supabase non configurato o SDK non caricato. Controlla la connessione.' } };
 
         const { data, error } = await supabaseClient.auth.signInWithPassword({
             email,
@@ -68,7 +68,7 @@ export const AuthService = {
     },
 
     async resetPasswordForEmail(email) {
-        if (!supabaseClient) return { error: { message: 'Supabase not configured' } };
+        if (!supabaseClient) return { error: { message: 'Supabase non configurato o SDK non caricato.' } };
         const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + '?reset_password=true',
         });
