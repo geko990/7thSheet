@@ -253,6 +253,31 @@ export const CampaignService = {
         return { data, error };
     },
 
+    async unlinkCharacter(campaignId) {
+        const user = AuthService.getUser();
+        if (!user) return { error: { message: "Not logged in" } };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_members')
+            .update({ character_data: null })
+            .match({ campaign_id: campaignId, user_id: user.id })
+            .select();
+
+        return { data, error };
+    },
+
+    async leaveCampaign(campaignId) {
+        const user = AuthService.getUser();
+        if (!user) return { error: { message: "Not logged in" } };
+
+        const { error } = await supabaseClient
+            .from('campaign_members')
+            .delete()
+            .match({ campaign_id: campaignId, user_id: user.id });
+
+        return { error };
+    },
+
     // IMAGES
     async uploadImage(file) {
         if (!file) return { error: { message: 'Nessun file selezionato' } };

@@ -459,7 +459,7 @@ export class CampaignDetail {
         menu.style.backdropFilter = 'blur(2px)';
 
         const targetName = member.character_data?.name || member.profile.username || 'Giocatore';
-        const isMe = member.user_id === this.userId;
+        const isMe = member.user_id === AuthService.user?.id; // Use AuthService directly or this.userId if set
         const isGm = this.myRole === 'gm';
         const isTargetGm = member.role === 'gm';
 
@@ -472,21 +472,21 @@ export class CampaignDetail {
             } else {
                 actionButtons += `<button class="btn btn-secondary" id="ctx-demote">⬇️ Retrocedi a Player</button>`;
             }
-            // Kick option
-            if (!isTargetGm) { // Shouldn't kick other GMs easily without demoting first? Or allow it.
-                actionButtons += `<button class="btn btn-secondary" id="ctx-kick" style="color: var(--accent-red); border-color: var(--accent-red);">🥾 Espelli</button>`;
-            }
+
+            actionButtons += `<button class="btn btn-secondary" id="ctx-kick" style="color: var(--accent-red); border-color: var(--accent-red);">🥾 Espelli</button>`;
         }
 
         if (isMe) {
             // Self Actions
-            // If I am the ONLY GM, I effectively delete the campaign or need to promote someone else?
-            // For now, simple "Leave"
-            actionButtons += `<button class="btn btn-secondary" id="ctx-leave" style="color: var(--accent-red); border-color: var(--accent-red);">👋 Abbandona</button>`;
+            if (member.character_data) {
+                actionButtons += `<button class="btn btn-secondary" id="ctx-unlink">💔 Scollega Personaggio</button>`;
+            }
+
+            actionButtons += `<button class="btn btn-secondary" id="ctx-leave" style="color: var(--accent-red); border-color: var(--accent-red);">👋 Abbandona Avventura</button>`;
         }
 
         if (!actionButtons) {
-            // Nothing to do (e.g. Player clicking on another Player)
+            // Nothing to do
             return;
         }
 
@@ -548,22 +548,34 @@ export class CampaignDetail {
             };
         }
 
+        const unlinkBtn = menu.querySelector('#ctx-unlink');
+        if (unlinkBtn) {
+            unlinkBtn.onclick = async () => {
+                if (confirm(`Vuoi scollegare il personaggio ${member.character_data.name}? Rimarrai nella campagna come spettatore.`)) {
+                    unlinkBtn.textContent = '...';
+                    const { error } = await CampaignService.unlinkCharacter(this.campaignId);
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+
         const leaveBtn = menu.querySelector('#ctx-leave');
         if (leaveBtn) {
             leaveBtn.onclick = async () => {
-                let msg = "Vuoi lasciare questa avventura?";
-                if (isGm) msg += " Sei un GM! Se sei l'unico, la campagna potrebbe rimanere orfana.";
+                let msg = "Vuoi lasciare questa avventura? Dovrai essere invitato nuovamente per rientrare.";
+                if (this.myRole === 'gm') msg += " ATTENZIONE: Sei un GM! Se sei l'unico, assicurati di promuovere qualcun altro prima.";
 
                 if (confirm(msg)) {
                     leaveBtn.textContent = '...';
-                    const { error } = await CampaignService.removeMember(this.campaignId, member.user_id);
+                    const { error } = await CampaignService.leaveCampaign(this.campaignId);
                     menu.remove();
                     if (error) alert("Errore: " + error.message);
                     else {
                         // Navigate back or refresh
-                        window.app.adventureTab.render(); // Go back to list
-                        // Or trigger router
-                        window.app.router.navigate('adventures');
+                        if (this.app?.adventureTab) this.app.adventureTab.render();
+                        if (this.app?.router) this.app.router.navigate('adventures');
                     }
                 }
             };
