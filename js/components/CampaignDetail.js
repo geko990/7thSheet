@@ -392,6 +392,13 @@ export class CampaignDetail {
             // CLICK
             card.addEventListener('click', () => {
                 if (isLongPress) return;
+
+                // If it's ME and I have a linked character, open my sheet
+                if (member.user_id === AuthService.user?.id && member.character_data?.id) {
+                    this.app.router.navigate('character-sheet', { id: member.character_data.id });
+                    return;
+                }
+
                 if (member.character_data) {
                     this.openPlayerPopup(member);
                 }
@@ -1002,15 +1009,36 @@ export class CampaignDetail {
 
         body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-navy);">Scegli il tuo Eroe</h3>
-            <div id="char-selection-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+            <div id="char-selection-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 10px; max-height: 400px; overflow-y: auto;">
                 ${localChars.length > 0 ? localChars.map(c => `
-                    <div class="card char-option" data-id="${c.id}" style="padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 2px solid transparent;">
-                        <div class="avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #ddd;">
-                            ${c.image ? `<img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover;">` : '👤'}
+                    <div class="card char-option" data-id="${c.id}" style="
+                        padding: 10px; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        gap: 10px; 
+                        cursor: pointer; 
+                        border: 2px solid transparent; 
+                        transition: all 0.2s;
+                        background: white;
+                    ">
+                        <div class="avatar" style="
+                            width: 70px; 
+                            height: 70px; 
+                            border-radius: 12px; 
+                            overflow: hidden; 
+                            background: #ddd; 
+                            border: 2px solid var(--accent-gold);
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        ">
+                            ${c.image ? `<img src="${c.image}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 2rem;">👤</span>'}
                         </div>
-                        <div style="font-weight: bold;">${c.name}</div>
+                        <div style="font-weight: bold; text-align: center; font-size: 0.9rem; line-height: 1.2;">
+                            ${c.name}
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-faded);">${c.nation || ''}</div>
                     </div>
-                `).join('') : '<div class="text-center">Non hai creato nessun personaggio sul dispositivo!</div>'}
+                `).join('') : '<div class="text-center" style="grid-column: 1/-1;">Non hai creato nessun personaggio sul dispositivo!</div>'}
             </div>
         `;
 

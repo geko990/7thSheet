@@ -72,7 +72,13 @@ self.addEventListener('fetch', (event) => {
         // Cache first for other assets
         event.respondWith(
             caches.match(event.request)
-                .then(response => response || fetch(event.request))
+                .then(response => {
+                    return response || fetch(event.request).catch(err => {
+                        console.warn('SW Fetch Error:', err);
+                        // Optional: return offline placeholder if it's an image
+                        return new Response('Network Error', { status: 408, statusText: 'Network Error' });
+                    });
+                })
         );
     }
 });
