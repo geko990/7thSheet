@@ -372,9 +372,13 @@ export class CampaignDetail {
 
             // TOUCH
             card.addEventListener('touchstart', (e) => {
+                // Ensure we don't start multiple timers
+                if (timer) clearTimeout(timer);
+
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isLongPress = false;
+
                 timer = setTimeout(() => {
                     isLongPress = true;
                     if (navigator.vibrate) navigator.vibrate(50);
@@ -382,23 +386,32 @@ export class CampaignDetail {
                     if (isMe || this.myRole === 'gm') {
                         this.openPlayerContextMenu(member);
                     }
-                }, 500);
+                }, 400); // Reduced to 400ms
             }, { passive: true });
 
             card.addEventListener('touchmove', (e) => {
                 const diffX = Math.abs(e.touches[0].clientX - startX);
                 const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+                if (diffX > 10 || diffY > 10) {
+                    clearTimeout(timer);
+                    isLongPress = false;
+                }
             }, { passive: true });
 
             card.addEventListener('touchend', (e) => {
                 clearTimeout(timer);
-                if (isLongPress) e.preventDefault();
+                if (isLongPress) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Stop click from firing
+                }
             });
 
             // CLICK
-            card.addEventListener('click', () => {
-                if (isLongPress) return;
+            card.addEventListener('click', (e) => {
+                if (isLongPress) {
+                    e.stopPropagation();
+                    return;
+                }
 
                 // If it's ME and I have a linked character, open my sheet
                 if (member.user_id === AuthService.user?.id && member.character_data?.id) {
@@ -411,9 +424,10 @@ export class CampaignDetail {
                 }
             });
 
-            // CONTEXT MENU
+            // CONTEXT MENU (Right Click for Desktop)
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 // Allow if GM OR if it's me
                 if (this.myRole === 'gm' || isMe) {
                     this.openPlayerContextMenu(member);
@@ -561,6 +575,7 @@ export class CampaignDetail {
 
             // TOUCH EVENTS
             card.addEventListener('touchstart', (e) => {
+                if (timer) clearTimeout(timer);
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isLongPress = false;
@@ -569,29 +584,39 @@ export class CampaignDetail {
                     isLongPress = true;
                     navigator.vibrate?.(50);
                     this.openEntityContextMenu(entity);
-                }, 500);
+                }, 400);
             }, { passive: true });
 
             card.addEventListener('touchmove', (e) => {
                 const diffX = Math.abs(e.touches[0].clientX - startX);
                 const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+                if (diffX > 10 || diffY > 10) {
+                    clearTimeout(timer);
+                    isLongPress = false;
+                }
             }, { passive: true });
 
             card.addEventListener('touchend', (e) => {
                 clearTimeout(timer);
-                if (isLongPress) e.preventDefault();
+                if (isLongPress) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
             });
 
             // CLICK (Short Press)
             card.addEventListener('click', (e) => {
-                if (isLongPress) return;
+                if (isLongPress) {
+                    e.stopPropagation();
+                    return;
+                }
                 this.openViewEntityModal(entity);
             });
 
             // CONTEXT MENU (Right Click)
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.openEntityContextMenu(entity);
             });
         });
@@ -1354,18 +1379,25 @@ export class CampaignDetail {
         const icons = { npc: '🎭', enemy: '⚔️', item: '💎' };
 
         body.innerHTML = `
-            <div class="text-center">
-                <div class="avatar" style="width: 120px; height: 120px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                    ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="line-height: 120px; font-size: 3rem;">${icons[e.type] || '❓'}</span>`}
+            <div class="entity-view-modal">
+                <div class="entity-image-large" style="width: 100%; aspect-ratio: 16/9; background: #eee; border-radius: 8px; overflow: hidden; border: 2px solid var(--accent-gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; position: relative;">
+                    ${e.image_url ?
+                `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--text-faded);">${icons[e.type] || '❓'}</div>`
+            }
+                    ${e.type ? `<div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">${e.type === 'item' ? 'Oggetto' : (e.type === 'enemy' ? 'Avversario' : 'NPC')}</div>` : ''}
                 </div>
-                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${e.name}</h2>
                 
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; font-size: 0.9rem;">
-                    ${e.level ? `<span style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 10px;">Liv. ${e.level}</span>` : ''}
-                    ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded);">${e.nationality}</span>` : ''}
+                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px; text-align: center; font-size: 1.8rem;">${e.name}</h2>
+                
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; font-size: 1rem;">
+                    ${e.level ? `<span style="background: var(--accent-gold); color: white; padding: 2px 12px; border-radius: 12px; font-weight: bold;">Liv. ${e.level}</span>` : ''}
+                    ${e.nationality ? `<span style="font-style: italic; color: var(--text-faded); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 12px;">${e.nationality}</span>` : ''}
                 </div>
 
-                <div style="text-align: left; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; white-space: pre-wrap; line-height: 1.6;">${e.description || 'Nessuna descrizione.'}</div>
+                <div style="text-align: left; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 12px; white-space: pre-wrap; line-height: 1.6; border: 1px solid var(--border-worn); font-size: 1.05rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">
+                    ${e.description || 'Nessuna descrizione disponibile.'}
+                </div>
             </div>
     `;
 
