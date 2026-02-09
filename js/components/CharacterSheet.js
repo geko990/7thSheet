@@ -1311,17 +1311,14 @@ export default class CharacterSheet {
             this.render();
             cropperOverlay.style.display = 'none';
         };
-        Storage.saveCharacter(this.character);
-        this.render(); // Re-render whole sheet to update avatar
-        cropperOverlay.style.display = 'none';
-    };
-}
 
-render() {
-    this.renderCharacter(this.character.id).then(div => {
-        const old = document.querySelector('.character-sheet-container');
-        if (old && old.parentNode) old.parentNode.replaceChild(div, old);
-        else this.app.container.appendChild(div);
-    });
-}
+    }
+
+    render() {
+        this.renderCharacter(this.character.id).then(div => {
+            const old = document.querySelector('.character-sheet-container');
+            if (old && old.parentNode) old.parentNode.replaceChild(div, old);
+            else this.app.container.appendChild(div);
+        });
+    }
 }
