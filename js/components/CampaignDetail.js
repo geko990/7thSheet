@@ -986,22 +986,22 @@ export class CampaignDetail {
 
         // Modal Content - Centered
         menu.innerHTML = `
-            < div class="modal-content" style = "width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;" >
-                <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${entity.name}</h3>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">📜 Apri</button>
-                    ${isGm ? `
-                        <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica</button>
-                        <button class="btn btn-secondary" id="ctx-toggle" style="width: 100%; padding: 12px;">${entity.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
-                        <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
-                    ` : ''}
-                    <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
-                </div>
-            </div >
-            <style>
-                @keyframes popIn {to {transform: scale(1); } }
-            </style>
-        `;
+        <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+            <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${entity.name}</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">📜 Apri</button>
+                ${isGm ? `
+                    <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica</button>
+                    <button class="btn btn-secondary" id="ctx-toggle" style="width: 100%; padding: 12px;">${entity.is_visible ? '🔒 Nascondi' : '👁️ Mostra'}</button>
+                    <button class="btn btn-secondary" id="ctx-delete" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
+                ` : ''}
+                <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
+            </div>
+        </div>
+        <style>
+            @keyframes popIn {to {transform: scale(1); } }
+        </style>
+    `;
 
         document.body.appendChild(menu);
 
@@ -1047,7 +1047,7 @@ export class CampaignDetail {
 
         // Copy paste of add modal HTML, ideally refactored into a shared render function
         body.innerHTML = `
-            < h3 class="text-center" style = "font-family: var(--font-display); color: var(--accent-gold);" > Modifica Elemento</h3 >
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Modifica Elemento</h3>
             
             <div class="mb-15 text-center">
                 <label style="margin-right: 10px;">Tipo:</label>
@@ -1303,7 +1303,7 @@ export class CampaignDetail {
 
         let html = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold);">Nuovo Messaggio</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
         `;
 
         if (targets.length === 0) {
