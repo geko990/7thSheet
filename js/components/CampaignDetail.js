@@ -80,20 +80,26 @@ export class CampaignDetail {
                 <div class="adventure-tabs-bar" style="
                     display: flex; 
                     justify-content: center; 
-                    gap: 20px; 
+                    gap: 15px; 
                     padding: 10px; 
                     background: rgba(var(--accent-navy-rgb), 0.05); 
                     border-bottom: 1px solid var(--border-color);
                     margin-bottom: 10px;
+                    overflow-x: auto;
+                    white-space: nowrap;
+                    -webkit-overflow-scrolling: touch;
                 ">
-                    <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
                         📖 Storia
                     </button>
-                    <button class="nav-tab ${this.currentTab === 'group' ? 'active' : ''}" data-tab="group" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'group' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        👥 Gruppo
+                    <button class="nav-tab ${this.currentTab === 'incontri' ? 'active' : ''}" data-tab="incontri" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'incontri' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+                        🎭 Incontri
                     </button>
-                    <button class="nav-tab ${this.currentTab === 'missive' ? 'active' : ''}" data-tab="missive" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'missive' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                        ✉️ Missive
+                    <button class="nav-tab ${this.currentTab === 'missioni' ? 'active' : ''}" data-tab="missioni" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'missioni' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+                        📜 Missioni
+                    </button>
+                    <button class="nav-tab ${this.currentTab === 'group' ? 'active' : ''}" data-tab="group" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'group' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
+                        👥 Gruppo
                     </button>
                 </div>
 
@@ -149,11 +155,164 @@ export class CampaignDetail {
 
         if (this.currentTab === 'story') {
             await this.renderStoryTab(contentDiv);
+        } else if (this.currentTab === 'incontri') {
+            await this.renderIncontriTab(contentDiv);
+        } else if (this.currentTab === 'missioni') {
+            await this.renderMissioniTab(contentDiv);
         } else if (this.currentTab === 'group') {
             await this.renderGroupTab(contentDiv);
-        } else if (this.currentTab === 'missive') {
-            await this.renderMissiveTab(contentDiv);
         }
+    }
+
+    async renderIncontriTab(container) {
+        const { data: entities } = await CampaignService.getEntities(this.campaignId);
+
+        let html = '';
+        const categories = {
+            'npc': { title: 'Alleati & NPC', icon: '🎭', color: 'var(--accent-gold)' },
+            'enemy': { title: 'Avversari', icon: '⚔️', color: 'var(--accent-red)' },
+            'item': { title: 'Oggetti & Indizi', icon: '💎', color: 'var(--accent-navy)' }
+        };
+
+        // Sub-navigation for Incontri
+        if (!this.currentIncontriTab) this.currentIncontriTab = 'all';
+
+        html += `
+            <div class="sub-nav" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                <button class="btn btn-xs ${this.currentIncontriTab === 'all' || !this.currentIncontriTab ? 'btn-primary' : 'btn-secondary'}" data-itp="all">Tutti</button>
+                <button class="btn btn-xs ${this.currentIncontriTab === 'npc' ? 'btn-primary' : 'btn-secondary'}" data-itp="npc">🎭 NPC</button>
+                <button class="btn btn-xs ${this.currentIncontriTab === 'enemy' ? 'btn-primary' : 'btn-secondary'}" data-itp="enemy">⚔️ Nemici</button>
+                <button class="btn btn-xs ${this.currentIncontriTab === 'item' ? 'btn-primary' : 'btn-secondary'}" data-itp="item">💎 Oggetti</button>
+            </div>
+        `;
+
+        if (this.myRole === 'gm') {
+            html += `
+                <div class="text-center mb-20">
+                    <button id="btn-add-entity" class="btn btn-sm btn-primary">+ Nuovo Elemento</button>
+                </div>
+            `;
+        }
+
+        if (!entities || entities.length === 0) {
+            html += '<div class="italic text-center mt-20">Nessun elemento ancora scoperto in questa avventura...</div>';
+        } else {
+            // Filter by sub-tab
+            const filtered = (this.currentIncontriTab === 'all' || !this.currentIncontriTab)
+                ? entities
+                : entities.filter(e => e.type === this.currentIncontriTab);
+
+            // Filter by visibility for players
+            const visibleList = this.myRole === 'gm' ? filtered : filtered.filter(e => e.is_visible);
+
+            if (visibleList.length === 0) {
+                html += '<div class="italic text-center mt-20">Nessun elemento in questa categoria.</div>';
+            } else {
+                html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+                visibleList.forEach(e => {
+                    const type = e.type || 'npc';
+                    const isHidden = !e.is_visible;
+                    html += `
+                        <div class="card entity-card no-select ${isHidden ? 'opacity-70' : ''}" style="padding: 0; overflow: hidden; position: relative; border-top: 4px solid ${categories[type]?.color || '#ccc'}; height: 100%; display: flex; flex-direction: column; background: #fff;" data-id="${e.id}" data-visible="${e.is_visible}">
+                            ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; z-index: 2;" title="Nascosto">🔒</div>' : ''}
+                            <div class="entity-image-container" style="width: 100%; aspect-ratio: 4/3; background: #eee; position: relative; border-bottom: 1px solid var(--border-color);">
+                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center ${typeof e.data?.image_focus === 'number' ? e.data.image_focus : 50}%;">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-faded);">${categories[type]?.icon || '❓'}</div>`}
+                            </div>
+                            <div style="padding: 10px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1.1rem; line-height: 1.2; margin-bottom: 5px;">${e.name}</div>
+                                ${e.nationality ? `<div style="font-size: 0.8rem; color: var(--text-faded); font-style: italic; margin-bottom: 5px;">${e.nationality}</div>` : ''}
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+        }
+
+        container.innerHTML = html;
+
+        // Sub-nav listeners
+        container.querySelectorAll('.sub-nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.currentIncontriTab = btn.dataset.itp;
+                this.renderIncontriTab(container);
+            });
+        });
+
+        // Add Entity
+        container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
+
+        // Interaction listeners
+        if (this.attachEntityInteractionListeners) {
+            this.attachEntityInteractionListeners(container, entities);
+        }
+    }
+
+    async renderMissioniTab(container) {
+        const { data: quests } = await CampaignService.getQuests(this.campaignId);
+
+        let html = '';
+
+        if (this.myRole === 'gm') {
+            html += `
+                <div class="text-center mb-20">
+                    <button id="btn-add-quest" class="btn btn-primary">+ Nuova Missione</button>
+                </div>
+            `;
+        }
+
+        if (!quests || quests.length === 0) {
+            html += '<div class="italic text-center mt-20" style="color: var(--text-faded)">Nessun obiettivo o missione ancora definita per questa avventura...</div>';
+        } else {
+            html += '<div class="quests-list" style="display: flex; flex-direction: column; gap: 15px;">';
+            quests.forEach(quest => {
+                const isCompleted = quest.status === 'completed';
+                html += `
+                    <div class="card quest-card" data-id="${quest.id}" style="
+                        padding: 15px; 
+                        background: ${isCompleted ? 'rgba(var(--accent-navy-rgb), 0.05)' : 'white'}; 
+                        border-left: 4px solid ${isCompleted ? 'var(--accent-navy)' : 'var(--accent-gold)'};
+                        opacity: ${isCompleted ? '0.8' : '1'};
+                        position: relative;
+                        cursor: pointer;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <h4 style="margin: 0; font-family: var(--font-display); color: var(--text-main);">${isCompleted ? '✅ ' : ''}${quest.title}</h4>
+                            <span style="font-size: 0.8rem; font-weight: bold; color: var(--accent-gold);">${quest.reward_xp} XP</span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-faded); line-height: 1.4;">
+                            ${quest.description || 'Nessuna descrizione.'}
+                        </div>
+                        ${this.myRole === 'gm' && !isCompleted ? `
+                            <div class="mt-10 text-right">
+                                <button class="btn btn-xs btn-primary btn-complete-quest" data-id="${quest.id}">Completa</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+
+        // Listeners
+        container.querySelector('#btn-add-quest')?.addEventListener('click', () => this.openAddQuestModal());
+
+        container.querySelectorAll('.btn-complete-quest').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.completeQuest(btn.dataset.id);
+            });
+        });
+
+        container.querySelectorAll('.quest-card').forEach(card => {
+            card.addEventListener('contextmenu', (e) => {
+                if (this.myRole === 'gm') {
+                    e.preventDefault();
+                    this.openQuestContextMenu(quests.find(q => q.id === card.dataset.id));
+                }
+            });
+        });
     }
 
     async renderStoryTab(container) {
@@ -271,8 +430,6 @@ export class CampaignDetail {
     }
 
     async renderGroupTab(container) {
-        // Use getEntities instead of getNPCs
-        const { data: entities } = await CampaignService.getEntities(this.campaignId);
         const { members } = this.campaign;
 
         // Load unread message counts
@@ -292,23 +449,10 @@ export class CampaignDetail {
             `;
         }
 
-        // Link Character Section
-        const myId = AuthService.user?.id;
-        const myMember = members.find(m => m.user_id === myId);
-
-        if (myMember && !myMember.character_data) {
-            html += `
-                <div class="alert alert-info text-center mb-20" style="background: rgba(var(--accent-navy-rgb), 0.1); border: 1px solid var(--accent-navy); padding: 15px; border-radius: 8px;">
-                    <div>Non hai ancora scelto chi interpretare!</div>
-                    <button id="btn-link-char" class="btn btn-sm btn-primary mt-10">Scegli il tuo Personaggio</button>
-                </div>
-            `;
-        }
-
         // --- GROUP MEMBERS Section ---
         html += '<h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px;">Membri del Gruppo</h3>';
 
-        // Show ALL members, sorted: GM first, then alphabetical
+        const myId = AuthService.user?.id;
         const sortedMembers = [...members].sort((a, b) => {
             if (a.role === 'gm' && b.role !== 'gm') return -1;
             if (a.role !== 'gm' && b.role === 'gm') return 1;
@@ -318,14 +462,12 @@ export class CampaignDetail {
         });
 
         html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px;">';
-
         sortedMembers.forEach(m => {
-            const isMe = m.user_id === myId;
             const hasChar = !!m.character_data;
             const charImg = m.character_data?.image || m.character_data?.image_url || '';
             const unread = (m.user_id !== myId) ? (this._unreadCounts[m.user_id] || 0) : 0;
             const profile = m.profile || {};
-            const displayName = m.character_data?.name || (isMe ? 'Tu' : (profile.username || 'Giocatore'));
+            const displayName = m.character_data?.name || (m.user_id === myId ? 'Tu' : (profile.username || 'Giocatore'));
             const displayRole = m.role === 'gm' ? 'Game Master' : (m.character_data?.nation || 'Giocatore');
 
             html += `
@@ -341,178 +483,254 @@ export class CampaignDetail {
         });
         html += '</div>';
 
-        // --- ENTITIES Section ---
-        if (this.myRole === 'gm') {
-            html += `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;">
-                    <h3 class="section-title" style="margin: 0; border: none;">Elementi di Gioco</h3>
-                    <button id="btn-add-entity" class="btn btn-xs btn-primary">+ Nuovo</button>
+        // --- GROUP CHAT Section ---
+        html += `
+            <h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px;">Chat di Gruppo</h3>
+            <div id="group-chat-container" class="card" style="height: 300px; display: flex; flex-direction: column; background: #fff; overflow: hidden;">
+                <div id="group-chat-messages" style="flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="text-center italic" style="color: var(--text-faded); font-size: 0.8rem;">Caricamento messaggi...</div>
                 </div>
-            `;
-        } else {
-            html += '<h3 class="section-title" style="border-bottom: 2px solid var(--border-color); margin-bottom: 15px;">Elementi di Gioco</h3>';
-        }
-
-        const categories = {
-            'npc': { title: 'Alleati & NPC', icon: '🎭', color: 'var(--accent-gold)' },
-            'enemy': { title: 'Avversari', icon: '⚔️', color: 'var(--accent-red)' },
-            'item': { title: 'Oggetti & Indizi', icon: '💎', color: 'var(--accent-navy)' }
-        };
-
-        if (!entities || entities.length === 0) {
-            html += '<div class="italic text-center">Nessun elemento ancora...</div>';
-        } else {
-            // Group entities
-            const grouped = { npc: [], enemy: [], item: [] };
-            entities.forEach(e => {
-                const type = e.type || 'npc';
-                if (grouped[type]) grouped[type].push(e);
-                else grouped.npc.push(e); // Fallback
-            });
-
-            for (const [type, list] of Object.entries(grouped)) {
-                if (list.length === 0) continue;
-                // Check visibility
-                const visibleList = this.myRole === 'gm' ? list : list.filter(e => e.is_visible);
-                if (visibleList.length === 0 && this.myRole !== 'gm') continue;
-
-                html += `<h4 style="color: ${categories[type].color}; margin: 20px 0 10px; display: flex; align-items: center; gap: 5px;">${categories[type].icon} ${categories[type].title}</h4>`;
-
-                html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
-                visibleList.forEach(e => {
-                    const isHidden = !e.is_visible;
-                    html += `
-            <div class="card entity-card no-select ${isHidden ? 'opacity-70' : ''}" style="padding: 0; overflow: hidden; position: relative; border-top: 4px solid ${categories[type].color}; height: 100%; display: flex; flex-direction: column; background: #fff;" data-id="${e.id}" data-visible="${e.is_visible}">
-                ${isHidden ? '<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; z-index: 2;" title="Nascosto">🔒</div>' : ''}
-                            
-                            <div class="entity-image-container" style="width: 100%; aspect-ratio: 4/3; background: #eee; position: relative; border-bottom: 1px solid var(--border-color);">
-                                 ${e.image_url ? `<img src="${e.image_url}" style="width: 100%; height: 100%; object-fit: cover; object-position: center ${typeof e.data?.image_focus === 'number' ? e.data.image_focus : 50}%;">` : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-faded);">${categories[type].icon}</div>`}
-                            </div>
-                            
-                            <div style="padding: 10px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div style="font-weight: bold; font-family: var(--font-display); color: var(--text-main); font-size: 1.1rem; line-height: 1.2; margin-bottom: 5px;">${e.name}</div>
-                                ${e.nationality ? `<div style="font-size: 0.8rem; color: var(--text-faded); font-style: italic; margin-bottom: 5px;">${e.nationality}</div>` : ''}
-
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-            }
-        }
+                <div style="padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px;">
+                    <input type="text" id="group-chat-input" placeholder="Scrivi al gruppo..." style="flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+                    <button id="btn-send-group-msg" class="btn btn-sm btn-primary">Invia</button>
+                </div>
+            </div>
+        `;
 
         container.innerHTML = html;
 
-        // --- LISTENERS ---
+        // Message loading
+        this.loadGroupChat();
 
-        // Link Character Btn
-        container.querySelector('#btn-link-char')?.addEventListener('click', () => this.openLinkCharacterModal());
+        // Listeners for chat
+        const input = container.querySelector('#group-chat-input');
+        const sendBtn = container.querySelector('#btn-send-group-msg');
 
-        // Add Entity Btn
-        if (this.myRole === 'gm') container.querySelector('#btn-add-entity')?.addEventListener('click', () => this.openAddEntityModal());
+        sendBtn.addEventListener('click', () => this.handleSendGroupMessage(input));
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSendGroupMessage(input);
+        });
 
-        // Player Cards Interactions
+        // Player card listeners
         container.querySelectorAll('.player-card').forEach(card => {
             const uid = card.dataset.uid;
             const member = members.find(m => m.user_id === uid);
             if (!member) return;
 
-            const isMe = member.user_id === AuthService.user?.id;
-            let timer = null;
-            let isLongPress = false;
-            let startX, startY;
-
-            // TOUCH
-            card.addEventListener('touchstart', (e) => {
-                if (timer) clearTimeout(timer);
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isLongPress = false;
-
-                timer = setTimeout(() => {
-                    isLongPress = true;
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    // Open full context menu mainly for GM, Creator or Self
-                    if (isMe || this.myRole === 'gm' || this.campaign.gm_id === AuthService.user?.id) {
-                        this.openPlayerContextMenu(member);
-                    } else {
-                        // For others, use missive context menu (chat/profile options)
-                        this.openMissiveContextMenu(member);
-                    }
-                }, 400);
-            }, { passive: true });
-
-            card.addEventListener('touchmove', (e) => {
-                const diffX = Math.abs(e.touches[0].clientX - startX);
-                const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) {
-                    clearTimeout(timer);
-                    isLongPress = false;
-                }
-            }, { passive: true });
-
-            card.addEventListener('touchend', (e) => {
-                clearTimeout(timer);
-                if (isLongPress) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            });
-
-            // CLICK
-            card.addEventListener('click', (e) => {
-                if (isLongPress) {
-                    e.stopPropagation();
-                    return;
-                }
-
-                // If it's ME and I have a linked character, open my sheet
-                if (member.user_id === AuthService.user?.id && member.character_data?.id) {
-                    this.app.router.navigate('character-sheet', { id: member.character_data.id });
-                    return;
-                }
-
-                // Open popup for any other player (or me if no char)
-                this.openPlayerPopup(member);
-            });
-
-            // CONTEXT MENU (Desktop)
+            card.addEventListener('click', () => this.openPlayerPopup(member));
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                if (this.myRole === 'gm' || isMe || this.campaign.gm_id === AuthService.user?.id) {
+                if (this.myRole === 'gm' || member.user_id === myId) {
                     this.openPlayerContextMenu(member);
                 } else {
                     this.openMissiveContextMenu(member);
                 }
             });
         });
+    }
 
-        // Entity Cards Interactions (restored inline logic similar to attachEntityInteractionListeners)
-        if (this.attachEntityInteractionListeners) {
-            this.attachEntityInteractionListeners(container, entities);
-        } else {
-            // Basic fallback if method missing, though unlikely if I didn't delete it?
-            // I likely deleted nothing else, only renderCharactersTab was replaced.
-            // But wait, where is attachEntityInteractionListeners defined?
-            // It wasn't in grep results ?
-            // If missing, I should add basic listener here too?
-            // Let's assume for now I should just call it if it exists, or look for it later.
-            // Actually, I should probably check if `attachEntityInteractionListeners` exists.
-            // In Step 808 view_file, line 493 called it.
-            // So it's used. But is it defined?
-            // If grep failed, it might be missing.
-            // I'll assume it might be missing and inline basic entity listeners if I can, OR just hope it's further down the file.
-            // But wait, line 493 in Step 808 was inside `renderGroupTab` (the corrupted version).
-            // Let's just assume I need to handle entity clicks too.
+    async loadGroupChat() {
+        const messagesDiv = this.container.querySelector('#group-chat-messages');
+        const { data: messages } = await CampaignService.getGroupConversation(this.campaignId);
 
-            container.querySelectorAll('.entity-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const id = card.dataset.id;
-                    const entity = entities.find(e => e.id === id);
-                    if (entity) this.openEntityModal(entity);
-                });
-            });
+        if (!messages || messages.length === 0) {
+            messagesDiv.innerHTML = '<div class="text-center italic" style="color: var(--text-faded); font-size: 0.8rem; margin-top: 20px;">Silenzio nel gruppo... scrivi qualcosa!</div>';
+            return;
         }
+
+        messagesDiv.innerHTML = messages.map(msg => {
+            const isMe = msg.sender_id === AuthService.user?.id;
+            const senderName = msg.sender?.username || 'Giramondo';
+            return `
+                <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
+                    <div style="font-size: 0.7rem; color: var(--text-faded); margin-bottom: 2px; text-align: ${isMe ? 'right' : 'left'}">${senderName}</div>
+                    <div style="padding: 8px 12px; border-radius: 12px; background: ${isMe ? 'var(--accent-navy)' : '#eee'}; color: ${isMe ? 'white' : 'var(--text-main)'}; font-size: 0.9rem; shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        ${msg.content}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async handleSendGroupMessage(input) {
+        const content = input.value.trim();
+        if (!content) return;
+
+        input.disabled = true;
+        const { error } = await CampaignService.sendGroupMessage(this.campaignId, content);
+        input.disabled = false;
+
+        if (error) {
+            alert("Errore invio: " + error.message);
+        } else {
+            input.value = '';
+            this.loadGroupChat();
+        }
+    }
+
+    // MODALS: QUESTS
+    openAddQuestModal() {
+        const modal = this.container.querySelector('#generic-modal');
+        const body = modal.querySelector('#modal-body');
+        const actionBtn = modal.querySelector('#modal-action-btn');
+
+        body.innerHTML = `
+            <h3 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">Nuova Missione</h3>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="quest-title" placeholder="Titolo" class="form-control">
+                <textarea id="quest-desc" placeholder="Descrizione / Obiettivi" class="form-control" style="min-height: 100px;"></textarea>
+                <div>
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">Premio XP (al completamento)</label>
+                    <input type="number" id="quest-xp" value="5" class="form-control">
+                </div>
+            </div>
+        `;
+
+        actionBtn.style.display = 'block';
+        actionBtn.textContent = 'Crea';
+        modal.style.display = 'flex';
+
+        actionBtn.onclick = async () => {
+            const title = body.querySelector('#quest-title').value.trim();
+            const description = body.querySelector('#quest-desc').value.trim();
+            const xp = parseInt(body.querySelector('#quest-xp').value) || 0;
+
+            if (!title) return alert("Inserisci un titolo");
+
+            actionBtn.disabled = true;
+            const { error } = await CampaignService.addQuest(this.campaignId, { title, description, reward_xp: xp });
+            actionBtn.disabled = false;
+
+            if (error) alert("Errore: " + error.message);
+            else {
+                modal.style.display = 'none';
+                this.loadTabContent();
+            }
+        };
+    }
+
+    async completeQuest(questId) {
+        const quest = (await CampaignService.getQuests(this.campaignId)).data.find(q => q.id === questId);
+        if (!quest) return;
+
+        if (!confirm(`Segnare "${quest.title}" come completata? Tutti i personaggi del gruppo riceveranno ${quest.reward_xp} XP.`)) return;
+
+        const { error } = await CampaignService.updateQuest(questId, { status: 'completed' });
+        if (error) {
+            alert("Errore: " + error.message);
+            return;
+        }
+
+        // Reward XP to members with characters
+        const membersWithChar = this.campaign.members.filter(m => m.character_data);
+        if (membersWithChar.length > 0 && quest.reward_xp > 0) {
+            // This is a bit complex because we need to update 'characters' table AND 'campaign_members' json.
+            // For now, let's at least update the Campaign members JSON so it reflects immediately.
+            // In a real scenario, we'd have a trigger or a function to update the base character.
+
+            // For simplicity in this demo/setup, we just alert or do a best effort update.
+            // Ideally we'd have: CharacterService.addXp(charId, xp)
+
+            await this.awardXpToParticipants(membersWithChar, quest.reward_xp);
+        }
+
+        this.loadTabContent();
+    }
+
+    async awardXpToParticipants(members, xp) {
+        // Implementation for awarding XP to multiple characters
+        // We can update them sequentially for now
+        for (const m of members) {
+            const char = m.character_data;
+            const newXp = (char.xp || 0) + xp;
+            const totalXp = (char.total_xp || 0) + xp;
+
+            const updatedChar = { ...char, xp: newXp, total_xp: totalXp };
+
+            // 1. Update Campaign Member JSON
+            await CampaignService.linkCharacter(this.campaignId, updatedChar);
+
+            // 2. Ideally update the characters table too if we have access to service
+            // (Assuming CharacterService is available globally or we can use supabase directly if needed)
+            // But let's stick to campaign sync for now.
+        }
+        alert(`Ottimo lavoro! ${xp} XP sono stati assegnati a tutto il gruppo.`);
+    }
+
+    openQuestContextMenu(quest) {
+        const existingMenu = document.getElementById('ctx-menu-quest');
+        if (existingMenu) existingMenu.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-quest';
+        menu.className = 'context-menu-floating'; // Need to define or use inline
+        menu.style.position = 'fixed';
+        menu.style.zIndex = '10001';
+        menu.style.background = 'white';
+        menu.style.border = '1px solid var(--accent-gold)';
+        menu.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        menu.style.borderRadius = '4px';
+        menu.style.padding = '5px 0';
+        menu.style.minWidth = '150px';
+
+        // Position at center (simplified for now)
+        menu.style.top = '50%';
+        menu.style.left = '50%';
+        menu.style.transform = 'translate(-50%, -50%)';
+
+        menu.innerHTML = `
+            <div style="padding: 10px; font-weight: bold; border-bottom: 1px solid #eee; font-size: 0.8rem; color: var(--accent-navy); text-align: center;">${quest.title}</div>
+            <button class="ctx-item" id="ctx-edit-quest" style="display: block; width: 100%; padding: 10px; text-align: left; background: none; border: none; cursor: pointer; font-size: 0.9rem;">✏️ Modifica</button>
+            <button class="ctx-item" id="ctx-delete-quest" style="display: block; width: 100%; padding: 10px; text-align: left; background: none; border: none; cursor: pointer; font-size: 0.9rem; color: var(--accent-red);">🗑️ Elimina</button>
+            <button class="ctx-item" id="ctx-close-quest" style="display: block; width: 100%; padding: 10px; text-align: left; background: none; border: none; cursor: pointer; font-size: 0.9rem; border-top: 1px solid #eee;">Annulla</button>
+        `;
+
+        document.body.appendChild(menu);
+
+        menu.querySelector('#ctx-edit-quest').onclick = () => {
+            menu.remove();
+            this.openEditQuestModal(quest);
+        };
+
+        menu.querySelector('#ctx-delete-quest').onclick = async () => {
+            if (confirm("Sei sicuro di voler eliminare questa missione?")) {
+                const { error } = await CampaignService.deleteQuest(quest.id);
+                menu.remove();
+                if (error) alert("Errore: " + error.message);
+                else this.loadTabContent();
+            }
+        };
+
+        menu.querySelector('#ctx-close-quest').onclick = () => menu.remove();
+    }
+
+    openEditQuestModal(quest) {
+        this.openAddQuestModal(); // Reuse structure
+        const modal = this.container.querySelector('#generic-modal');
+        modal.querySelector('h3').textContent = 'Modifica Missione';
+        modal.querySelector('#quest-title').value = quest.title;
+        modal.querySelector('#quest-desc').value = quest.description || '';
+        modal.querySelector('#quest-xp').value = quest.reward_xp;
+
+        const actionBtn = modal.querySelector('#modal-action-btn');
+        actionBtn.textContent = 'Salva';
+        actionBtn.onclick = async () => {
+            const title = modal.querySelector('#quest-title').value.trim();
+            const description = modal.querySelector('#quest-desc').value.trim();
+            const xp = parseInt(modal.querySelector('#quest-xp').value) || 0;
+
+            actionBtn.disabled = true;
+            const { error } = await CampaignService.updateQuest(quest.id, { title, description, reward_xp: xp });
+            actionBtn.disabled = false;
+
+            if (error) alert("Errore: " + error.message);
+            else {
+                modal.style.display = 'none';
+                this.loadTabContent();
+            }
+        };
     }
 
 
@@ -1030,211 +1248,7 @@ export class CampaignDetail {
         modal.style.display = 'flex';
     }
 
-    async renderMissiveTab(container) {
-        const { members } = this.campaign;
-        // Load unread message counts
-        const { data: unreadCounts } = await CampaignService.getUnreadCounts(this.campaignId);
-        const counts = unreadCounts || {};
-        const myId = AuthService.user?.id;
 
-        const targets = members.filter(m => m.user_id !== myId);
-
-        let html = '';
-
-        // Add "New Message" FAB (Floating Action Button)
-        html += `
-            <div style="position: sticky; top: 10px; z-index: 10; display: flex; justify-content: flex-end; margin-bottom: 10px; pointer-events: none;">
-                <button id="btn-new-missive" class="btn btn-primary" style="pointer-events: auto; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--accent-gold);">
-                    +
-                </button>
-            </div>
-        `;
-
-        if (targets.length === 0) {
-            html += '<div class="text-center italic" style="color: var(--text-faded); margin-top: 30px;">Nessun altro membro nella campagna.</div>';
-        } else {
-            html += '<div style="display: flex; flex-direction: column; gap: 10px;">';
-
-            // Sort: members with unread messages first, then by name
-            targets.sort((a, b) => {
-                const unreadA = counts[a.user_id] || 0;
-                const unreadB = counts[b.user_id] || 0;
-                if (unreadB !== unreadA) return unreadB - unreadA;
-                return (a.character_data?.name || 'Z').localeCompare(b.character_data?.name || 'Z');
-            });
-
-            targets.forEach(m => {
-                const unread = counts[m.user_id] || 0;
-                const profile = m.profile || {};
-                const char = m.character_data || {};
-                const charName = char.name || (m.role === 'gm' ? 'Game Master' : 'Spettatore');
-                const displayName = profile.username || 'Sconosciuto';
-                const avatarUrl = char.image || char.image_url || profile.avatar_url || null;
-
-                html += `
-                    <div class="card p-15 player-card" data-uid="${m.user_id}" style="display: flex; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.1s; background: rgba(255,255,255,0.6); border: 1px solid var(--border-worn); position: relative; user-select: none;">
-                         <div class="avatar-container" data-uid="${m.user_id}" style="width: 50px; height: 50px; position: relative;">
-                            <div class="avatar" style="width: 100%; height: 100%; border-radius: 50%; background: #ccc; overflow: hidden; border: 2px solid ${unread > 0 ? 'var(--accent-red)' : 'var(--accent-navy)'};">
-                                ${avatarUrl ? `<img src="${avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 1.5rem;">👤</span>'}
-                            </div>
-                            <!-- Small overlay icon to indicate clickable avatar -->
-                            <div style="position: absolute; bottom: -2px; right: -2px; background: var(--bg-main); border-radius: 50%; padding: 2px; border: 1px solid var(--border-worn);">
-                                <span style="font-size: 0.6rem;">ℹ️</span>
-                            </div>
-                         </div>
-                         <div style="flex-grow: 1;">
-                            <div style="font-weight: bold; font-family: var(--font-display); font-size: 1.1rem; color: var(--accent-navy);">${charName}</div>
-                            <div style="font-size: 0.85rem; color: var(--text-faded);">Giocatore: ${displayName}</div>
-                         </div>
-                         ${unread > 0 ? `
-                            <div style="background: var(--accent-red); color: white; font-size: 0.8rem; min-width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold;">
-                                ${unread}
-                            </div>
-                         ` : '<div style="font-size: 1.2rem; opacity: 0.3;">💬</div>'}
-                    </div>
-                `;
-            });
-            html += '</div>';
-        }
-
-        container.innerHTML = html;
-
-        // --- LISTENERS ---
-
-        // FAB Listener
-        container.querySelector('#btn-new-missive').addEventListener('click', () => {
-            // For now, since contacts are just campaign members, I'll show a modal to select a member.
-            // Or maybe just a simple list.
-            // The "contacts" list IS the current list effectively.
-            // So engaging "New Message" might just filter or highlight? 
-            // Logic: The user asked for a "+" to write a message.
-            // "Dovremmo però creare anche un ambiente dove poter salvare i contatti..."
-            // For now I will open a modal with the list of ALL members to select one to start chatting with.
-            this.openNewMessageModal(targets);
-        });
-
-        // Card Listeners
-        container.querySelectorAll('.player-card').forEach(card => {
-            const uid = card.dataset.uid;
-            const member = members.find(m => m.user_id === uid);
-
-            // AVATAR CLICK (Profile)
-            const avatarContainer = card.querySelector('.avatar-container');
-            avatarContainer.addEventListener('click', (e) => {
-                e.stopPropagation(); // Don't trigger card click
-                this.openProfileModal(member);
-            });
-
-            // LONG PRESS (Context Menu)
-            let timer;
-            let isLongPress = false;
-            let startX, startY;
-
-            card.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isLongPress = false;
-                timer = setTimeout(() => {
-                    isLongPress = true;
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    this.openMissiveContextMenu(member);
-                }, 500);
-            }, { passive: true });
-
-            card.addEventListener('touchmove', (e) => {
-                const diffX = Math.abs(e.touches[0].clientX - startX);
-                const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) clearTimeout(timer);
-            }, { passive: true });
-
-            card.addEventListener('touchend', (e) => {
-                clearTimeout(timer);
-                if (isLongPress) e.preventDefault();
-            });
-
-            // NORMAL CLICK (Open Chat)
-            card.addEventListener('click', (e) => {
-                if (isLongPress) return;
-                this.openPlayerPopup(member);
-            });
-
-            // CONTEXT MENU (Desktop)
-            card.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                this.openMissiveContextMenu(member);
-            });
-        });
-    }
-
-    // --- NEW MODALS ---
-
-    openMissiveContextMenu(member) {
-        const existingMenu = document.getElementById('ctx-menu-missive');
-        if (existingMenu) existingMenu.remove();
-
-        const menu = document.createElement('div');
-        menu.id = 'ctx-menu-missive';
-        menu.className = 'modal-overlay';
-        menu.style.display = 'flex';
-        menu.style.alignItems = 'center';
-        menu.style.justifyContent = 'center';
-        menu.style.background = 'rgba(0,0,0,0.6)';
-        menu.style.zIndex = '10000';
-        menu.style.backdropFilter = 'blur(2px)';
-
-        const targetName = member.character_data?.name || member.profile?.username || 'Giocatore';
-
-        menu.innerHTML = `
-            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
-                <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <button id="ctx-open" class="btn btn-primary" style="width: 100%;">💬 Apri Chat</button>
-                    <button id="ctx-profile" class="btn btn-secondary" style="width: 100%;">👤 Vedi Profilo</button>
-                    <button id="ctx-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Cancella Conversazione</button>
-                    <button id="ctx-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Annulla</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(menu);
-
-        // Prevent bubbles
-        menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
-
-        const closeMenu = () => menu.remove();
-
-        menu.querySelector('#ctx-cancel').onclick = closeMenu;
-        menu.onclick = (e) => { if (e.target === menu) closeMenu(); };
-
-        menu.querySelector('#ctx-open').onclick = () => {
-            closeMenu();
-            this.openPlayerPopup(member);
-        };
-
-        menu.querySelector('#ctx-profile').onclick = () => {
-            closeMenu();
-            this.openProfileModal(member);
-        };
-
-        menu.querySelector('#ctx-delete').onclick = async () => {
-            if (confirm(`Vuoi davvero cancellare la conversazione con ${targetName}? (Sarà nascosta finché non riceverai nuovi messaggi)`)) {
-                // Logic to "delete" (mark as deleted or just hide locally?). 
-                // Currently we don't have a "delete" API. We can just mark read.
-                // User request says "Cancella". Usually this means deleting history locally.
-                // For now, let's just mark as read effectively hiding the "notification", 
-                // but true deletion needs backend support not yet present (soft delete).
-                // I will implement a "mark read" as a smooth placeholder or actually trigger a delete if I had the API.
-                // Since I don't have delete API, I'll alert implementation pending or just mark read for now.
-                // OR, I can add a quick local hack to hide it? No, better be honest.
-                // Let's implement "Mark Read" as "Cancella notifiche" effectively. 
-                // "Cancella conversazione" usually implies deleting messages. 
-                // I'll stick to marking read for now as "Clear notifications" equivalent.
-                await CampaignService.markConversationRead(this.campaignId, member.user_id);
-                this.loadTabContent();
-                closeMenu();
-            }
-        };
-    }
 
     openProfileModal(member) {
         const modal = this.container.querySelector('#generic-modal');

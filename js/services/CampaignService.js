@@ -516,5 +516,88 @@ export const CampaignService = {
             .eq('is_read', false);
 
         return { error };
+    },
+
+    // =====================
+    // QUESTS
+    // =====================
+
+    async getQuests(campaignId) {
+        const { data, error } = await supabaseClient
+            .from('campaign_quests')
+            .select('*')
+            .eq('campaign_id', campaignId)
+            .order('created_at', { ascending: false });
+        return { data, error };
+    },
+
+    async addQuest(campaignId, questData) {
+        const { data, error } = await supabaseClient
+            .from('campaign_quests')
+            .insert([{
+                campaign_id: campaignId,
+                title: questData.title,
+                description: questData.description,
+                reward_xp: questData.reward_xp || 0,
+                status: 'active'
+            }])
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    async updateQuest(questId, updates) {
+        const { data, error } = await supabaseClient
+            .from('campaign_quests')
+            .update(updates)
+            .eq('id', questId)
+            .select()
+            .single();
+        return { data, error };
+    },
+
+    async deleteQuest(questId) {
+        const { error } = await supabaseClient
+            .from('campaign_quests')
+            .delete()
+            .eq('id', questId);
+        return { error };
+    },
+
+    // =====================
+    // GROUP MESSAGING
+    // =====================
+
+    async sendGroupMessage(campaignId, content) {
+        const user = AuthService.getUser();
+        if (!user) return { error: { message: "Not logged in" } };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .insert({
+                campaign_id: campaignId,
+                sender_id: user.id,
+                receiver_id: null, // NULL means Group Chat
+                content: content.trim()
+            })
+            .select()
+            .single();
+
+        return { data, error };
+    },
+
+    async getGroupConversation(campaignId, limit = 50) {
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .select(`
+                *,
+                sender:profiles (username, avatar_url)
+            `)
+            .eq('campaign_id', campaignId)
+            .is('receiver_id', null)
+            .order('created_at', { ascending: true })
+            .limit(limit);
+
+        return { data: data || [], error };
     }
 };
