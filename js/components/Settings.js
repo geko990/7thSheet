@@ -41,31 +41,40 @@ export default class Settings {
                             <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
                         </div>
                         
-                        <!-- Account Info Grid -->
-                        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 15px 15px; align-items: center; margin-bottom: 25px; padding: 0 10px;">
-                            <!-- Row 1 -->
-                            <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Account</span>
-                            <span style="text-align: right; color: var(--text-faded); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</span>
+                        <!-- Account Info -->
+                        <div style="padding: 0 10px;">
+                            <!-- Row 1: Account (always visible) -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-worn);">
+                                <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Account</span>
+                                <span style="color: var(--text-faded); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">${user.email}</span>
+                            </div>
 
-                            <!-- Row 2 -->
-                            <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Nome Pubblico</span>
-                            <input type="text" id="profile-username" placeholder="Il tuo nick..." style="text-align: right; background: transparent; border: none; border-bottom: 1px solid var(--border-worn); padding: 5px; color: var(--text-color); font-family: var(--font-main); width: 100%; font-size: 1rem;" value="${currentUsername}">
+                            <!-- Row 2: Nome Pubblico + toggle -->
+                            <div id="profile-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; cursor: pointer; user-select: none;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span id="profile-chevron" style="font-size: 0.7rem; color: var(--text-faded); transition: transform 0.3s;">▶</span>
+                                    <span style="font-weight: bold; color: var(--accent-navy); font-size: 0.95rem;">Nome Pubblico</span>
+                                </div>
+                                <input type="text" id="profile-username" placeholder="Il tuo nick..." style="text-align: right; background: transparent; border: none; border-bottom: 1px solid var(--border-worn); padding: 5px; color: var(--text-color); font-family: var(--font-main); width: 45%; font-size: 1rem;" value="${currentUsername}" onclick="event.stopPropagation();">
+                            </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                             <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
-                                Salva Modifiche
-                            </button>
-                             <a href="#" id="btn-change-password" style="text-align: center; font-size: 0.8rem; color: var(--text-faded); text-decoration: none;">Cambia password</a>
-                             <div id="change-password-area" style="display: none; margin-top: 5px;">
-                                <input type="password" id="new-password" placeholder="Nuova password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
-                                <input type="password" id="confirm-password" placeholder="Conferma password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
-                                <button class="btn btn-secondary btn-sm" id="btn-confirm-password" style="width: 100%; font-size: 0.85rem;">Aggiorna Password</button>
-                             </div>
-                             <button class="btn btn-secondary" id="btn-logout" style="width: 100%; justify-content: center; border-color: var(--accent-red); color: var(--accent-red);">
-                                Esci
-                            </button>
+                        <!-- Collapsible Actions -->
+                        <div id="profile-actions-panel" style="display: none; padding: 15px 10px 5px; margin-top: 5px; border-top: 1px solid var(--border-worn);">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                 <button class="settings-btn" id="btn-save-profile" style="width: 100%; justify-content: center; background: var(--accent-gold); color: white;">
+                                    Salva Modifiche
+                                </button>
+                                 <a href="#" id="btn-change-password" style="text-align: center; font-size: 0.8rem; color: var(--text-faded); text-decoration: none;">Cambia password</a>
+                                 <div id="change-password-area" style="display: none; margin-top: 5px;">
+                                    <input type="password" id="new-password" placeholder="Nuova password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
+                                    <input type="password" id="confirm-password" placeholder="Conferma password" style="width: 100%; padding: 8px; border: 1px solid var(--border-worn); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;">
+                                    <button class="btn btn-secondary btn-sm" id="btn-confirm-password" style="width: 100%; font-size: 0.85rem;">Aggiorna Password</button>
+                                 </div>
+                                 <button class="btn btn-secondary" id="btn-logout" style="width: 100%; justify-content: center; border-color: var(--accent-red); color: var(--accent-red);">
+                                    Esci
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,6 +237,19 @@ export default class Settings {
         const usernameInput = container.querySelector('#profile-username');
         const saveProfileBtn = container.querySelector('#btn-save-profile');
         const logoutBtn = container.querySelector('#btn-logout');
+
+        // Toggle profile actions panel
+        const toggleRow = container.querySelector('#profile-toggle-row');
+        const actionsPanel = container.querySelector('#profile-actions-panel');
+        const chevron = container.querySelector('#profile-chevron');
+        if (toggleRow) {
+            toggleRow.addEventListener('click', (e) => {
+                if (e.target.tagName === 'INPUT') return; // don't toggle when typing
+                const isOpen = actionsPanel.style.display !== 'none';
+                actionsPanel.style.display = isOpen ? 'none' : 'block';
+                chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+            });
+        }
 
         let currentAvatarUrl = null;
 
