@@ -258,6 +258,10 @@ export class CampaignDetail {
         const { data: entities } = await CampaignService.getEntities(this.campaignId);
         const { members } = this.campaign;
 
+        // Load unread message counts
+        const { data: unreadCounts } = await CampaignService.getUnreadCounts(this.campaignId);
+        this._unreadCounts = unreadCounts || {};
+
         let html = '';
 
         // INVITE CODE Section (Only GM sees it)
@@ -285,17 +289,21 @@ export class CampaignDetail {
              `;
         }
 
+        const myId = AuthService.user?.id;
         html += '<div class="grid-2-col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px;">';
         members.forEach(m => {
             if (m.role === 'gm') return;
             const hasChar = !!m.character_data;
+            const charImg = m.character_data?.image || m.character_data?.image_url || '';
+            const unread = (m.user_id !== myId) ? (this._unreadCounts[m.user_id] || 0) : 0;
             html += `
-                <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="background: rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border-worn);">
+                <div class="card p-10 text-center player-card no-select" data-uid="${m.user_id}" style="position: relative; background: rgba(255,255,255,0.4); cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border-worn);">
+                     ${unread > 0 ? `<div style="position: absolute; top: 5px; right: 5px; background: var(--accent-red); color: white; font-size: 0.7rem; min-width: 18px; height: 18px; line-height: 18px; border-radius: 9px; text-align: center; font-weight: bold;">${unread}</div>` : ''}
                      <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin: 0 auto 5px; overflow: hidden; border: 2px solid ${hasChar ? 'var(--accent-gold)' : '#ccc'};">
-                        ${(m.character_data?.image || m.character_data?.image_url || m.profile.avatar_url) ? `<img src="${m.character_data?.image || m.character_data?.image_url || m.profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
+                        ${charImg ? `<img src="${charImg}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 50px;">👤</span>'}
                      </div>
                      <div style="font-weight: bold; font-family: var(--font-display);">${m.character_data?.name || 'In attesa...'}</div>
-                     <div style="font-size: 0.8rem; color: var(--text-faded);">${m.profile.username || 'Sconosciuto'}</div>
+                     <div style="font-size: 0.75rem; color: var(--text-faded);">${m.character_data?.nation || ''}</div>
                 </div>
             `;
         });
@@ -434,7 +442,8 @@ export class CampaignDetail {
                     return;
                 }
 
-                if (member.character_data) {
+                // Open popup for any other player
+                if (member.user_id !== AuthService.user?.id) {
                     this.openPlayerPopup(member);
                 }
             });
@@ -931,7 +940,7 @@ export class CampaignDetail {
 
     // --- NEW MODALS ---
 
-    openPlayerPopup(member) {
+    async openPlayerPopup(member) {
         const modal = this.container.querySelector('#generic-modal');
         const body = this.container.querySelector('#modal-body');
         const btnAction = this.container.querySelector('#modal-action-btn');
@@ -939,29 +948,105 @@ export class CampaignDetail {
 
         const char = member.character_data || {};
         const profile = member.profile || {};
+        const charImg = char.image || char.image_url || '';
+        const playerImg = profile.avatar_url || '';
 
         body.innerHTML = `
-            <div class="text-center">
-                <div class="avatar" style="width: 100px; height: 100px; border-radius: 50%; background: #ccc; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-                    ${(char.image || char.image_url || profile.avatar_url) ? `<img src="${char.image || char.image_url || profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
-                </div>
-                <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${char.name || 'Sconosciuto'}</h2>
-                <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 20px;">Giocato da: <strong>${profile.username || 'Sconosciuto'}</strong></div>
-                
-                <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 8px; border: 1px solid var(--border-worn); text-align: left;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>Nazione:</span> <strong>${char.nation || '-'}</strong>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Player Profile -->
+                <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-worn);">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent-navy);">
+                        ${playerImg ? `<img src="${playerImg}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 1.5rem;">👤</span>'}
                     </div>
-                    ${char.concept ? `
-                        <div style="margin-top: 10px; font-style: italic; color: var(--text-faded); border-top: 1px dashed var(--border-worn); padding-top: 10px;">
-                            "${char.concept}"
-                        </div>
-                    ` : ''}
+                    <div>
+                        <div style="font-weight: bold; color: var(--accent-navy);">${profile.username || 'Sconosciuto'}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-faded);">Giocatore</div>
+                    </div>
+                </div>
+
+                <!-- Character Info -->
+                ${char.name ? `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 60px; height: 60px; border-radius: 10px; background: #ccc; overflow: hidden; flex-shrink: 0; border: 2px solid var(--accent-gold);">
+                        ${charImg ? `<img src="${charImg}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 2rem;">🎭</span>'}
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; font-family: var(--font-display); font-size: 1.1rem;">${char.name}</div>
+                        ${char.nation ? `<div style="font-size: 0.85rem; color: var(--text-faded);">${char.nation}</div>` : ''}
+                        ${char.concept ? `<div style="font-size: 0.8rem; font-style: italic; color: var(--text-faded); margin-top: 3px;">"${char.concept}"</div>` : ''}
+                    </div>
+                </div>
+                ` : '<div style="text-align: center; color: var(--text-faded); font-style: italic;">Personaggio non ancora scelto</div>'}
+
+                <!-- Chat Section -->
+                <div style="border-top: 1px solid var(--border-worn); padding-top: 10px;">
+                    <div style="font-size: 0.85rem; font-weight: bold; color: var(--accent-navy); margin-bottom: 8px;">💬 Messaggi</div>
+                    <div id="chat-messages" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 5px 0;">
+                        <div class="text-center" style="color: var(--text-faded); font-size: 0.8rem;">Caricamento...</div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input type="text" id="chat-input" placeholder="Scrivi un messaggio..." style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-worn); border-radius: 20px; font-size: 0.9rem; outline: none;">
+                        <button id="btn-send-msg" style="background: var(--accent-gold); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">➤</button>
+                    </div>
                 </div>
             </div>
         `;
 
         modal.style.display = 'flex';
+
+        // Load conversation
+        const chatContainer = body.querySelector('#chat-messages');
+        const chatInput = body.querySelector('#chat-input');
+        const sendBtn = body.querySelector('#btn-send-msg');
+        const myId = AuthService.user?.id;
+
+        const loadMessages = async () => {
+            const { data: messages } = await CampaignService.getConversation(this.campaignId, member.user_id);
+            if (!messages || messages.length === 0) {
+                chatContainer.innerHTML = '<div class="text-center" style="color: var(--text-faded); font-size: 0.8rem; padding: 15px 0;">Nessun messaggio. Scrivi per iniziare la conversazione!</div>';
+            } else {
+                chatContainer.innerHTML = messages.map(msg => {
+                    const isMine = msg.sender_id === myId;
+                    const time = new Date(msg.created_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                    const date = new Date(msg.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+                    return `
+                        <div style="display: flex; justify-content: ${isMine ? 'flex-end' : 'flex-start'};">
+                            <div style="max-width: 80%; padding: 8px 12px; border-radius: ${isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px'}; background: ${isMine ? 'var(--accent-gold)' : 'rgba(0,0,0,0.06)'}; color: ${isMine ? 'white' : 'var(--text-color)'}; font-size: 0.9rem;">
+                                <div>${msg.content}</div>
+                                <div style="font-size: 0.65rem; opacity: 0.7; text-align: right; margin-top: 3px;">${date} ${time}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Mark as read
+            await CampaignService.markConversationRead(this.campaignId, member.user_id);
+        };
+
+        await loadMessages();
+
+        // Send message handler
+        const sendMessage = async () => {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            chatInput.value = '';
+            sendBtn.disabled = true;
+            const { error } = await CampaignService.sendMessage(this.campaignId, member.user_id, text);
+            if (error) {
+                alert('Errore invio messaggio: ' + error.message);
+            } else {
+                await loadMessages();
+            }
+            sendBtn.disabled = false;
+            chatInput.focus();
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     }
 
     openChangeBannerModal() {

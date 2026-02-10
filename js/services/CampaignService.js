@@ -422,5 +422,78 @@ export const CampaignService = {
             .match({ campaign_id: campaignId, user_id: userId });
 
         return { error };
+    },
+
+    // =====================
+    // MESSAGING
+    // =====================
+
+    async sendMessage(campaignId, receiverId, content) {
+        const user = AuthService.getUser();
+        if (!user) return { error: { message: "Not logged in" } };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .insert({
+                campaign_id: campaignId,
+                sender_id: user.id,
+                receiver_id: receiverId,
+                content: content.trim()
+            })
+            .select()
+            .single();
+
+        return { data, error };
+    },
+
+    async getConversation(campaignId, otherUserId, limit = 50) {
+        const user = AuthService.getUser();
+        if (!user) return { data: [], error: null };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .select('*')
+            .eq('campaign_id', campaignId)
+            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
+            .order('created_at', { ascending: true })
+            .limit(limit);
+
+        return { data: data || [], error };
+    },
+
+    async getUnreadCounts(campaignId) {
+        const user = AuthService.getUser();
+        if (!user) return { data: {}, error: null };
+
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .select('sender_id')
+            .eq('campaign_id', campaignId)
+            .eq('receiver_id', user.id)
+            .eq('is_read', false);
+
+        if (error || !data) return { data: {}, error };
+
+        // Count unread per sender
+        const counts = {};
+        data.forEach(m => {
+            counts[m.sender_id] = (counts[m.sender_id] || 0) + 1;
+        });
+        return { data: counts, error: null };
+    },
+
+    async markConversationRead(campaignId, senderUserId) {
+        const user = AuthService.getUser();
+        if (!user) return { error: null };
+
+        const { error } = await supabaseClient
+            .from('campaign_messages')
+            .update({ is_read: true })
+            .eq('campaign_id', campaignId)
+            .eq('sender_id', senderUserId)
+            .eq('receiver_id', user.id)
+            .eq('is_read', false);
+
+        return { error };
     }
 };
