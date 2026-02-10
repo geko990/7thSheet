@@ -200,25 +200,19 @@ select {
 /* Bottom Navigation */
 #bottom-nav {
     height: var(--nav-height);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg-parchment-dark);
     display: flex;
     justify-content: space-around;
     align-items: center;
     position: fixed;
-    /* Changed to fixed */
     bottom: 0;
-    /* left: 0; */
-    /* Handled by margin auto if max-width used? No, Fixed needs positioning */
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: 600px;
-    /* Match app max-width */
     z-index: 100;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+    border-top: 2px solid var(--border-worn);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Fade overlay above nav bar */
