@@ -76,7 +76,7 @@ export const CampaignService = {
             .select(`
                 role,
                 campaign:campaigns (
-                    id, title, join_code, gm_id
+                    id, title, join_code, gm_id, next_session
                 )
             `)
             .eq('user_id', user.id);

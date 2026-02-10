@@ -177,8 +177,8 @@ export class AdventureTab {
                                     <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem;">${c.title}</h3>
                                     <span class="badge" style="background: ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">${c.my_role === 'gm' ? 'GM' : 'PLAYER'}</span>
                                 </div>
-                                <div style="font-size: 0.9rem; color: var(--text-faded); margin-top: 5px;">
-                                    Codice: <span style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${c.join_code}</span>
+                                 <div style="font-size: 0.9rem; color: var(--text-faded); margin-top: 5px;" class="session-info">
+                                    Prossima Sessione: <span class="session-date" style="font-family: inherit; background: rgba(var(--accent-gold-rgb), 0.1); padding: 2px 5px; border-radius: 3px; color: var(--accent-gold); font-weight: bold; font-size: 0.85rem;">${c.next_session ? new Date(c.next_session).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Da definire'}</span>
                                 </div>
                             </div>
                         `;
@@ -238,12 +238,75 @@ export class AdventureTab {
                 if (this.navigateCallback) this.navigateCallback('campaign-detail', { id });
             });
 
+            // SESSION DATE LONG PRESS (for GM)
+            const sessionArea = card.querySelector('.session-info');
+            if (sessionArea && campaign.my_role === 'gm') {
+                let sTimer = null;
+                let sLongPress = false;
+
+                sessionArea.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    sLongPress = false;
+                    sTimer = setTimeout(() => {
+                        sLongPress = true;
+                        if (navigator.vibrate) navigator.vibrate(50);
+                        this.openEditSessionDateModal(campaign);
+                    }, 600);
+                }, { passive: true });
+
+                sessionArea.addEventListener('touchend', (e) => {
+                    clearTimeout(sTimer);
+                });
+
+                sessionArea.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openEditSessionDateModal(campaign);
+                });
+            }
+
             // CONTEXT MENU
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 this.openCampaignContextMenu(campaign);
             });
         });
+    }
+
+    openEditSessionDateModal(campaign) {
+        const modal = this.container.querySelector('#generic-modal');
+        const body = this.container.querySelector('#modal-body');
+        const btnAction = this.container.querySelector('#modal-action-btn');
+
+        const currentVal = campaign.next_session ? new Date(campaign.next_session).toISOString().slice(0, 16) : '';
+
+        body.innerHTML = `
+            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 20px;">Prossima Sessione</h3>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">Data e Ora</label>
+                <input type="datetime-local" id="session-date-input" class="form-control" value="${currentVal}" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px;">
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-faded); font-style: italic;">Imposta la data della prossima sessione per informare tutti i giocatori.</p>
+        `;
+
+        btnAction.textContent = 'Salva';
+        btnAction.onclick = async () => {
+            const newVal = body.querySelector('#session-date-input').value;
+            if (!newVal) {
+                if (!confirm("Rimuovere la data della prossima sessione?")) return;
+            }
+
+            const { error } = await CampaignService.updateCampaign(campaign.id, { next_session: newVal || null });
+            if (error) {
+                this.showErrorPopup("Errore durante l'aggiornamento.");
+            } else {
+                this.showSuccessPopup("Data aggiornata!");
+                modal.style.display = 'none';
+                this.renderDashboard(AuthService.user); // Refresh
+            }
+        };
+
+        modal.style.display = 'flex';
     }
 
     openCampaignContextMenu(campaign) {
@@ -272,6 +335,7 @@ export class AdventureTab {
                         <button class="btn btn-secondary" id="ctx-dup" style="width: 100%; padding: 12px;">👯 Duplica</button>
                         <button class="btn btn-secondary" id="ctx-del" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
                     ` : ''}
+                    <button class="btn btn-secondary" id="ctx-copy-code" style="width: 100%; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">🔑 Copia Codice Invito</button>
                     <button class="btn btn-secondary" id="ctx-cancel" style="width: 100%; padding: 12px; margin-top: 5px;">Annulla</button>
                 </div>
             </div>
@@ -285,7 +349,11 @@ export class AdventureTab {
             menu.remove();
             if (this.navigateCallback) this.navigateCallback('campaign-detail', { id: campaign.id });
         };
-        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
+        menu.querySelector('#ctx-copy-code').onclick = () => {
+            navigator.clipboard.writeText(campaign.join_code);
+            this.showSuccessPopup("Codice copiato!");
+            menu.remove();
+        };
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
         if (isGm) {
