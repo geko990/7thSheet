@@ -394,5 +394,155 @@
         "name": "Virtù",
         "cost": 0,
         "description": "La Virtù del tuo Arcano. Ogni Eroe ne ha una gratuitamente. Può essere attivata spendendo un Punto Eroe per ottenere un effetto potente unico basato sul tuo Arcano."
+    },
+    {
+        "id": "commander",
+        "name": "Comandante",
+        "cost": 3,
+        "description": "Sei un leader naturale. Quando dai ordini in una Sequenza d'Azione, i tuoi alleati che li seguono ottengono 1 Dado Bonus sul Rischio. Spendi un Punto Eroe per far agire un alleato immediatamente."
+    },
+    {
+        "id": "court_connections",
+        "name": "Connesso a Corte",
+        "cost": 2,
+        "description": "Hai contatti e conoscenze nelle corti della nobiltà. Ottieni 1 Dado Bonus sui Rischi sociali quando interagisci con nobili e cortigiani. Puoi chiedere udienza a personaggi di rango."
+    },
+    {
+        "id": "renowned_artist",
+        "name": "Artista Rinomato",
+        "cost": 2,
+        "description": "La tua arte è conosciuta e apprezzata. Ottieni 2 Dadi Bonus quando usi Esibirsi per impressionare, e puoi guadagnarti vitto e alloggio esibendoti senza bisogno di un Rischio."
+    },
+    {
+        "id": "guild_membership",
+        "name": "Membro di Gilda",
+        "cost": 2,
+        "description": "Fai parte di una gilda di artigiani o mercanti. Hai accesso ai loro contatti, risorse e laboratori. Ottieni 1 Dado Bonus sui Rischi legati al commercio e all'artigianato."
+    },
+    {
+        "id": "expert_crafter",
+        "name": "Artigiano Esperto",
+        "cost": 3,
+        "description": "Sei un maestro artigiano nel tuo campo. I tuoi oggetti sono di qualità superiore. Ottieni 2 Dadi Bonus quando crei, ripari o valuti oggetti del tuo mestiere."
+    },
+    {
+        "id": "underworld_contact",
+        "name": "Contatto nella Malavita",
+        "cost": 1,
+        "description": "Hai un contatto fidato nel mondo criminale. Spendi un Punto Eroe per ottenere informazioni sulla malavita locale, trovare merci illegali o organizzare un incontro discreto."
+    },
+    {
+        "id": "physician",
+        "name": "Medico",
+        "cost": 3,
+        "description": "Hai una formazione medica completa. Puoi curare Ferite e malattie con un Rischio di Borsa di Studio. Ottieni 2 Dadi Bonus quando curi qualcuno e puoi eliminare 1 Ferita Drammatica tra un Atto e l'altro."
+    },
+    {
+        "id": "surgeon",
+        "name": "Chirurgo",
+        "cost": 3,
+        "description": "Sei specializzato in chirurgia. Puoi stabilizzare un alleato incapacitato spendendo un'Azione e un Rischio. Ottieni 2 Dadi Bonus per trattare Ferite Drammatiche e condizioni critiche."
+    },
+    {
+        "id": "inventor",
+        "name": "Inventore",
+        "cost": 3,
+        "description": "Hai un talento naturale per costruire dispositivi meccanici. Ottieni 2 Dadi Bonus sui Rischi per creare, comprendere o riparare congegni complessi e macchinari."
+    },
+    {
+        "id": "wanderer",
+        "name": "Viandante",
+        "cost": 2,
+        "description": "Hai viaggiato per tutto Théah. Ovunque ti trovi, conosci i costumi locali e puoi orientarti. Ottieni 1 Dado Bonus sui Rischi di sopravvivenza e orientamento fuori dalle città."
+    },
+    {
+        "id": "tough",
+        "name": "Resistente",
+        "cost": 2,
+        "description": "Sei abituato alla fatica e alle privazioni. Riduci di 1 il numero di Ferite che subisci da ogni singola fonte di danno (minimo 1). La fame, il freddo e la fatica ti affliggono meno."
+    },
+    {
+        "id": "animal_friend",
+        "name": "Amico degli Animali",
+        "cost": 2,
+        "description": "Gli animali ti percepiscono come un amico. Spendi un Punto Eroe per calmare un animale aggressivo o spaventato. Ottieni 1 Dado Bonus su tutti i Rischi che coinvolgono animali."
+    },
+    {
+        "id": "marksman",
+        "name": "Tiratore Scelto",
+        "cost": 3,
+        "description": "Sei un arciere o tiratore eccezionale. Ottieni 1 Incremento gratuito su tutti gli attacchi a distanza con archi e balestre."
+    },
+    {
+        "id": "tracker",
+        "name": "Tracciatore",
+        "cost": 2,
+        "description": "Sei un esperto nel seguire le tracce. Ottieni 2 Dadi Bonus su tutti i Rischi per seguire piste, impronte o tracce di passaggio, anche in condizioni difficili."
+    },
+    {
+        "id": "charming",
+        "name": "Affascinante",
+        "cost": 2,
+        "description": "Hai un fascino naturale e irresistibile. Ottieni 2 Dadi Bonus quando usi il carisma in situazioni sociali per conquistare simpatia, fiducia o ammirazione."
+    },
+    {
+        "id": "veteran",
+        "name": "Veterano",
+        "cost": 3,
+        "description": "Hai esperienza di combattimento reale. Ottieni 1 Dado Bonus su tutti i Rischi di combattimento. La prima volta che subisci una Ferita Drammatica in una scena, puoi ignorarne le penalità per 1 Round."
+    },
+    {
+        "id": "survivor",
+        "name": "Sopravvissuto",
+        "cost": 2,
+        "description": "Sei cresciuto in condizioni difficili e hai imparato a cavartela. Ottieni 1 Dado Bonus su Rischi di sopravvivenza, Nascondersi e Furto quando si tratta di procurarti il necessario per vivere."
+    },
+    {
+        "id": "acrobat",
+        "name": "Acrobata",
+        "cost": 3,
+        "description": "Sei straordinariamente agile. Ottieni 2 Dadi Bonus su tutti i Rischi di Atletica che coinvolgono acrobazie, salti, arrampicate e movimenti spettacolari."
+    },
+    {
+        "id": "ordained",
+        "name": "Ordinato",
+        "cost": 3,
+        "description": "Sei un membro del clero ordinato. Hai l'autorità di celebrare cerimonie religiose e accesso a chiese e monasteri. I fedeli ti rispettano e si confidano con te."
+    },
+    {
+        "id": "inspired",
+        "name": "Ispirato",
+        "cost": 2,
+        "description": "La tua fede o i tuoi ideali ispirano chi ti circonda. Spendi un Punto Eroe per dare a un alleato 1 Dado Bonus sul suo prossimo Rischio attraverso un discorso o una preghiera."
+    },
+    {
+        "id": "invisible",
+        "name": "Invisibile",
+        "cost": 2,
+        "description": "Sei il tipo di persona che nessuno nota. Ottieni 2 Dadi Bonus su tutti i Rischi per passare inosservato, mimetizzarti in una folla o non attirare l'attenzione."
+    },
+    {
+        "id": "discreet",
+        "name": "Discreto",
+        "cost": 2,
+        "description": "Sai quando tacere e come farlo. Ottieni 1 Dado Bonus quando menti per omissione o eviti di rivelare informazioni. Nessuno sospetta che tu stia nascondendo qualcosa."
+    },
+    {
+        "id": "expert_rider",
+        "name": "Cavaliere Esperto",
+        "cost": 2,
+        "description": "Sei un cavaliere provetto. Ottieni 2 Dadi Bonus su tutti i Rischi di Cavalcare e non cadi mai di sella a meno di circostanze estreme."
+    },
+    {
+        "id": "well_supplied",
+        "name": "Rifornito",
+        "cost": 2,
+        "description": "Sei sempre preparato. Spendi un Punto Eroe per rivelare di avere con te un oggetto utile e ragionevole che non era stato menzionato prima (corda, medicine, chiavi, ecc.)."
+    },
+    {
+        "id": "organizer",
+        "name": "Organizzatore",
+        "cost": 2,
+        "description": "Sei un genio della logistica. Ottieni 2 Dadi Bonus quando pianifichi, organizzi risorse o coordini gruppi di persone. Le spedizioni e i viaggi sotto la tua guida procedono senza intoppi."
     }
 ]
