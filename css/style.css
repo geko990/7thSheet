@@ -133,6 +133,19 @@ select {
     overflow: visible;
 }
 
+/* Fade overlay below header */
+#app-header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to bottom, var(--bg-parchment), transparent);
+    pointer-events: none;
+    z-index: 99;
+}
+
 #app-header h1 {
     font-family: var(--font-display);
     font-size: 2.0rem;
@@ -175,18 +188,11 @@ select {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
-
-    /* Converted to margin so mask-image works on viewport edges */
     padding-top: 10px;
     margin-top: calc(var(--header-height) + 85px);
     margin-top: calc(env(safe-area-inset-top) + var(--header-height) + 85px);
-
     padding-bottom: 20px;
     margin-bottom: var(--nav-height);
-
-    /* Fade top and bottom */
-    mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
     display: flex;
     flex-direction: column;
 }
@@ -213,6 +219,19 @@ select {
     z-index: 100;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Fade overlay above nav bar */
+#bottom-nav::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to top, var(--bg-parchment), transparent);
+    pointer-events: none;
+    z-index: 99;
 }
 
 .nav-btn {
