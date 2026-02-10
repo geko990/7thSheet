@@ -856,8 +856,8 @@ export default class CharacterSheet {
     }
 
     // ... Helpers ...
-    translateTrait(trait) { return this.descriptions[trait] ? this.descriptions[trait].split(':')[0] : trait; }
-    translateSkill(skillId) { return this.skillMap[skillId] || skillId; }
+    translateTrait(trait) { const names = { 'brawn': 'Muscoli', 'finesse': 'Finezza', 'resolve': 'Risolutezza', 'wits': 'Acume', 'panache': 'Panache' }; return names[trait] || null; }
+    translateSkill(skillId) { return this.skillMap[skillId] || null; }
     translateKey(key) { return this.translateTrait(key) || this.translateSkill(key) || key; }
     renderTraitSpot(trait) {
         const val = this.character.traits[trait];
