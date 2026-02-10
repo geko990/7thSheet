@@ -115,7 +115,7 @@ export default class CharacterList {
 
     renderList(characters) {
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
+            <div class="fixed-char-bg" style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
                 <img src="assets/empty_characters_transparent.png?v=0.9.25" alt="" style="width: 100%;">
             </div>
         `;
