@@ -523,13 +523,14 @@ export class CampaignDetail {
         const isTargetGm = member.role === 'gm';
 
         // Check if I am the Creator of the campaign
-        // We assume 'created_by' is available in this.campaign object
-        const isCreator = this.campaign.created_by === AuthService.user?.id;
+        // The field is 'gm_id' based on CampaignService.createCampaign
+        const isCreator = this.campaign.gm_id === AuthService.user?.id;
 
         let actionButtons = '';
 
         // ACTIONS ON OTHERS
-        if (isGm && !isMe) {
+        // Allow if I am GM OR if I am the Creator (even if I'm currently playing)
+        if ((isGm || isCreator) && !isMe) {
             if (!isTargetGm) {
                 // Promote to GM
                 actionButtons += `<button class="btn btn-primary" id="ctx-promote">⭐ Promuovi a Master</button>`;
@@ -557,9 +558,9 @@ export class CampaignDetail {
                 }
             }
 
-            // LEAVE (Only if NOT creator, or if creator warns?)
-            // Usually Creator archiving campaign is better than leaving. 
-            // But let's keep leave for now, maybe add logic to prevent if Creator is the only one.
+            // LEAVE
+            // Creator cannot leave efficiently if they are the only admin, but for now let's leave it.
+            // If they are Creator, maybe we should warn them more.
             actionButtons += `<button class="btn btn-secondary" id="ctx-leave" style="color: var(--accent-red); border-color: var(--accent-red);">👋 Abbandona Avventura</button>`;
         }
 
@@ -616,7 +617,12 @@ export class CampaignDetail {
             toggleRoleBtn.onclick = async () => {
                 const newRole = isGm ? 'player' : 'gm';
                 const label = isGm ? 'Giocatore' : 'Game Master';
-                if (confirm(`Vuoi cambiare il tuo ruolo in ${label}?`)) {
+
+                let confirmMsg = `Vuoi cambiare il tuo ruolo in ${label}?`;
+                if (!isGm) confirmMsg += "\n\nDiventando GM potrai vedere gli elementi nascosti e gestire la campagna.";
+                else confirmMsg += "\n\nDiventando Giocatore perderai la vista sugli elementi nascosti (ma rimarrai Admin).";
+
+                if (confirm(confirmMsg)) {
                     toggleRoleBtn.textContent = '...';
                     const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, newRole);
                     menu.remove();
@@ -642,7 +648,7 @@ export class CampaignDetail {
         const unlinkBtn = menu.querySelector('#ctx-unlink');
         if (unlinkBtn) {
             unlinkBtn.onclick = async () => {
-                if (confirm(`Vuoi scollegare il personaggio ${member.character_data.name}? Rimarrai nella campagna come spettatore.`)) {
+                if (confirm(`Vuoi scollegare il personaggio ${member.character_data.name}? Rimarrai nella campagna come spettatore (o GM se lo sei).`)) {
                     unlinkBtn.textContent = '...';
                     const { error } = await CampaignService.unlinkCharacter(this.campaignId);
                     menu.remove();
