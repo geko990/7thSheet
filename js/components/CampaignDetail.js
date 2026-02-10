@@ -418,8 +418,8 @@ export class CampaignDetail {
                 timer = setTimeout(() => {
                     isLongPress = true;
                     if (navigator.vibrate) navigator.vibrate(50);
-                    // Open full context menu mainly for GM or Self
-                    if (isMe || this.myRole === 'gm') {
+                    // Open full context menu mainly for GM, Creator or Self
+                    if (isMe || this.myRole === 'gm' || this.campaign.gm_id === AuthService.user?.id) {
                         this.openPlayerContextMenu(member);
                     } else {
                         // For others, use missive context menu (chat/profile options)
@@ -466,7 +466,7 @@ export class CampaignDetail {
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (this.myRole === 'gm' || isMe) {
+                if (this.myRole === 'gm' || isMe || this.campaign.gm_id === AuthService.user?.id) {
                     this.openPlayerContextMenu(member);
                 } else {
                     this.openMissiveContextMenu(member);
@@ -1156,52 +1156,42 @@ export class CampaignDetail {
     // --- NEW MODALS ---
 
     openMissiveContextMenu(member) {
-        // Create context menu
+        const existingMenu = document.getElementById('ctx-menu-missive');
+        if (existingMenu) existingMenu.remove();
+
         const menu = document.createElement('div');
-        menu.style.position = 'fixed';
-        menu.style.bottom = '0';
-        menu.style.left = '0';
-        menu.style.width = '100%';
-        menu.style.background = '#fdfaf5';
-        menu.style.boxShadow = '0 -5px 20px rgba(0,0,0,0.3)';
-        menu.style.borderRadius = '20px 20px 0 0';
-        menu.style.padding = '20px';
-        menu.style.zIndex = '2000';
+        menu.id = 'ctx-menu-missive';
+        menu.className = 'modal-overlay';
         menu.style.display = 'flex';
-        menu.style.flexDirection = 'column';
-        menu.style.gap = '10px';
-        menu.style.border = '2px solid var(--accent-gold)';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
 
         const targetName = member.character_data?.name || member.profile?.username || 'Giocatore';
 
         menu.innerHTML = `
-            <h3 class="text-center" style="margin-top: 0; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
-            <button id="ctx-open" class="btn btn-primary" style="width: 100%;">💬 Apri Chat</button>
-            <button id="ctx-profile" class="btn btn-secondary" style="width: 100%;">👤 Vedi Profilo</button>
-            <button id="ctx-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Cancella Conversazione</button>
-            <button id="ctx-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Annulla</button>
+            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
+                <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="ctx-open" class="btn btn-primary" style="width: 100%;">💬 Apri Chat</button>
+                    <button id="ctx-profile" class="btn btn-secondary" style="width: 100%;">👤 Vedi Profilo</button>
+                    <button id="ctx-delete" class="btn btn-secondary" style="width: 100%; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Cancella Conversazione</button>
+                    <button id="ctx-cancel" class="btn btn-secondary" style="width: 100%; margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
         `;
 
         document.body.appendChild(menu);
 
-        // Backdrop
-        const backdrop = document.createElement('div');
-        backdrop.style.position = 'fixed';
-        backdrop.style.top = '0';
-        backdrop.style.left = '0';
-        backdrop.style.width = '100%';
-        backdrop.style.height = '100%';
-        backdrop.style.background = 'rgba(0,0,0,0.5)';
-        backdrop.style.zIndex = '1999';
-        document.body.appendChild(backdrop);
+        // Prevent bubbles
+        menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
 
-        const closeMenu = () => {
-            menu.remove();
-            backdrop.remove();
-        };
+        const closeMenu = () => menu.remove();
 
         menu.querySelector('#ctx-cancel').onclick = closeMenu;
-        backdrop.onclick = closeMenu;
+        menu.onclick = (e) => { if (e.target === menu) closeMenu(); };
 
         menu.querySelector('#ctx-open').onclick = () => {
             closeMenu();
