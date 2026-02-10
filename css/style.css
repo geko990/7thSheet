@@ -175,11 +175,12 @@ select {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
-    padding-top: 10px;
+    padding-top: 80px;
+    /* Ensures content starts below the ribbon */
 
     /* Spacing for fixed header and nav bar */
-    margin-top: 115px;
-    /* Compensates for header height + ribbon overflow */
+    margin-top: calc(var(--header-height) + env(safe-area-inset-top));
+    /* Compensates for header height */
     margin-bottom: var(--nav-height);
 
     padding-bottom: 20px;
@@ -188,8 +189,8 @@ select {
     flex-direction: column;
 
     /* Fade only scrollable content at top/bottom edges */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
 
     /* Ensure content stays within viewport bounds */
     position: relative;
@@ -706,9 +707,10 @@ select {
 .dice-roller-container {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: calc(100vh - var(--header-height) - var(--nav-height) - 40px);
     padding: 20px;
+    padding-top: 40px;
 }
 
 .dice-popup {
@@ -1641,7 +1643,8 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
     width: 100%;
     min-height: 100%;
 
