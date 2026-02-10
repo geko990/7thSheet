@@ -943,7 +943,7 @@ export class CampaignDetail {
         body.innerHTML = `
             <div class="text-center">
                 <div class="avatar" style="width: 100px; height: 100px; border-radius: 50%; background: #ccc; margin: 0 auto 15px; overflow: hidden; border: 4px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-                    ${(char.image_url || profile.avatar_url) ? `<img src="${char.image_url || profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
+                    ${(char.image || char.image_url || profile.avatar_url) ? `<img src="${char.image || char.image_url || profile.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="line-height: 100px; font-size: 3rem;">👤</span>'}
                 </div>
                 <h2 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 5px;">${char.name || 'Sconosciuto'}</h2>
                 <div style="font-size: 0.9rem; color: var(--text-faded); margin-bottom: 20px;">Giocato da: <strong>${profile.username || 'Sconosciuto'}</strong></div>
@@ -1226,8 +1226,8 @@ export class CampaignDetail {
                 id: selectedChar.id,
                 name: selectedChar.name,
                 concept: selectedChar.concept,
-                nation: selectedChar.nation
-                // We don't store full sheet yet, just identity
+                nation: selectedChar.nation,
+                image: selectedChar.image || null
             };
 
             await CampaignService.linkCharacter(this.campaignId, charData);
