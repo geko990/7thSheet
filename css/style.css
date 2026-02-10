@@ -177,18 +177,23 @@ select {
     padding: 20px;
     padding-top: 10px;
 
-    /* Removed large margins that were pushing content out */
+    /* Spacing for fixed header and nav bar */
+    margin-top: 115px;
+    /* Compensates for header height + ribbon overflow */
+    margin-bottom: var(--nav-height);
+
     padding-bottom: 20px;
 
     display: flex;
     flex-direction: column;
 
     /* Fade only scrollable content at top/bottom edges */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%);
 
     /* Ensure content stays within viewport bounds */
     position: relative;
+    z-index: 1;
 }
 
 /* Bottom Navigation */
