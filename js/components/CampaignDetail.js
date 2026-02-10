@@ -77,13 +77,22 @@ export class CampaignDetail {
                 </div>
 
                 <!-- Tabs -->
-                    <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
+                <div class="adventure-tabs-bar" style="
+                    display: flex; 
+                    justify-content: center; 
+                    gap: 20px; 
+                    padding: 10px; 
+                    background: rgba(var(--accent-navy-rgb), 0.05); 
+                    border-bottom: 1px solid var(--border-color);
+                    margin-bottom: 10px;
+                ">
+                    <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                         📖 Storia
                     </button>
-                    <button class="nav-tab ${this.currentTab === 'group' ? 'active' : ''}" data-tab="group" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'group' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
+                    <button class="nav-tab ${this.currentTab === 'group' ? 'active' : ''}" data-tab="group" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'group' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                         👥 Gruppo
                     </button>
-                    <button class="nav-tab ${this.currentTab === 'missive' ? 'active' : ''}" data-tab="missive" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'missive' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
+                    <button class="nav-tab ${this.currentTab === 'missive' ? 'active' : ''}" data-tab="missive" style="background: none; border: none; font-family: var(--font-display); font-size: 1.1rem; color: ${this.currentTab === 'missive' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                         ✉️ Missive
                     </button>
                 </div>
