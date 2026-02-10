@@ -188,9 +188,9 @@ select {
     display: flex;
     flex-direction: column;
 
-    /* Fade only scrollable content at top/bottom edges */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0px, black 8px, black calc(100% - 8px), transparent 100%);
+    /* Fade only scrollable content at top/bottom edges - Very subtle (5px) */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 5px, black calc(100% - 5px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0px, black 5px, black calc(100% - 5px), transparent 100%);
 
     /* Ensure content stays within viewport bounds */
     position: relative;
