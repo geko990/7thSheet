@@ -3,396 +3,396 @@
         "id": "connection",
         "name": "Contatto",
         "cost": 1,
-        "description": "Hai un alleato che può fornirti informazioni o aiuto."
+        "description": "Hai un alleato in una posizione utile. Spendi un Punto Eroe per chiedere un favore: informazioni, un nascondiglio o un piccolo aiuto logistico."
     },
     {
         "id": "direction_sense",
         "name": "Senso dell'Orientamento",
         "cost": 1,
-        "description": "Non ti perdi mai finché hai un punto di riferimento."
+        "description": "Finché hai almeno un punto di riferimento (il sole, le stelle, una mappa), non ti perdi mai. Non serve nessun tiro per orientarsi."
     },
     {
         "id": "foreign_born",
         "name": "Straniero",
         "cost": 1,
-        "description": "Nato in un'altra nazione, ottieni bonus su rischi legati alla tua doppia eredità."
+        "description": "Sei nato in un'altra Nazione. Parli la lingua della tua Nazione d'origine in aggiunta a quella attuale. Ottieni 1 Dado Bonus sui Rischi che coinvolgono la tua doppia eredità culturale."
     },
     {
         "id": "languages",
         "name": "Lingue",
         "cost": 1,
-        "description": "Conosci lingue aggiuntive oltre alla nativa."
+        "description": "Ogni volta che acquisti questo Vantaggio, impari una lingua aggiuntiva a tua scelta, parlandola e scrivendola fluentemente."
     },
     {
         "id": "perfect_balance",
         "name": "Equilibrio Perfetto",
         "cost": 1,
-        "description": "Bonus su atletica e equilibrio. Non cadi mai."
+        "description": "Non perdi mai l'equilibrio, nemmeno su superfici instabili. Ottieni 1 Dado Bonus sui Rischi legati ad Atletica quando l'equilibrio è un fattore."
     },
     {
         "id": "sea_legs",
         "name": "Gambe da Marinaio",
         "cost": 1,
-        "description": "Non soffri mal di mare e ti muovi perfettamente sulle navi."
+        "description": "Non soffri il mal di mare e ti muovi su un ponte in movimento come fosse terraferma. Non subisci penalità ai Rischi per il movimento su navi."
     },
     {
         "id": "way_of_the_land",
         "name": "Conoscenza del Territorio",
         "cost": 1,
-        "description": "Conosci a memoria una regione specifica."
+        "description": "Scegli una regione specifica. In quel territorio conosci ogni sentiero, rifugio e pericolo. Non ti perdi mai e ottieni 1 Dado Bonus sui Rischi di sopravvivenza al suo interno."
     },
     {
         "id": "wealthy",
         "name": "Benestante",
         "cost": 1,
-        "description": "Hai più denaro iniziale."
+        "description": "Hai risorse economiche superiori alla media. Non devi mai effettuare Rischi per permetterti spese ordinarie (cibo, alloggio, equipaggiamento comune)."
     },
     {
         "id": "able_drinker",
         "name": "Bevitore Reggente",
         "cost": 2,
-        "description": "L'alcol non ha effetto negativo su di te. Vinci tutte le gare di bevute."
+        "description": "L'alcol non influenza mai i tuoi tiri, indipendentemente da quanto bevi. Vinci automaticamente qualsiasi gara di bevute."
     },
     {
         "id": "allies",
         "name": "Alleati",
         "cost": 2,
-        "description": "Hai amici influenti che possono aiutarti."
+        "description": "Hai un gruppo di amici influenti. Spendi un Punto Eroe per chiedere aiuto a uno di loro: possono fornire risorse, informazioni o supporto diretto."
     },
     {
         "id": "appearance",
         "name": "Aspetto (Attraente/Mozzafiato)",
         "cost": 2,
-        "description": "Ottieni dadi bonus in situazioni sociali grazie al tuo aspetto."
+        "description": "Il tuo aspetto è straordinariamente attraente. Quando lo sfrutti in una situazione sociale, ottieni 2 Dadi Bonus sul Rischio."
     },
     {
         "id": "dangerous_beauty",
         "name": "Bellezza Pericolosa",
         "cost": 2,
-        "description": "Ottieni dadi bonus quando usi il tuo aspetto per sedurre con intenti ostili."
+        "description": "Il tuo fascino è un'arma. Ottieni 2 Dadi Bonus quando usi la seduzione con intenti ostili o manipolatori, come estorcere informazioni o tendere trappole."
     },
     {
         "id": "exploit_weakness",
         "name": "Sfruttare Debolezza",
         "cost": 2,
-        "description": "Bonus contro uno specifico stile di combattimento."
+        "description": "Scegli uno Stile di Duello specifico. Quando combatti contro un duellante che usa quello stile, ottieni 1 Dado Bonus su tutti i tiri di attacco e difesa."
     },
     {
         "id": "extended_family",
         "name": "Famiglia Estesa",
         "cost": 2,
-        "description": "Puoi trovare un cugino lontano ovunque per aiuto."
+        "description": "La tua famiglia è enorme e sparsa in Théah. Spendi un Punto Eroe: trovi un cugino lontano nella zona che ti offre ospitalità, informazioni locali o un piccolo favore."
     },
     {
         "id": "indomitable_will",
         "name": "Volontà Indomita",
         "cost": 2,
-        "description": "Bonus pesante a resistere a intimidazione e seduzione."
+        "description": "Spendi un Punto Eroe per resistere automaticamente a un tentativo di intimidazione, seduzione o coercizione, annullandone completamente l'effetto."
     },
     {
         "id": "leadership",
         "name": "Leadership",
         "cost": 2,
-        "description": "Puoi donare la tua iniziativa agli alleati."
+        "description": "Spendi un Punto Eroe per donare una delle tue Azioni a un alleato nella stessa Sequenza d'Azione. L'alleato agisce immediatamente con quell'Azione."
     },
     {
         "id": "left_handed",
         "name": "Mancino",
         "cost": 2,
-        "description": "Combattere con la mano sinistra ti dà vantaggi contro destrimani."
+        "description": "Combatti con la mano sinistra. La prima volta che affronti un avversario, ottieni 1 Dado Bonus su tutti i Rischi di combattimento finché il nemico non si adatta (di solito 1 Round)."
     },
     {
         "id": "linguist",
         "name": "Linguista",
         "cost": 2,
-        "description": "Impari due lingue per ogni punto speso."
+        "description": "Hai un talento naturale per le lingue. Ogni volta che impari una nuova lingua, ne impari automaticamente due invece di una."
     },
     {
         "id": "night_trained",
         "name": "Addestramento Notturno",
         "cost": 2,
-        "description": "Penalità ridotte al buio."
+        "description": "Sei abituato a operare al buio. Non subisci penalità ai Rischi dovute a scarsa illuminazione o oscurità."
     },
     {
         "id": "poison_resistance",
         "name": "Resistenza ai Veleni",
         "cost": 2,
-        "description": "Bonus a resistere ai veleni e droghe."
+        "description": "Il tuo corpo resiste naturalmente ai veleni e alle droghe. Ottieni 2 Dadi Bonus su qualsiasi Rischio per resistere ai loro effetti."
     },
     {
         "id": "precise_memory",
         "name": "Memoria Eidetica",
         "cost": 2,
-        "description": "Ricordi tutto ciò che vedi o leggi perfettamente."
+        "description": "Ricordi perfettamente tutto ciò che vedi, leggi o senti. Puoi richiamare qualsiasi dettaglio senza bisogno di un tiro."
     },
     {
         "id": "psst_over_here",
         "name": "Psst... Da questa parte",
         "cost": 2,
-        "description": "Spendi 1 PE per attirare e stordire un nemico senza farti notare dagli altri."
+        "description": "Spendi 1 Punto Eroe per attirare un singolo nemico lontano dal gruppo e stordirlo silenziosamente, senza che gli altri se ne accorgano."
     },
     {
         "id": "read_lips",
         "name": "Leggere le Labbra",
         "cost": 2,
-        "description": "Puoi capire cosa dicono le persone a distanza."
+        "description": "Puoi capire cosa dicono le persone osservando il movimento delle loro labbra a distanza, anche se non puoi sentirle. Funziona solo se vedi chiaramente il volto."
     },
     {
         "id": "reputation",
         "name": "Reputazione",
         "cost": 2,
-        "description": "Sei famoso per qualcosa. Ottieni dadi quando usi la tua fama."
+        "description": "Sei noto per un'impresa o una qualità specifica. Quando sfrutti la tua fama in una situazione pertinente, ottieni 2 Dadi Bonus sul Rischio."
     },
     {
         "id": "riot_breaker",
         "name": "Spaccafolla",
         "cost": 2,
-        "description": "Subisci meno ferite dalle Squadre di Bruti."
+        "description": "Sei esperto nel combattere gruppi. Subisci 1 Ferita in meno da ogni attacco proveniente da Squadre di Bruti (minimo 1)."
     },
     {
         "id": "rissoso",
         "name": "Rissoso",
         "cost": 2,
-        "description": "Nelle risse da taverna, i tuoi Attacchi Improvvisati fanno più danni."
+        "description": "Nelle risse da taverna e combattimenti a mani nude con armi improvvisate, ottieni 1 Dado Bonus e i tuoi attacchi con oggetti improvvisati infliggono 1 Ferita aggiuntiva."
     },
     {
         "id": "servants",
         "name": "Servitori",
         "cost": 2,
-        "description": "Hai uno staff di servitori fedeli."
+        "description": "Hai un piccolo staff di servitori fedeli che gestiscono le tue faccende quotidiane. Possono svolgere compiti semplici e non combattono."
     },
     {
         "id": "signature_item",
         "name": "Oggetto Distintivo",
         "cost": 2,
-        "description": "Possiedi un oggetto unico. Bonus quando lo usi."
+        "description": "Possiedi un oggetto unico e riconoscibile (una spada speciale, un ciondolo, ecc.). Quando lo usi in un Rischio pertinente, ottieni 1 Dado Bonus."
     },
     {
         "id": "small",
         "name": "Piccolo",
         "cost": 2,
-        "description": "Sei piccolo e agile. Bonus a nascondersi, difficile da colpire."
+        "description": "Sei più piccolo della media. Ottieni 1 Dado Bonus sui Rischi per nasconderti o infilarti in spazi angusti, ma subisci -1 ai danni in combattimento ravvicinato."
     },
     {
         "id": "tenure",
         "name": "Cattedra",
         "cost": 2,
-        "description": "Hai accesso a università, biblioteche e risorse accademiche."
+        "description": "Sei un accademico con una posizione stabile. Hai accesso a università, biblioteche e risorse di ricerca. Ottieni 1 Dado Bonus sui Rischi di tipo accademico."
     },
     {
         "id": "toughness",
         "name": "Robustezza",
         "cost": 2,
-        "description": "Le ferite ti penalizzano meno."
+        "description": "Sei particolarmente resistente al dolore. Riduci di 1 il numero di Ferite necessarie ad ogni singolo attacco per infliggerti una Ferita Drammatica."
     },
     {
         "id": "voice",
         "name": "Voce",
         "cost": 2,
-        "description": "La tua voce è potente e affascinante. Bonus a Esibirsi/Oratoria."
+        "description": "La tua voce è straordinariamente potente e magnetica. Ottieni 2 Dadi Bonus su tutti i Rischi che coinvolgono il canto, la retorica o i discorsi pubblici."
     },
     {
         "id": "wary",
         "name": "Diffidente",
         "cost": 2,
-        "description": "Bonus a Notare contro agguati e inganni."
+        "description": "Sei sempre all'erta. Ottieni 1 Dado Bonus sui Rischi per individuare agguati, imboscate o inganni. Non puoi mai essere sorpreso."
     },
     {
         "id": "clear_thinker",
         "name": "Pensatore Lucido",
         "cost": 3,
-        "description": "Resistente a confusione e manipolazione mentale."
+        "description": "La tua mente è difficile da confondere. Ottieni 2 Dadi Bonus per resistere a manipolazione mentale, illusioni e tentativi di confonderti o spaventarti."
     },
     {
         "id": "daredevil",
         "name": "Scavezzacollo",
         "cost": 3,
-        "description": "Ottieni più dadi quando spendi Punti Eroe per azioni pericolose."
+        "description": "Quando compi un'azione chiaramente pericolosa o temeraria e spendi un Punto Eroe, ottieni 3 Dadi Bonus invece del solito 1 Dado Bonus."
     },
     {
         "id": "esoteric_knowledge",
         "name": "Conoscenza Esoterica",
         "cost": 3,
-        "description": "Conosci segreti proibiti o dimenticati."
+        "description": "Conosci segreti proibiti, dimenticati o esoterici: antiche rovine, rituali misteriosi, creature leggendarie. Ottieni 1 Dado Bonus sui Rischi legati a queste conoscenze occulte."
     },
     {
         "id": "faith",
         "name": "Fede",
         "cost": 3,
-        "description": "La tua devozione ti protegge o guida (a discrezione del GM)."
+        "description": "Hai una fede incrollabile. Spendi un Punto Eroe per ottenere un effetto miracoloso a discrezione del GM: ignorare la paura, resistere alla magia, guarire leggermente o ricevere una visione divina."
     },
     {
         "id": "foul_weather_jack",
         "name": "Calamita per Guai",
         "cost": 3,
-        "description": "L'avventura ti trova sempre. Ottieni più Punti Eroe in certe situazioni."
+        "description": "L'avventura ti trova, che tu lo voglia o no. Il GM ti fornisce ganci narrativi aggiuntivi. Quando ti metti nei guai per seguire un'avventura, guadagni 1 Punto Eroe."
     },
     {
         "id": "gentry",
         "name": "Proprietario Terriere",
         "cost": 3,
-        "description": "Possiedi terre e rendite, ma anche responsabilità."
+        "description": "Possiedi una proprietà terriera (fattoria, tenuta, piccolo feudo). Hai una rendita modesta e autorità locale, ma anche responsabilità verso i tuoi contadini."
     },
     {
         "id": "great_potential",
         "name": "Grande Potenziale",
         "cost": 3,
-        "description": "Il limite di una tua Abilità è alzato."
+        "description": "Scegli un'Abilità. Il suo limite massimo aumenta da 5 a 6. Puoi acquistare questo Vantaggio più volte, ogni volta per un'Abilità diversa."
     },
     {
         "id": "hands_of_stone",
         "name": "Mani di Pietra",
         "cost": 3,
-        "description": "I tuoi pugni fanno danni come un'arma."
+        "description": "I tuoi pugni, calci e testate infliggono Ferite come un'arma: ogni volta che colpisci a mani nude, infliggi 1 Ferita aggiuntiva."
     },
     {
         "id": "hard_to_kill",
         "name": "Duro a Morire",
         "cost": 3,
-        "description": "Richiedi più ferite drammatiche per essere messo KO."
+        "description": "Sei incredibilmente tenace. Quando subisci una Ferita Drammatica che ti metterebbe normalmente fuori combattimento, puoi spendere un Punto Eroe per restare in piedi con 1 Ferita."
     },
     {
         "id": "large",
         "name": "Grosso",
         "cost": 3,
-        "description": "Sei imponente. +1 Danno con armi pesanti, +1 Intimidire."
+        "description": "Sei molto più grande della media. Infliggi 1 Ferita aggiuntiva con armi pesanti e a mani nude. Ottieni 1 Dado Bonus sui Rischi di Intimidire. Non puoi avere anche 'Piccolo'."
     },
     {
         "id": "luck",
         "name": "Fortuna",
         "cost": 3,
-        "description": "Puoi rerollare un tiro fallito una volta per sessione."
+        "description": "Una volta per sessione, puoi ritirare un singolo dado di un tiro fallito o insoddisfacente, accettando il secondo risultato."
     },
     {
         "id": "lyceum",
         "name": "Liceo",
         "cost": 3,
-        "description": "Istruzione superiore, bonus su conoscenze."
+        "description": "Hai frequentato un liceo o istituto superiore. Ottieni 1 Dado Bonus su tutti i Rischi di tipo accademico e di conoscenza generale."
     },
     {
         "id": "patron",
         "name": "Mecenate",
         "cost": 3,
-        "description": "Hai un ricco sponsor che finanzia le tue imprese."
+        "description": "Hai un ricco e potente benefattore che finanzia le tue imprese. Puoi contare su di lui per risorse economiche e protezione politica, ma in cambio dovrai portare a termine le sue richieste."
     },
     {
         "id": "quick_reflexes",
         "name": "Riflessi Rapidi",
         "cost": 3,
-        "description": "Agisci prima nelle Scene d'Azione."
+        "description": "Scegli un'Abilità. Quando effettui un Rischio usando quell'Abilità, ottieni sempre 1 Incremento gratuito, prima di spendere i tuoi dadi."
     },
     {
         "id": "sage",
         "name": "Saggio",
         "cost": 3,
-        "description": "Hai conoscenze vaste. Non hai penalità per prove di Conoscenza non addestrate."
+        "description": "Hai una conoscenza enciclopedica. Non subisci penalità per prove di conoscenza su argomenti in cui non sei addestrato. Puoi sempre tentare Rischi di Borsa di Studio."
     },
     {
         "id": "secret_society",
         "name": "Società Segreta",
         "cost": 3,
-        "description": "Sei membro di una società segreta. Hai accesso a risorse nascoste."
+        "description": "Sei membro di una Società Segreta di Théah. Hai accesso a risorse, informazioni e alleati nascosti, ma sei anche vincolato ai loro obiettivi e regole."
     },
     {
         "id": "spark_of_genius",
         "name": "Scintilla di Genio",
         "cost": 3,
-        "description": "Puoi inventare o capire meccanismi complessi istantaneamente."
+        "description": "Hai un talento innato per inventare e comprendere meccanismi complessi. Puoi creare invenzioni e gadget spendendo un Punto Eroe e un Rischio di Borsa di Studio."
     },
     {
         "id": "spirit_touch",
         "name": "Tocco Spirituale",
         "cost": 3,
-        "description": "Puoi vedere o interagire con gli spiriti."
+        "description": "Puoi percepire la presenza di spiriti, fantasmi e creature soprannaturali. Spendi un Punto Eroe per comunicare brevemente con uno spirito nelle vicinanze."
     },
     {
         "id": "tactician",
         "name": "Tattico",
         "cost": 3,
-        "description": "Bonus in guerra e combattimenti di massa."
+        "description": "Sei un esperto stratega. Nei combattimenti di massa e Rischi di Guerra, ottieni 2 Dadi Bonus. Puoi spendere un Punto Eroe per riposizionare un alleato nella scena."
     },
     {
         "id": "trusted_companion",
         "name": "Compagno Fidato",
         "cost": 3,
-        "description": "Hai un animale o seguace fedele (Livello gregario)."
+        "description": "Hai un animale addestrato o un seguace leale (un falco, un cane, un mozzo). Agisce come un gregario con competenze limitate ma utili, e non ti tradirà mai."
     },
     {
         "id": "academy",
         "name": "Accademia Militare",
         "cost": 4,
-        "description": "Ottieni bonus tattici in guerra e strategie."
+        "description": "Hai frequentato un'accademia militare. Ottieni +1 al valore di tutti i dadi quando effettui un Rischio usando Atletica, Guerra o Cavalcare."
     },
     {
         "id": "duelist_academy",
         "name": "Accademia di Duello",
         "cost": 4,
-        "description": "Conosci uno stile di duello. Ottieni manovre speciali."
+        "description": "Hai studiato in un'Accademia di Duello e conosci uno Stile di combattimento. Ottieni accesso alle Manovre speciali del tuo Stile (Sfida, Parata, Contrattacco, ecc.)."
     },
     {
         "id": "legendary_attribute",
         "name": "Attributo Leggendario",
         "cost": 4,
-        "description": "Un tuo Tratto può arrivare a 6."
+        "description": "Scegli un Tratto. Il suo limite massimo aumenta da 5 a 6, permettendoti di raggiungere livelli sovrumani in quell'area."
     },
     {
         "id": "noble",
         "name": "Nobile",
         "cost": 4,
-        "description": "Hai un titolo nobiliare, autorità e rendita."
+        "description": "Hai un titolo nobiliare riconosciuto. Ottieni una rendita regolare, autorità politica nella tua regione, e accesso alla corte. In cambio, hai doveri feudali e potresti avere nemici politici."
     },
     {
         "id": "sorcery",
         "name": "Stregoneria",
         "cost": 4,
-        "description": "Hai il dono della magia della tua nazione."
+        "description": "Possiedi il dono della Stregoneria della tua Nazione (Glamour, Porté, Sorte, Hexenwerk, Matushka, El Fuego Adentro). Acquistabile più volte per potenziare i tuoi poteri."
     },
     {
         "id": "strength_of_ten",
         "name": "Forza di Dieci",
         "cost": 4,
-        "description": "Puoi compiere imprese di forza sovrumana spendendo PE."
+        "description": "Spendi un Punto Eroe per compiere un'impresa di forza sovrumana: sfondare una porta rinforzata, sollevare un macigno, piegare sbarre di ferro."
     },
     {
         "id": "together_we_are_strong",
         "name": "Insieme Siamo Forti",
         "cost": 4,
-        "description": "Puoi dare azioni ai tuoi alleati spendendo PE."
+        "description": "Spendi un Punto Eroe per cedere tutte le tue Azioni rimanenti nel Round a uno o più alleati, distribuendole come preferisci."
     },
     {
         "id": "university",
         "name": "Università",
         "cost": 4,
-        "description": "Accesso a Skill civili a costo ridotto."
+        "description": "Hai frequentato un'università prestigiosa. Puoi acquistare Abilità civili a costo ridotto (1 punto invece di 2 durante la creazione del personaggio)."
     },
     {
         "id": "we_are_not_so_different",
         "name": "Non Siamo Così Diversi",
         "cost": 4,
-        "description": "Puoi convincere un Malvagio che siete simili per evitare uno scontro."
+        "description": "Spendi un Punto Eroe parlando con un Malvagio. Lo convinci che avete qualcosa in comune, impedendogli di attaccare o agire in modo ostile per il resto della scena."
     },
     {
         "id": "i_wont_die_here",
         "name": "Non Morirò Qui",
         "cost": 5,
-        "description": "Spendi un PE per ignorare le penalità ferite per un round."
+        "description": "Spendi un Punto Eroe per ignorare completamente tutte le penalità da Ferite per il resto del Round. Agisci come se fossi illeso."
     },
     {
         "id": "letter_of_marque",
         "name": "Lettera di Corsa",
         "cost": 2,
-        "description": "Sei un corsaro autorizzato (Pirate Nations)."
+        "description": "Sei un corsaro autorizzato da una Nazione. Puoi attaccare legalmente le navi nemiche senza essere considerato un pirata. Hai protezione legale nel porto della tua Nazione."
     },
     {
         "id": "speed_load",
         "name": "Ricarica Rapida",
         "cost": 3,
-        "description": "Ricarichi armi da fuoco più velocemente spendendo PE (Pirate Nations)."
+        "description": "Spendi un Punto Eroe per ricaricare istantaneamente un'arma da fuoco, senza spendere un'Azione aggiuntiva."
     },
     {
         "id": "virtue",
         "name": "Virtù",
         "cost": 0,
-        "description": "Ogni eroe ha una Virtù (gratis)."
+        "description": "La Virtù del tuo Arcano. Ogni Eroe ne ha una gratuitamente. Può essere attivata spendendo un Punto Eroe per ottenere un effetto potente unico basato sul tuo Arcano."
     }
 ]

@@ -3,186 +3,186 @@
         "id": "able_drinker",
         "name": "Bevitore Formidabile",
         "cost": 2,
-        "description": "L'alcol non ha effetto su di te fino a dosi massicce."
+        "description": "L'alcol non influenza mai i tuoi tiri, indipendentemente dalla quantità. Vinci automaticamente qualsiasi gara di bevute e non subisci penalità da ubriachezza."
     },
     {
         "id": "academy",
         "name": "Accademia",
         "cost": 4,
-        "description": "Hai studiato in un'accademia militare. Ottieni abilità marziali a costo ridotto."
+        "description": "Hai studiato in un'accademia militare. Puoi acquistare Abilità Marziali a costo ridotto (1 punto invece di 2) durante la creazione del personaggio."
     },
     {
         "id": "age_wisdom",
         "name": "Età e Saggezza",
         "cost": 2,
-        "description": "Sei anziano. Meno fisicità, più esperienza e riverenza."
+        "description": "Sei anziano e saggio. Subisci -1 a un Tratto fisico, ma ottieni 1 Incremento gratuito su tutti i Rischi che coinvolgono Primo Soccorso, Commerciare o consigliare."
     },
     {
         "id": "animal_affinity",
         "name": "Affinità Animale",
         "cost": 2,
-        "description": "Bonus ad addestrare e cavalcare animali."
+        "description": "Hai un legame naturale con gli animali. Ottieni 1 Dado Bonus su tutti i Rischi per addestrare, calmare o cavalcare animali. Spendi un Punto Eroe per calmare un animale aggressivo o spaventato."
     },
     {
         "id": "appearance",
         "name": "Aspetto (Attraente)",
         "cost": 5,
-        "description": "Sei molto bello. Bonus alle interazioni sociali."
+        "description": "Il tuo aspetto è mozzafiato. Ottieni 2 Dadi Bonus su tutti i Rischi di tipo sociale quando il tuo aspetto fisico è rilevante (seduzione, persuasione, corteggiamento)."
     },
     {
         "id": "architectural",
         "name": "Senso Architettonico",
         "cost": 1,
-        "description": "Trovi passaggi segreti e stanze nascoste facilmente."
+        "description": "Hai un occhio naturale per le strutture. Individuare passaggi segreti, stanze nascoste o difetti strutturali non richiede un Rischio: li noti automaticamente."
     },
     {
         "id": "combat_reflexes",
         "name": "Riflessi da Combattimento",
         "cost": 3,
-        "description": "Puoi agire più velocemente. Reroll iniziativa fallita?"
+        "description": "All'inizio di ogni Round di combattimento, puoi ritirare un dado Iniziativa e tenere il risultato migliore tra i due."
     },
     {
         "id": "commission",
         "name": "Commissione",
         "cost": 3,
-        "description": "Possiedi un grado in un esercito o marina."
+        "description": "Possiedi un grado ufficiale in un esercito o marina. Hai autorità sui soldati sotto il tuo comando, accesso a risorse militari e uno stipendio regolare."
     },
     {
         "id": "connections",
         "name": "Connessioni",
         "cost": 2,
-        "description": "Conosci qualcuno che può aiutarti."
+        "description": "Hai una rete di contatti utili. Spendi un Punto Eroe per trovare qualcuno nella zona che possa aiutarti con informazioni, un rifugio o un favore specifico."
     },
     {
         "id": "dracheneisen",
         "name": "Dracheneisen",
         "cost": 20,
-        "description": "Possiedi l'armatura o equipaggiamento di ferro di drago (Solo Eisen)."
+        "description": "Possiedi un'arma o armatura di Dracheneisen, il leggendario ferro di drago di Eisen. È praticamente indistruttibile, taglia qualsiasi materiale e conferisce bonus significativi in combattimento. Solo per Eroi Eisen di sangue nobile."
     },
     {
         "id": "faith",
         "name": "Fede",
         "cost": 5,
-        "description": "Hai una fede incrollabile. Protezione contro la paura."
+        "description": "Hai una fede incrollabile nel Creatore. Spendi un Punto Eroe per ottenere un effetto miracoloso: ignorare la paura soprannaturale, resistere alla magia o cancellarne gli effetti, o ricevere una visione divina."
     },
     {
         "id": "foul_weather_jack",
         "name": "Portasfortuna",
         "cost": 3,
-        "description": "Attiri i guai, ma trovi indizi."
+        "description": "I guai ti seguono ovunque, ma portano con sé avventure. Ricevi un Background gratuito da 4 punti all'inizio del gioco. Quando lo risolvi, ne ottieni uno nuovo automaticamente."
     },
     {
         "id": "frightening_countenance",
         "name": "Aspetto Spaventoso",
         "cost": 2,
-        "description": "Ottieni bonus alle prove di Intimidire."
+        "description": "Il tuo aspetto incute terrore (cicatrici, occhi freddi, corporatura minacciosa). Ottieni 2 Dadi Bonus su tutti i Rischi di Intimidire."
     },
     {
         "id": "guardian_angel",
         "name": "Angelo Custode",
         "cost": 4,
-        "description": "Una volta per atto eviti un colpo mortale o sventura."
+        "description": "Una volta per Atto (capitolo della storia), puoi evitare completamente un singolo evento catastrofico: un colpo mortale, una caduta fatale o un'esplosione. Il GM descrive come ti salvi."
     },
     {
         "id": "indomitable",
         "name": "Indomito",
         "cost": 2,
-        "description": "Bonus a resistere a dolore e tortura."
+        "description": "Resisti al dolore e alla tortura con straordinaria tenacia. Ottieni 2 Dadi Bonus su tutti i Rischi per resistere a dolore, tortura e coercizione fisica."
     },
     {
         "id": "iron_will",
         "name": "Volontà di Ferro",
         "cost": 4,
-        "description": "Immune alla paura e charme magico."
+        "description": "La tua mente è una fortezza. Sei immune agli effetti di paura soprannaturale e resistenza automatica a charme o controllo mentale magico."
     },
     {
         "id": "keen_senses",
         "name": "Sensi Acuti",
         "cost": 1,
-        "description": "Uno dei tuoi sensi è sovrasviluppato."
+        "description": "Scegli un senso (vista, udito, olfatto, ecc.). Quel senso è straordinariamente sviluppato. Ottieni 1 Dado Bonus su tutti i Rischi che lo coinvolgono."
     },
     {
         "id": "large",
         "name": "Grosso",
         "cost": 5,
-        "description": "Sei fisicamente imponente. +1 Vigore (max 6)."
+        "description": "Sei fisicamente imponente. Il tuo Vigore può arrivare a 6 (invece del massimo normale di 5). Infliggi 1 Ferita aggiuntiva con armi pesanti e a mani nude."
     },
     {
         "id": "left_handed",
         "name": "Mancino",
         "cost": 3,
-        "description": "Combattere di sinistro disorienta i nemici."
+        "description": "Combatti con la mano sinistra. La prima volta che affronti un avversario, questi subisce penalità perché non è abituato al tuo stile. Ottieni 1 Dado Bonus al primo Round di ogni nuovo scontro."
     },
     {
         "id": "legendary_trait",
         "name": "Tratto Leggendario",
         "cost": 3,
-        "description": "Uno dei tuoi tratti può superare il massimo di 5."
+        "description": "Scegli uno dei tuoi Tratti (Vigore, Grinta, Risolutezza, Astuzia, Panache). Il suo limite massimo aumenta da 5 a 6."
     },
     {
         "id": "linguist",
         "name": "Linguista",
         "cost": 2,
-        "description": "Impari lingue a costo ridotto."
+        "description": "Hai un talento per le lingue. Ogni volta che impari una nuova lingua, ne impari automaticamente due per il costo di una."
     },
     {
         "id": "membership",
         "name": "Membro di Società Segreta",
         "cost": 3,
-        "description": "Fai parte di una società segreta (es. Rilascia, Die Kreuzritter)."
+        "description": "Fai parte di una delle Società Segrete di Théah (Rilascia, Die Kreuzritter, Sophia's Daughters, ecc.). Hai accesso a risorse, contatti e missioni segrete, ma devi seguire le regole della Società."
     },
     {
         "id": "noble",
         "name": "Nobile",
         "cost": 10,
-        "description": "Sei di sangue nobile. Ottieni rendita e status."
+        "description": "Sei di sangue nobile. Ottieni una rendita mensile, status sociale elevato, accesso alla corte e potere politico. Hai anche doveri feudali e potenziali rivali politici."
     },
     {
         "id": "patron_saint",
         "name": "Santo Patrono",
         "cost": 2,
-        "description": "Hai un santo che ti protegge in certe situazioni."
+        "description": "Hai scelto un Santo Patrono vaticino. Una volta per sessione, quando ti trovi in una situazione legata al dominio del tuo santo, puoi invocare la sua protezione per ottenere 1 Incremento gratuito."
     },
     {
         "id": "poison_resistance",
         "name": "Resistenza ai Veleni",
         "cost": 2,
-        "description": "Bonus a resistere ai veleni."
+        "description": "Il tuo corpo resiste naturalmente ai veleni e alle droghe. Ottieni 2 Dadi Bonus su qualsiasi Rischio per resistere ai loro effetti. I veleni hanno durata dimezzata su di te."
     },
     {
         "id": "scoundrel",
         "name": "Canaglia",
         "cost": 3,
-        "description": "Sei bravo a mentire e rubare. Bonus a Strada."
+        "description": "Sei un truffatore esperto. Ottieni 1 Dado Bonus su tutti i Rischi di inganno, furto e attività criminali. Hai -10 alla Reputazione (non puoi avere anche 'Commissione')."
     },
     {
         "id": "servant",
         "name": "Servitore",
         "cost": 3,
-        "description": "Hai un NPC fedele."
+        "description": "Hai un servitore NPC leale e competente. Può svolgere compiti per conto tuo, raccogliere informazioni e occuparsi delle faccende pratiche. Non combatte, ma è fidato."
     },
     {
         "id": "small",
         "name": "Piccolo",
         "cost": 2,
-        "description": "Difficile da colpire, facile nascondersi. -1 Danni."
+        "description": "Sei più piccolo della media. Ottieni 1 Dado Bonus su Rischi per nascondersi e muoversi in spazi angusti. Sei più difficile da colpire in mischia, ma infliggi -1 Ferita con armi da mischia."
     },
     {
         "id": "spark_of_genius",
         "name": "Scintilla di Genio",
         "cost": 2,
-        "description": "Inventi gadget (Collegio Invisibile)."
+        "description": "Hai un talento innato per l'invenzione (legato al Collegio Invisibile). Puoi creare gadget e congegni meccanici spendendo un Punto Eroe e superando un Rischio di Borsa di Studio."
     },
     {
         "id": "toughness",
         "name": "Robustezza",
         "cost": 2,
-        "description": "+1 Salute o Ferite."
+        "description": "Sei particolarmente resistente. Ottieni +1 alla soglia di Ferite Drammatiche: servono più Ferite per metterti fuori combattimento."
     },
     {
         "id": "wealth",
         "name": "Ricchezza",
         "cost": 1,
-        "description": "Denaro extra iniziale o rendita."
+        "description": "Inizi il gioco con il doppio del denaro iniziale. Non devi mai preoccuparti di spese ordinarie come cibo, alloggio e vestiti."
     }
 ]
