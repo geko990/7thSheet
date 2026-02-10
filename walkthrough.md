@@ -17,7 +17,7 @@ Ho completato il refactoring per supportare sia la 1ª che la 2ª edizione di 7t
 
 ### 3. Dice Roller
 - Added **Edition Toggle** in the Dice Roller.
-- **2nd Edition**: Standard Roll & Raise (sets of 10).
+- **2nd Edition**: Standard Roll & Raise
 - **1st Edition**: Roll & Keep logic (Roll X, Keep Y, Sum).
 - Added UI controls for "Keep" dice count.
 - Added visual highlighting for "Kept" vs "Dropped" dice.
@@ -25,6 +25,21 @@ Ho completato il refactoring per supportare sia la 1ª che la 2ª edizione di 7t
 ### 4. Styling
 - Updated CSS to support new dice visuals.
 - Fixed layout issues.
+
+### 5. Next Session Date & UI Refinements (v0.9.100)
+- **Prossima Sessione**: In the main Adventure list, the invite code has been replaced by the "Prossima Sessione" date.
+- **Improved Editing**: Added a dedicated "📅 Modifica Prossima Sessione" button in the campaign's context menu (accessible by long-pressing the campaign card). This provides a more reliable alternative to long-pressing the specific session area.
+- **UI Tab Optimization**: Removed emojis from the "Storia", "Incontri", "Missioni", and "Gruppo" tabs to allow them to fit on a single row without horizontal scrolling.
+
+## ✅ Verification Results
+- [x] Database migration successful.
+- [x] Tab switching logic verified.
+- [x] Quest creation and XP reward logic confirmed.
+- [x] Group chat persistence and rendering verified.
+- [x] Legacy private message unread indicators restored.
+- [x] Next Session date display and edit functionality verified.
+- [x] Invite code accessibility verified in context menu.
+- [x] Tab UI optimization confirmed.
 
 ## Testing Required
 Please test the following flows:

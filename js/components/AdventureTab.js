@@ -332,6 +332,7 @@ export class AdventureTab {
                     <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">Desidera Entrare</button>
                     ${isGm ? `
                         <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica Titolo</button>
+                        <button class="btn btn-secondary" id="ctx-edit-session" style="width: 100%; padding: 12px; color: var(--accent-gold); border-color: var(--accent-gold);">📅 Modifica Prossima Sessione</button>
                         <button class="btn btn-secondary" id="ctx-dup" style="width: 100%; padding: 12px;">👯 Duplica</button>
                         <button class="btn btn-secondary" id="ctx-del" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
                     ` : ''}
@@ -360,6 +361,10 @@ export class AdventureTab {
             menu.querySelector('#ctx-edit').onclick = () => {
                 menu.remove();
                 this.openEditCampaignModal(campaign);
+            };
+            menu.querySelector('#ctx-edit-session').onclick = () => {
+                menu.remove();
+                this.openEditSessionDateModal(campaign);
             };
             menu.querySelector('#ctx-dup').onclick = async () => {
                 menu.remove();

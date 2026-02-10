@@ -90,16 +90,16 @@ export class CampaignDetail {
                     -webkit-overflow-scrolling: touch;
                 ">
                     <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
-                        📖 Storia
+                        Storia
                     </button>
                     <button class="nav-tab ${this.currentTab === 'incontri' ? 'active' : ''}" data-tab="incontri" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'incontri' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
-                        🎭 Incontri
+                        Incontri
                     </button>
                     <button class="nav-tab ${this.currentTab === 'missioni' ? 'active' : ''}" data-tab="missioni" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'missioni' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
-                        📜 Missioni
+                        Missioni
                     </button>
                     <button class="nav-tab ${this.currentTab === 'group' ? 'active' : ''}" data-tab="group" style="background: none; border: none; font-family: var(--font-display); font-size: 1rem; color: ${this.currentTab === 'group' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink: 0;">
-                        👥 Gruppo
+                        Gruppo
                     </button>
                 </div>
 
