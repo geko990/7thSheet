@@ -71,7 +71,7 @@ export const CampaignService = {
         const user = AuthService.getUser();
         if (!user) return { data: [] };
 
-        const { data, error } = await supabaseClient
+        let { data, error } = await supabaseClient
             .from('campaign_members')
             .select(`
                 role,
@@ -80,6 +80,21 @@ export const CampaignService = {
                 )
             `)
             .eq('user_id', user.id);
+
+        if (error && error.message?.includes('next_session')) {
+            console.warn("next_session column not found, falling back to basic campaign info");
+            const fallback = await supabaseClient
+                .from('campaign_members')
+                .select(`
+                    role,
+                    campaign:campaigns (
+                        id, title, join_code, gm_id
+                    )
+                `)
+                .eq('user_id', user.id);
+            data = fallback.data;
+            error = fallback.error;
+        }
 
         if (error) return { error, data: [] };
 
