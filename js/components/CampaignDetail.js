@@ -73,12 +73,14 @@ export class CampaignDetail {
                 </div>
 
                 <!-- Tabs -->
-                <div class="tabs-nav" style="display: flex; justify-content: space-around; padding: 10px; border-bottom: 1px solid var(--border-color); background: var(--bg-main);">
                     <button class="nav-tab ${this.currentTab === 'story' ? 'active' : ''}" data-tab="story" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'story' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
                         📖 Storia
                     </button>
                     <button class="nav-tab ${this.currentTab === 'characters' ? 'active' : ''}" data-tab="characters" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'characters' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
                         👥 Personaggi
+                    </button>
+                    <button class="nav-tab ${this.currentTab === 'missive' ? 'active' : ''}" data-tab="missive" style="background: none; border: none; font-family: var(--font-display); font-size: 1.2rem; color: ${this.currentTab === 'missive' ? 'var(--accent-gold)' : 'var(--text-faded)'}; cursor: pointer;">
+                        ✉️ Missive
                     </button>
                 </div>
 
@@ -134,8 +136,10 @@ export class CampaignDetail {
 
         if (this.currentTab === 'story') {
             await this.renderStoryTab(contentDiv);
-        } else {
+        } else if (this.currentTab === 'characters') {
             await this.renderCharactersTab(contentDiv);
+        } else if (this.currentTab === 'missive') {
+            await this.renderMissiveTab(contentDiv);
         }
     }
 
@@ -315,6 +319,18 @@ export class CampaignDetail {
             'enemy': { title: 'Avversari', icon: '⚔️', color: 'var(--accent-red)' },
             'item': { title: 'Oggetti & Indizi', icon: '💎', color: 'var(--accent-navy)' }
         };
+
+        // ... rest of entities code ...
+        // (Actually I must not truncate. The chunk needs to match. But I want to append renderMissiveTab after renderCharactersTab.)
+        // I will use a simpler approach: append renderMissiveTab at the end of the file or after renderCharactersTab.
+        // Let's replace the end of renderCharactersTab to include the new method.
+        // Waiting... I can't match "end of file" easily with multi_replace if I don't see it.
+        // I'll match the end of renderCharactersTab block roughly.
+        // Let's scroll down to find where verify renderCharactersTab ends.
+        // It's long.
+        // Actually I can insert it before `openStoryModal` or similar.
+        // Let's look for `openViewStoryModal`.
+
 
         if (this.myRole === 'gm') {
             html += `
@@ -936,6 +952,71 @@ export class CampaignDetail {
         };
 
         modal.style.display = 'flex';
+    }
+
+    async renderMissiveTab(container) {
+        const { members } = this.campaign;
+        // Load unread message counts
+        const { data: unreadCounts } = await CampaignService.getUnreadCounts(this.campaignId);
+        const counts = unreadCounts || {};
+        const myId = AuthService.user?.id;
+
+        const otherMembers = members.filter(m => m.user_id !== myId && m.role !== 'gm'); // Include GM? Yes, why not. Just exclude me.
+        // Actually, let's include GM too if they are not me.
+        const targets = members.filter(m => m.user_id !== myId);
+
+        let html = '';
+
+        if (targets.length === 0) {
+            html = '<div class="text-center italic" style="color: var(--text-faded); margin-top: 30px;">Nessun altro membro nella campagna con cui parlare.</div>';
+        } else {
+            html += '<div style="display: flex; flex-direction: column; gap: 10px;">';
+
+            // Sort: members with unread messages first
+            targets.sort((a, b) => {
+                const unreadA = counts[a.user_id] || 0;
+                const unreadB = counts[b.user_id] || 0;
+                return unreadB - unreadA;
+            });
+
+            targets.forEach(m => {
+                const unread = counts[m.user_id] || 0;
+                const profile = m.profile || {};
+                const char = m.character_data || {};
+                const charName = char.name || (m.role === 'gm' ? 'Game Master' : 'Spettatore');
+                const displayName = profile.username || 'Sconosciuto';
+                const avatarUrl = char.image || char.image_url || profile.avatar_url || null;
+
+                html += `
+                    <div class="card p-15 player-card" data-uid="${m.user_id}" style="display: flex; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.1s; background: rgba(255,255,255,0.6); border: 1px solid var(--border-worn);">
+                         <div class="avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #ccc; overflow: hidden; flex-shrink: 0; border: 2px solid ${unread > 0 ? 'var(--accent-red)' : 'var(--accent-navy)'}; position: relative;">
+                            ${avatarUrl ? `<img src="${avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : '<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 1.5rem;">👤</span>'}
+                         </div>
+                         <div style="flex-grow: 1;">
+                            <div style="font-weight: bold; font-family: var(--font-display); font-size: 1.1rem; color: var(--accent-navy);">${charName}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-faded);">Giocatore: ${displayName}</div>
+                         </div>
+                         ${unread > 0 ? `
+                            <div style="background: var(--accent-red); color: white; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; font-weight: bold;">
+                                ${unread} messaggi
+                            </div>
+                         ` : '<div style="font-size: 1.2rem; opacity: 0.3;">💬</div>'}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
+
+        // Add listeners
+        container.querySelectorAll('.player-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const uid = card.dataset.uid;
+                const member = members.find(m => m.user_id === uid);
+                if (member) this.openPlayerPopup(member);
+            });
+        });
     }
 
     // --- NEW MODALS ---

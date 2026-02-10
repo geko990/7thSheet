@@ -482,6 +482,27 @@ export const CampaignService = {
         return { data: counts, error: null };
     },
 
+    async getTotalUnreadCounts() {
+        const user = AuthService.getUser();
+        if (!user) return { data: {}, error: null };
+
+        // Fetch all unread messages for this user across all campaigns
+        const { data, error } = await supabaseClient
+            .from('campaign_messages')
+            .select('campaign_id')
+            .eq('receiver_id', user.id)
+            .eq('is_read', false);
+
+        if (error || !data) return { data: {}, error };
+
+        // Aggregate by campaign_id
+        const counts = {};
+        data.forEach(m => {
+            counts[m.campaign_id] = (counts[m.campaign_id] || 0) + 1;
+        });
+        return { data: counts, error: null };
+    },
+
     async markConversationRead(campaignId, senderUserId) {
         const user = AuthService.getUser();
         if (!user) return { error: null };

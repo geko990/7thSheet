@@ -139,6 +139,9 @@ export class AdventureTab {
 
     async renderDashboard(user) {
         const { data: campaigns } = await CampaignService.getMyCampaigns();
+        // Load unread counts for all campaigns
+        const { data: unreadCounts } = await CampaignService.getTotalUnreadCounts();
+        const counts = unreadCounts || {};
 
         const bgHtml = `
             <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
@@ -157,8 +160,11 @@ export class AdventureTab {
                     </div>
 
                     <div id="campaign-list" style="display: flex; flex-direction: column; gap: 15px;">
-                        ${campaigns && campaigns.length > 0 ? campaigns.map(c => `
-                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s; user-select: none; background: #fdfaf5;">
+                        ${campaigns && campaigns.length > 0 ? campaigns.map(c => {
+            const unread = counts[c.id] || 0;
+            return `
+                            <div class="card campaign-card" data-id="${c.id}" style="border-left: 4px solid ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; padding: 15px; cursor: pointer; transition: transform 0.2s; user-select: none; background: #fdfaf5; position: relative;">
+                                ${unread > 0 ? `<div style="position: absolute; top: -8px; right: -8px; background: var(--accent-red); color: white; font-size: 0.8rem; min-width: 24px; height: 24px; line-height: 24px; border-radius: 12px; text-align: center; font-weight: bold; border: 2px solid #fdfaf5; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">💬 ${unread}</div>` : ''}
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <h3 style="margin: 0; font-family: var(--font-display); font-size: 1.1rem;">${c.title}</h3>
                                     <span class="badge" style="background: ${c.my_role === 'gm' ? 'var(--accent-gold)' : 'var(--accent-navy)'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">${c.my_role === 'gm' ? 'GM' : 'PLAYER'}</span>
@@ -167,7 +173,8 @@ export class AdventureTab {
                                     Codice: <span style="font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${c.join_code}</span>
                                 </div>
                             </div>
-                        `).join('') : '<div class="text-center italic" style="color: var(--text-faded)">Nessuna campagna attiva.</div>'}
+                        `;
+        }).join('') : '<div class="text-center italic" style="color: var(--text-faded)">Nessuna campagna attiva.</div>'}
                     </div>
                 </div>
             </div>
