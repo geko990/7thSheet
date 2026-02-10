@@ -41,12 +41,13 @@
 
 html {
     background-color: var(--bg-paper);
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
     height: 100%;
-    /* overflow: hidden; */
-    overflow: auto;
+    overflow: hidden;
     overscroll-behavior-y: none;
     background-color: transparent;
     /* Allows map on pseudo to show */
@@ -89,8 +90,8 @@ select {
 #app {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    /* Better than 100vh for mobile browsers */
+    height: 100vh;
+    height: 100dvh;
     max-width: 600px;
     margin: 0 auto;
     background: transparent;
@@ -169,23 +170,25 @@ select {
     /* Move text UP to original position (25px offset + slight tweak) */
 }
 
-/* Main Content */
 #main-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px;
     padding-top: 10px;
-    margin-top: calc(var(--header-height) + 85px);
-    margin-top: calc(env(safe-area-inset-top) + var(--header-height) + 85px);
+
+    /* Removed large margins that were pushing content out */
     padding-bottom: 20px;
-    margin-bottom: var(--nav-height);
+
     display: flex;
     flex-direction: column;
 
     /* Fade only scrollable content at top/bottom edges */
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
     mask-image: linear-gradient(to bottom, transparent 0px, black 25px, black calc(100% - 25px), transparent 100%);
+
+    /* Ensure content stays within viewport bounds */
+    position: relative;
 }
 
 /* Bottom Navigation */

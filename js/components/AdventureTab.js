@@ -53,12 +53,16 @@ export class AdventureTab {
 
     renderAuthForm() {
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+            <div class="fixed-char-bg" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
                 <img src="assets/Avventure.png" alt="" style="width: 100%;">
             </div>
         `;
 
-        this.container.innerHTML = bgHtml + `
+        if (document.getElementById('app-background-layer')) {
+            document.getElementById('app-background-layer').innerHTML = bgHtml;
+        }
+
+        this.container.innerHTML = `
             <div class="text-center p-20" style="max-width: 400px; margin: 40px auto; position: relative; z-index: 1;">
                 <div style="font-size: 4rem; margin-bottom: 20px;">🏴‍☠️</div>
                 <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Avventure Condivise</h3>
@@ -144,12 +148,16 @@ export class AdventureTab {
         const counts = unreadCounts || {};
 
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+            <div class="fixed-char-bg" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
                 <img src="assets/Avventure.png" alt="" style="width: 100%;">
             </div>
         `;
 
-        this.container.innerHTML = bgHtml + `
+        if (document.getElementById('app-background-layer')) {
+            document.getElementById('app-background-layer').innerHTML = bgHtml;
+        }
+
+        this.container.innerHTML = `
             <div class="settings-container" style="position: relative; z-index: 1;">
                 <div class="sheet-section">
                     <div class="sheet-section-title">Le mie Campagne</div>

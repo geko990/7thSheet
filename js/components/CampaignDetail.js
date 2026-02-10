@@ -43,12 +43,16 @@ export class CampaignDetail {
 
         // Background Logic
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
+            <div class="fixed-char-bg" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
                 <img src="assets/Avventure.png" alt="" style="width: 100%;">
             </div>
         `;
 
-        this.container.innerHTML = bgHtml + `
+        if (document.getElementById('app-background-layer')) {
+            document.getElementById('app-background-layer').innerHTML = bgHtml;
+        }
+
+        this.container.innerHTML = `
             <div class="campaign-detail-container" style="padding-bottom: 80px; position: relative; z-index: 1;">
                 <!-- Header with Banner -->
                 <div class="campaign-banner" style="

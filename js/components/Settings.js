@@ -116,12 +116,16 @@ export default class Settings {
         }
 
         const bgHtml = `
-            <div class="fixed-char-bg" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5; mask-image: linear-gradient(to top, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);">
+            <div class="fixed-char-bg" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 0; pointer-events: none; opacity: 0.5;">
                 <img src="assets/opzioni.png" alt="" style="width: 100%;">
             </div>
         `;
 
-        div.innerHTML = bgHtml + `
+        if (document.getElementById('app-background-layer')) {
+            document.getElementById('app-background-layer').innerHTML = bgHtml;
+        }
+
+        div.innerHTML = `
             <div style="position: relative; z-index: 1;">
                 
                 <div class="settings-cards" style="margin-top: 20px;">

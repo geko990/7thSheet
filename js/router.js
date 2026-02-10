@@ -33,6 +33,8 @@ export class Router {
         this.updateNavigation();
 
         const mainContent = document.getElementById('main-content');
+        const bgLayer = document.getElementById('app-background-layer');
+        if (bgLayer) bgLayer.innerHTML = '';
         mainContent.innerHTML = '<div class="text-center mt-20">Caricamento...</div>';
 
         try {
