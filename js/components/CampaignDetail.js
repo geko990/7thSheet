@@ -334,7 +334,7 @@ export class CampaignDetail {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;">
                     <h3 class="section-title" style="margin: 0; border: none;">Elementi di Gioco</h3>
                     <button id="btn-add-entity" class="btn btn-xs btn-primary">+ Nuovo</button>
-            </div>
+                </div>
             `;
         } else {
             html += '<h3 class="section-title" style="border-bottom: 2px solid var(--border-color); margin-bottom: 15px;">Elementi di Gioco</h3>';
@@ -518,52 +518,69 @@ export class CampaignDetail {
         menu.style.backdropFilter = 'blur(2px)';
 
         const targetName = member.character_data?.name || member.profile.username || 'Giocatore';
-        const isMe = member.user_id === AuthService.user?.id; // Use AuthService directly or this.userId if set
+        const isMe = member.user_id === AuthService.user?.id;
         const isGm = this.myRole === 'gm';
         const isTargetGm = member.role === 'gm';
 
+        // Check if I am the Creator of the campaign
+        // We assume 'created_by' is available in this.campaign object
+        const isCreator = this.campaign.created_by === AuthService.user?.id;
+
         let actionButtons = '';
 
+        // ACTIONS ON OTHERS
         if (isGm && !isMe) {
-            // GM Actions on others
             if (!isTargetGm) {
-                actionButtons += `< button class="btn btn-primary" id = "ctx-promote" >⭐ Promuovi a Master</button > `;
+                // Promote to GM
+                actionButtons += `<button class="btn btn-primary" id="ctx-promote">⭐ Promuovi a Master</button>`;
             } else {
-                actionButtons += `< button class="btn btn-secondary" id = "ctx-demote" >⬇️ Retrocedi a Player</button > `;
+                // Demote to Player
+                actionButtons += `<button class="btn btn-secondary" id="ctx-demote">⬇️ Retrocedi a Player</button>`;
             }
-
-            actionButtons += `< button class="btn btn-secondary" id = "ctx-kick" style = "color: var(--accent-red); border-color: var(--accent-red);" >🥾 Espelli</button > `;
+            // Kick
+            actionButtons += `<button class="btn btn-secondary" id="ctx-kick" style="color: var(--accent-red); border-color: var(--accent-red);">🥾 Espelli</button>`;
         }
 
+        // ACTIONS ON SELF
         if (isMe) {
-            // Self Actions
+            // UNLINK Character
             if (member.character_data) {
-                actionButtons += `< button class="btn btn-secondary" id = "ctx-unlink" >💔 Scollega Personaggio</button > `;
+                actionButtons += `<button class="btn btn-secondary" id="ctx-unlink">💔 Scollega Personaggio</button>`;
             }
 
-            actionButtons += `< button class="btn btn-secondary" id = "ctx-leave" style = "color: var(--accent-red); border-color: var(--accent-red);" >👋 Abbandona Avventura</button > `;
+            // CREATOR ROLE TOGGLE
+            if (isCreator) {
+                if (isGm) {
+                    actionButtons += `<button class="btn btn-secondary" id="ctx-toggle-role">⬇️ Diventa Giocatore</button>`;
+                } else {
+                    actionButtons += `<button class="btn btn-primary" id="ctx-toggle-role">⭐ Diventa GM</button>`;
+                }
+            }
+
+            // LEAVE (Only if NOT creator, or if creator warns?)
+            // Usually Creator archiving campaign is better than leaving. 
+            // But let's keep leave for now, maybe add logic to prevent if Creator is the only one.
+            actionButtons += `<button class="btn btn-secondary" id="ctx-leave" style="color: var(--accent-red); border-color: var(--accent-red);">👋 Abbandona Avventura</button>`;
         }
 
         if (!actionButtons) {
-            // Nothing to do
             return;
         }
 
         menu.innerHTML = `
-            < div class="modal-content" style = "width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);" >
+            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 20px; text-align: center; border: 2px solid var(--accent-gold);">
                 <h3 style="margin-bottom: 15px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     ${actionButtons}
                     <button class="btn btn-secondary" id="ctx-cancel-player" style="margin-top: 5px;">Annulla</button>
                 </div>
-            </div >
-            `;
+            </div>
+        `;
 
         document.body.appendChild(menu);
 
-        // Prevent props
+        // Prevent bubbles
         menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
-
         menu.querySelector('#ctx-cancel-player').onclick = () => menu.remove();
         menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
@@ -571,7 +588,7 @@ export class CampaignDetail {
         const promoteBtn = menu.querySelector('#ctx-promote');
         if (promoteBtn) {
             promoteBtn.onclick = async () => {
-                if (confirm(`Rendere ${targetName} un Game Master ? Potrà modificare la campagna.`)) {
+                if (confirm(`Rendere ${targetName} un Game Master? Potrà modificare la campagna.`)) {
                     promoteBtn.textContent = '...';
                     const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'gm');
                     menu.remove();
@@ -587,6 +604,21 @@ export class CampaignDetail {
                 if (confirm(`Rimuovere i permessi da GM a ${targetName}?`)) {
                     demoteBtn.textContent = '...';
                     const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'player');
+                    menu.remove();
+                    if (error) alert("Errore: " + error.message);
+                    else this.render(this.container, this.campaignId);
+                }
+            };
+        }
+
+        const toggleRoleBtn = menu.querySelector('#ctx-toggle-role');
+        if (toggleRoleBtn) {
+            toggleRoleBtn.onclick = async () => {
+                const newRole = isGm ? 'player' : 'gm';
+                const label = isGm ? 'Giocatore' : 'Game Master';
+                if (confirm(`Vuoi cambiare il tuo ruolo in ${label}?`)) {
+                    toggleRoleBtn.textContent = '...';
+                    const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, newRole);
                     menu.remove();
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
@@ -625,6 +657,7 @@ export class CampaignDetail {
             leaveBtn.onclick = async () => {
                 let msg = "Vuoi lasciare questa avventura? Dovrai essere invitato nuovamente per rientrare.";
                 if (this.myRole === 'gm') msg += " ATTENZIONE: Sei un GM! Se sei l'unico, assicurati di promuovere qualcun altro prima.";
+                if (isCreator) msg += " SEI IL CREATORE: Se abbandoni, potresti perdere l'accesso di gestione se non ci sono altri GM.";
 
                 if (confirm(msg)) {
                     leaveBtn.textContent = '...';
@@ -632,7 +665,6 @@ export class CampaignDetail {
                     menu.remove();
                     if (error) alert("Errore: " + error.message);
                     else {
-                        // Navigate back or refresh
                         if (this.app?.adventureTab) this.app.adventureTab.render();
                         if (this.app?.router) this.app.router.navigate('adventures');
                     }
