@@ -210,77 +210,67 @@ export class AdventureTab {
 
             // TOUCH
             card.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isLongPress = false;
-                timer = setTimeout(() => {
-                    isLongPress = true;
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    this.openCampaignContextMenu(campaign);
-                }, 500);
-            }, { passive: true });
+            \n                startX = e.touches[0].clientX; \n                startY = e.touches[0].clientY; \n                isLongPress = false; \n                timer = setTimeout(() => {
+            \n                    isLongPress = true; \n                    if (navigator.vibrate) navigator.vibrate(50); \n                    this.openCampaignContextMenu(campaign); \n                    // Prevent immediate ghost clicks\n                    this._lastLongPress = Date.now();\n                }, 500);\n            }, { passive: true });
 
-            card.addEventListener('touchmove', (e) => {
-                const diffX = Math.abs(e.touches[0].clientX - startX);
-                const diffY = Math.abs(e.touches[0].clientY - startY);
-                if (diffX > 10 || diffY > 10) clearTimeout(timer);
-            }, { passive: true });
-
-            card.addEventListener('touchend', (e) => {
-                clearTimeout(timer);
-                if (isLongPress) e.preventDefault();
-            });
-
-            // CLICK
-            card.addEventListener('click', () => {
-                if (isLongPress) return;
-                // Navigate
-                if (this.navigateCallback) this.navigateCallback('campaign-detail', { id });
-            });
-
-            // SESSION DATE LONG PRESS (for GM)
-            const sessionArea = card.querySelector('.session-info');
-            if (sessionArea && campaign.my_role === 'gm') {
-                let sTimer = null;
-                let sLongPress = false;
-
-                sessionArea.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                    sLongPress = false;
-                    sTimer = setTimeout(() => {
-                        sLongPress = true;
-                        if (navigator.vibrate) navigator.vibrate(50);
-                        this.openEditSessionDateModal(campaign);
-                    }, 600);
+                card.addEventListener('touchmove', (e) => {
+                    const diffX = Math.abs(e.touches[0].clientX - startX);
+                    const diffY = Math.abs(e.touches[0].clientY - startY);
+                    if (diffX > 10 || diffY > 10) clearTimeout(timer);
                 }, { passive: true });
 
-                sessionArea.addEventListener('touchend', (e) => {
-                    clearTimeout(sTimer);
+                card.addEventListener('touchend', (e) => {
+                    clearTimeout(timer);
+                    if (isLongPress) e.preventDefault();
                 });
 
-                sessionArea.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.openEditSessionDateModal(campaign);
+                // CLICK
+                card.addEventListener('click', (e) => {
+                \n                if (isLongPress) { \n                    e.preventDefault(); \n                    e.stopPropagation(); \n                    return; \n } \n                // Cooldown check for ghost clicks from touch devices\n                if (this._lastLongPress && Date.now() - this._lastLongPress < 400) {\n                    e.preventDefault();\n                    e.stopPropagation();\n                    return;\n                }\n                // Navigate\n                if (this.navigateCallback) this.navigateCallback('campaign-detail', { id });\n            });
+
+                    // SESSION DATE LONG PRESS (for GM)
+                    const sessionArea = card.querySelector('.session-info');
+                    if (sessionArea && campaign.my_role === 'gm') {
+                        let sTimer = null;
+                        let sLongPress = false;
+
+                        sessionArea.addEventListener('touchstart', (e) => {
+                            e.stopPropagation();
+                            sLongPress = false;
+                            sTimer = setTimeout(() => {
+                                sLongPress = true;
+                                if (navigator.vibrate) navigator.vibrate(50);
+                                this.openEditSessionDateModal(campaign);
+                            }, 600);
+                        }, { passive: true });
+
+                        sessionArea.addEventListener('touchend', (e) => {
+                            clearTimeout(sTimer);
+                        });
+
+                        sessionArea.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.openEditSessionDateModal(campaign);
+                        });
+                    }
+
+                    // CONTEXT MENU
+                    card.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        this.openCampaignContextMenu(campaign);
+                    });
                 });
             }
 
-            // CONTEXT MENU
-            card.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                this.openCampaignContextMenu(campaign);
-            });
-        });
-    }
-
     openEditSessionDateModal(campaign) {
-        const modal = this.container.querySelector('#generic-modal');
-        const body = this.container.querySelector('#modal-body');
-        const btnAction = this.container.querySelector('#modal-action-btn');
+                const modal = this.container.querySelector('#generic-modal');
+                const body = this.container.querySelector('#modal-body');
+                const btnAction = this.container.querySelector('#modal-action-btn');
 
-        const currentVal = campaign.next_session ? new Date(campaign.next_session).toISOString().slice(0, 16) : '';
+                const currentVal = campaign.next_session ? new Date(campaign.next_session).toISOString().slice(0, 16) : '';
 
-        body.innerHTML = `
+                body.innerHTML = `
             <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 20px;">Prossima Sessione</h3>
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">Data e Ora</label>
@@ -289,43 +279,43 @@ export class AdventureTab {
             <p style="font-size: 0.8rem; color: var(--text-faded); font-style: italic;">Imposta la data della prossima sessione per informare tutti i giocatori.</p>
         `;
 
-        btnAction.textContent = 'Salva';
-        btnAction.onclick = async () => {
-            const newVal = body.querySelector('#session-date-input').value;
-            if (!newVal) {
-                if (!confirm("Rimuovere la data della prossima sessione?")) return;
-            }
+                btnAction.textContent = 'Salva';
+                btnAction.onclick = async () => {
+                    const newVal = body.querySelector('#session-date-input').value;
+                    if (!newVal) {
+                        if (!confirm("Rimuovere la data della prossima sessione?")) return;
+                    }
 
-            const { error } = await CampaignService.updateCampaign(campaign.id, { next_session: newVal || null });
-            if (error) {
-                this.showErrorPopup("Errore durante l'aggiornamento.");
-            } else {
-                this.showSuccessPopup("Data aggiornata!");
-                modal.style.display = 'none';
-                this.renderDashboard(AuthService.user); // Refresh
-            }
-        };
+                    const { error } = await CampaignService.updateCampaign(campaign.id, { next_session: newVal || null });
+                    if (error) {
+                        this.showErrorPopup("Errore durante l'aggiornamento.");
+                    } else {
+                        this.showSuccessPopup("Data aggiornata!");
+                        modal.style.display = 'none';
+                        this.renderDashboard(AuthService.user); // Refresh
+                    }
+                };
 
-        modal.style.display = 'flex';
-    }
+                modal.style.display = 'flex';
+            }
 
     openCampaignContextMenu(campaign) {
-        const existingMenu = document.getElementById('ctx-menu-modal');
-        if (existingMenu) existingMenu.remove();
+                const existingMenu = document.getElementById('ctx-menu-modal');
+                if(existingMenu) existingMenu.remove();
 
-        const menu = document.createElement('div');
-        menu.id = 'ctx-menu-modal';
-        menu.className = 'modal-overlay';
-        menu.style.display = 'flex';
-        menu.style.alignItems = 'center';
-        menu.style.justifyContent = 'center';
-        menu.style.background = 'rgba(0,0,0,0.6)';
-        menu.style.zIndex = '10000';
-        menu.style.backdropFilter = 'blur(2px)';
+                const menu = document.createElement('div');
+                menu.id = 'ctx-menu-modal';
+                menu.className = 'modal-overlay';
+                menu.style.display = 'flex';
+                menu.style.alignItems = 'center';
+                menu.style.justifyContent = 'center';
+                menu.style.background = 'rgba(0,0,0,0.6)';
+                menu.style.zIndex = '10000';
+                menu.style.backdropFilter = 'blur(2px)';
 
-        const isGm = campaign.my_role === 'gm';
+                const isGm = campaign.my_role === 'gm';
 
-        menu.innerHTML = `
+                menu.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width: 320px; background: #fdfaf5; border-radius: 16px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold); box-shadow: 0 10px 40px rgba(0,0,0,0.5); transform: scale(0.9); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
                 <h3 style="margin-bottom: 20px; font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-navy);">${campaign.title}</h3>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -343,49 +333,49 @@ export class AdventureTab {
             <style>@keyframes popIn { to { transform: scale(1); } }</style>
         `;
 
-        document.body.appendChild(menu);
+                document.body.appendChild(menu);
 
-        // Actions
-        menu.querySelector('#ctx-open').onclick = () => {
-            menu.remove();
-            if (this.navigateCallback) this.navigateCallback('campaign-detail', { id: campaign.id });
-        };
-        menu.querySelector('#ctx-copy-code').onclick = () => {
-            navigator.clipboard.writeText(campaign.join_code);
-            this.showSuccessPopup("Codice copiato!");
-            menu.remove();
-        };
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+                // Actions
+                menu.querySelector('#ctx-open').onclick = () => {
+                    menu.remove();
+                    if (this.navigateCallback) this.navigateCallback('campaign-detail', { id: campaign.id });
+                };
+                menu.querySelector('#ctx-copy-code').onclick = () => {
+                    navigator.clipboard.writeText(campaign.join_code);
+                    this.showSuccessPopup("Codice copiato!");
+                    menu.remove();
+                };
+                menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
 
-        if (isGm) {
-            menu.querySelector('#ctx-edit').onclick = () => {
-                menu.remove();
-                this.openEditCampaignModal(campaign);
-            };
-            menu.querySelector('#ctx-edit-session').onclick = () => {
-                menu.remove();
-                this.openEditSessionDateModal(campaign);
-            };
-            menu.querySelector('#ctx-dup').onclick = async () => {
-                menu.remove();
-                if (!confirm("Duplicare la campagna?")) return;
-                const { error } = await CampaignService.duplicateCampaign(campaign.id);
-                if (error) this.showErrorPopup(error.message);
-                else this.render();
-            };
-            menu.querySelector('#ctx-del').onclick = async () => {
-                menu.remove();
-                if (!confirm("SEI SICURO? Questa azione è irreversibile e cancellerà tutto.")) return;
-                const { error } = await CampaignService.deleteCampaign(campaign.id);
-                if (error) this.showErrorPopup(error.message);
-                else this.render();
-            };
-        }
-    }
+                if(isGm) {
+                    menu.querySelector('#ctx-edit').onclick = () => {
+                        menu.remove();
+                        this.openEditCampaignModal(campaign);
+                    };
+                    menu.querySelector('#ctx-edit-session').onclick = () => {
+                        menu.remove();
+                        this.openEditSessionDateModal(campaign);
+                    };
+                    menu.querySelector('#ctx-dup').onclick = async () => {
+                        menu.remove();
+                        if (!confirm("Duplicare la campagna?")) return;
+                        const { error } = await CampaignService.duplicateCampaign(campaign.id);
+                        if (error) this.showErrorPopup(error.message);
+                        else this.render();
+                    };
+                    menu.querySelector('#ctx-del').onclick = async () => {
+                        menu.remove();
+                        if (!confirm("SEI SICURO? Questa azione è irreversibile e cancellerà tutto.")) return;
+                        const { error } = await CampaignService.deleteCampaign(campaign.id);
+                        if (error) this.showErrorPopup(error.message);
+                        else this.render();
+                    };
+                }
+            }
 
     // MODALS (Create/Join)
     openCreateCampaignModal() {
-        const modalHtml = `
+                const modalHtml = `
             <div class="text-center">
                 <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Nuova Avventura</h3>
                 <input type="text" id="new-campaign-title" class="input-field w-100 mb-20" placeholder="Titolo dell'avventura">
@@ -395,28 +385,28 @@ export class AdventureTab {
                 </div>
             </div>
         `;
-        window.app.showModal(modalHtml);
+                window.app.showModal(modalHtml);
 
-        setTimeout(() => {
-            const input = document.getElementById('new-campaign-title');
-            if (input) input.focus();
+                setTimeout(() => {
+                const input = document.getElementById('new-campaign-title');
+                if(input) input.focus();
 
-            document.getElementById('btn-cancel-create').onclick = () => window.app.closeModal();
-            document.getElementById('btn-confirm-create').onclick = () => {
-                const title = input.value.trim();
-                if (title) {
-                    CampaignService.createCampaign(title).then(res => {
-                        window.app.closeModal();
-                        if (res.error) this.showErrorPopup(res.error.message);
-                        else this.render();
-                    });
-                }
-            };
-        }, 100);
-    }
+                document.getElementById('btn-cancel-create').onclick = () => window.app.closeModal();
+                document.getElementById('btn-confirm-create').onclick = () => {
+                    const title = input.value.trim();
+                    if (title) {
+                        CampaignService.createCampaign(title).then(res => {
+                            window.app.closeModal();
+                            if (res.error) this.showErrorPopup(res.error.message);
+                            else this.render();
+                        });
+                    }
+                };
+            }, 100);
+            }
 
     openJoinCampaignModal() {
-        const modalHtml = `
+                const modalHtml = `
             <div class="text-center">
                 <h3 style="font-family: var(--font-display); color: var(--accent-navy); margin-bottom: 15px;">Unisciti ad Avventura</h3>
                 <input type="text" id="join-campaign-code" class="input-field w-100 mb-20" placeholder="Codice invito (es. ABC-123)">
@@ -426,28 +416,28 @@ export class AdventureTab {
                 </div>
             </div>
         `;
-        window.app.showModal(modalHtml);
+                window.app.showModal(modalHtml);
 
-        setTimeout(() => {
-            const input = document.getElementById('join-campaign-code');
-            if (input) input.focus();
+                setTimeout(() => {
+                const input = document.getElementById('join-campaign-code');
+                if(input) input.focus();
 
-            document.getElementById('btn-cancel-join').onclick = () => window.app.closeModal();
-            document.getElementById('btn-confirm-join').onclick = () => {
-                const code = input.value.trim();
-                if (code) {
-                    CampaignService.joinCampaign(code).then(res => {
-                        window.app.closeModal();
-                        if (res.error) this.showErrorPopup(res.error.message);
-                        else this.render();
-                    });
-                }
-            };
-        }, 100);
-    }
+                document.getElementById('btn-cancel-join').onclick = () => window.app.closeModal();
+                document.getElementById('btn-confirm-join').onclick = () => {
+                    const code = input.value.trim();
+                    if (code) {
+                        CampaignService.joinCampaign(code).then(res => {
+                            window.app.closeModal();
+                            if (res.error) this.showErrorPopup(res.error.message);
+                            else this.render();
+                        });
+                    }
+                };
+            }, 100);
+        }
 
     openEditCampaignModal(campaign) {
-        const modalHtml = `
+            const modalHtml = `
             <div class="text-center">
                 <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 15px;">Modifica Titolo</h3>
                 <input type="text" id="edit-campaign-title" class="input-field w-100 mb-20" value="${campaign.title}" placeholder="Titolo">
@@ -457,11 +447,11 @@ export class AdventureTab {
                 </div>
             </div>
         `;
-        window.app.showModal(modalHtml);
+            window.app.showModal(modalHtml);
 
-        setTimeout(() => {
+            setTimeout(() => {
             const input = document.getElementById('edit-campaign-title');
-            if (input) input.focus();
+            if(input) input.focus();
 
             document.getElementById('btn-cancel-edit').onclick = () => window.app.closeModal();
             document.getElementById('btn-confirm-edit').onclick = () => {

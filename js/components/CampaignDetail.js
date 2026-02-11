@@ -485,14 +485,40 @@ export class CampaignDetail {
 
         // --- GROUP CHAT Section ---
         html += `
-            <h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px;">Chat di Gruppo</h3>
-            <div id="group-chat-container" class="card" style="height: 300px; display: flex; flex-direction: column; background: #fff; overflow: hidden;">
-                <div id="group-chat-messages" style="flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <h3 class="section-title" style="border-bottom: 2px solid var(--accent-navy); margin-bottom: 15px; margin-top: 20px;">Chat di Gruppo</h3>
+            <div id="group-chat-container" class="card" style="
+                height: 400px; 
+                display: flex; 
+                flex-direction: column; 
+                background: #fdfaf5; 
+                overflow: hidden; 
+                border: 2px solid var(--border-worn);
+                position: relative;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            ">
+                <div id="group-chat-messages" style="
+                    flex: 1; 
+                    overflow-y: auto; 
+                    padding: 15px; 
+                    display: flex; 
+                    flex-direction: column; 
+                    gap: 12px;
+                    position: relative;
+                    z-index: 1;
+                ">
                     <div class="text-center italic" style="color: var(--text-faded); font-size: 0.8rem;">Caricamento messaggi...</div>
                 </div>
-                <div style="padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px;">
-                    <input type="text" id="group-chat-input" placeholder="Scrivi al gruppo..." style="flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
-                    <button id="btn-send-group-msg" class="btn btn-sm btn-primary">Invia</button>
+                <div style="padding: 10px; border-top: 1px solid var(--border-worn); display: flex; gap: 8px; background: rgba(255,255,255,0.5); position: relative; z-index: 1;">
+                    <input type="text" id="group-chat-input" placeholder="Scrivi al gruppo..." style="
+                        flex: 1; 
+                        padding: 10px; 
+                        border: 1px solid var(--border-worn); 
+                        border-radius: 20px; 
+                        font-size: 0.95rem;
+                        background: #fff;
+                        font-family: var(--font-body);
+                    ">
+                    <button id="btn-send-group-msg" class="btn btn-primary" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">🏹</button>
                 </div>
             </div>
         `;
@@ -517,7 +543,50 @@ export class CampaignDetail {
             const member = members.find(m => m.user_id === uid);
             if (!member) return;
 
-            card.addEventListener('click', () => this.openPlayerPopup(member));
+            let timer = null;
+            let isLongPress = false;
+            let startX, startY;
+
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isLongPress = false;
+                timer = setTimeout(() => {
+                    isLongPress = true;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    if (this.myRole === 'gm' || member.user_id === myId) {
+                        this.openPlayerContextMenu(member);
+                    } else {
+                        this.openMissiveContextMenu(member);
+                    }
+                    this._lastLongPress = Date.now();
+                }, 600);
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - startX);
+                const diffY = Math.abs(e.touches[0].clientY - startY);
+                if (diffX > 10 || diffY > 10) clearTimeout(timer);
+            }, { passive: true });
+
+            card.addEventListener('touchend', (e) => {
+                clearTimeout(timer);
+            });
+
+            card.addEventListener('click', (e) => {
+                if (isLongPress) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                if (this._lastLongPress && Date.now() - this._lastLongPress < 400) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                this.openPlayerPopup(member);
+            });
+
             card.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 if (this.myRole === 'gm' || member.user_id === myId) {
@@ -541,10 +610,23 @@ export class CampaignDetail {
         messagesDiv.innerHTML = messages.map(msg => {
             const isMe = msg.sender_id === AuthService.user?.id;
             const senderName = msg.sender?.username || 'Giramondo';
+            const dateStr = new Date(msg.created_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
             return `
-                <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
-                    <div style="font-size: 0.7rem; color: var(--text-faded); margin-bottom: 2px; text-align: ${isMe ? 'right' : 'left'}">${senderName}</div>
-                    <div style="padding: 8px 12px; border-radius: 12px; background: ${isMe ? 'var(--accent-navy)' : '#eee'}; color: ${isMe ? 'white' : 'var(--text-main)'}; font-size: 0.9rem; shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 85%; margin-bottom: 5px;">
+                    <div style="font-size: 0.7rem; color: var(--text-faded); margin-bottom: 2px; text-align: ${isMe ? 'right' : 'left'}; font-family: var(--font-display);">
+                        ${senderName} • <span style="font-size: 0.65rem;">${dateStr}</span>
+                    </div>
+                    <div style="
+                        padding: 10px 14px; 
+                        border-radius: ${isMe ? '15px 15px 2px 15px' : '15px 15px 15px 2px'}; 
+                        background: ${isMe ? 'var(--accent-navy)' : 'rgba(var(--accent-gold-rgb), 0.15)'}; 
+                        color: ${isMe ? 'white' : 'var(--text-ink)'}; 
+                        font-size: 0.95rem; 
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        position: relative;
+                        border: 1px solid ${isMe ? 'var(--accent-navy)' : 'var(--border-worn)'};
+                    ">
                         ${msg.content}
                     </div>
                 </div>
