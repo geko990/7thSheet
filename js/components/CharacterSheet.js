@@ -515,10 +515,20 @@ export default class CharacterSheet {
         `;
 
         document.body.appendChild(menu);
+        const openTime = Date.now();
 
-        menu.querySelector('#ctx-view').onclick = () => { menu.remove(); this.openViewItemModal(type, idx); };
-        menu.querySelector('#ctx-edit').onclick = () => { menu.remove(); type === 'journal' ? this.openJournalModal(idx) : this.openItemModal(type, idx); };
+        menu.querySelector('#ctx-view').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+            this.openViewItemModal(type, idx);
+        };
+        menu.querySelector('#ctx-edit').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+            type === 'journal' ? this.openJournalModal(idx) : this.openItemModal(type, idx);
+        };
         menu.querySelector('#ctx-delete').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             if (confirm("Eliminare definitivamente?")) {
                 list.splice(idx, 1);
@@ -526,8 +536,16 @@ export default class CharacterSheet {
                 this.renderTabContent(document.querySelector('#tab-content'), type);
             }
         };
-        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.querySelector('#ctx-cancel').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
     }
 
     openWealthModal(container) {
@@ -1059,23 +1077,19 @@ export default class CharacterSheet {
         `;
 
         document.body.appendChild(menu);
+        const openTime = Date.now();
 
         menu.querySelector('#ctx-av-upload').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             document.getElementById('sheet-image-upload')?.click();
         };
 
         menu.querySelector('#ctx-av-url').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             const url = prompt("Incolla l'URL dell'immagine:");
             if (url) {
-                // Pre-load to check validity (optional) or just crop
-                // For simplicity, we can load it into cropper directly if we want cropping, or just save.
-                // Let's pass it to cropper?
-                // The cropper expects a file reader result usually, but we can hack it.
-                // Or just set it directly. Let's set it directly for now, user can crop if they upload. 
-                // Wait, user complained about "white image" after change. Best to use cropper if possible?
-                // Let's just set it.
                 this.character.image = url;
                 Storage.saveCharacter(this.character);
                 this.render();
@@ -1084,6 +1098,7 @@ export default class CharacterSheet {
 
         if (this.character.image) {
             menu.querySelector('#ctx-av-remove').onclick = () => {
+                if (Date.now() - openTime < 400) return;
                 if (confirm("Rimuovere l'immagine attuale?")) {
                     this.character.image = null;
                     Storage.saveCharacter(this.character);
@@ -1093,8 +1108,17 @@ export default class CharacterSheet {
             };
         }
 
-        menu.querySelector('#ctx-av-cancel').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.querySelector('#ctx-av-cancel').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
     }
 
     attachSheetListeners(container) {

@@ -307,29 +307,37 @@ export default class CharacterList {
         `;
 
         document.body.appendChild(menu);
+        const openTime = Date.now();
 
         // Listeners
         menu.querySelector('#ctx-open').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             if (this.app.viewCharacter) this.app.viewCharacter(id);
         };
 
         menu.querySelector('#ctx-edit').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             this.openEditModal(id);
         };
 
         menu.querySelector('#ctx-delete').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             this.confirmDelete(id);
         };
 
         menu.querySelector('#ctx-cancel').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
         };
 
         menu.onclick = (e) => {
-            if (e.target === menu) menu.remove();
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
         };
     }
 

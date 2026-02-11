@@ -771,12 +771,16 @@ export class CampaignDetail {
 
         document.body.appendChild(menu);
 
+        const openTime = Date.now();
+
         menu.querySelector('#ctx-edit-quest').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             this.openEditQuestModal(quest);
         };
 
         menu.querySelector('#ctx-delete-quest').onclick = async () => {
+            if (Date.now() - openTime < 400) return;
             if (confirm("Sei sicuro di voler eliminare questa missione?")) {
                 const { error } = await CampaignService.deleteQuest(quest.id);
                 menu.remove();
@@ -785,7 +789,18 @@ export class CampaignDetail {
             }
         };
 
-        menu.querySelector('#ctx-close-quest').onclick = () => menu.remove();
+        menu.querySelector('#ctx-close-quest').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+
+        // Click outside
+        window.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target) && Date.now() - openTime > 400) {
+                menu.remove();
+                window.removeEventListener('click', closeMenu);
+            }
+        });
     }
 
     openEditQuestModal(quest) {
@@ -893,15 +908,30 @@ export class CampaignDetail {
 
         document.body.appendChild(menu);
 
+        const openTime = Date.now();
+
         // Prevent bubbles
         menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
-        menu.querySelector('#ctx-cancel-player').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.querySelector('#ctx-cancel-player').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
 
-        // Bind Actions
+        // Bind Actions (wrapped with shield)
+        const wrap = (fn) => async () => {
+            if (Date.now() - openTime < 400) return;
+            await fn();
+        };
+
         const promoteBtn = menu.querySelector('#ctx-promote');
         if (promoteBtn) {
-            promoteBtn.onclick = async () => {
+            promoteBtn.onclick = wrap(async () => {
                 if (confirm(`Rendere ${targetName} un Game Master? Potrà modificare la campagna.`)) {
                     promoteBtn.textContent = '...';
                     const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'gm');
@@ -909,12 +939,12 @@ export class CampaignDetail {
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
                 }
-            };
+            });
         }
 
         const demoteBtn = menu.querySelector('#ctx-demote');
         if (demoteBtn) {
-            demoteBtn.onclick = async () => {
+            demoteBtn.onclick = wrap(async () => {
                 if (confirm(`Rimuovere i permessi da GM a ${targetName}?`)) {
                     demoteBtn.textContent = '...';
                     const { error } = await CampaignService.updateMemberRole(this.campaignId, member.user_id, 'player');
@@ -922,12 +952,12 @@ export class CampaignDetail {
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
                 }
-            };
+            });
         }
 
         const toggleRoleBtn = menu.querySelector('#ctx-toggle-role');
         if (toggleRoleBtn) {
-            toggleRoleBtn.onclick = async () => {
+            toggleRoleBtn.onclick = wrap(async () => {
                 const newRole = isGm ? 'player' : 'gm';
                 const label = isGm ? 'Giocatore' : 'Game Master';
 
@@ -942,12 +972,12 @@ export class CampaignDetail {
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
                 }
-            };
+            });
         }
 
         const kickBtn = menu.querySelector('#ctx-kick');
         if (kickBtn) {
-            kickBtn.onclick = async () => {
+            kickBtn.onclick = wrap(async () => {
                 if (confirm(`Sei sicuro di voler espellere ${targetName}?`)) {
                     kickBtn.textContent = '...';
                     const { error } = await CampaignService.removeMember(this.campaignId, member.user_id);
@@ -955,12 +985,12 @@ export class CampaignDetail {
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
                 }
-            };
+            });
         }
 
         const unlinkBtn = menu.querySelector('#ctx-unlink');
         if (unlinkBtn) {
-            unlinkBtn.onclick = async () => {
+            unlinkBtn.onclick = wrap(async () => {
                 if (confirm(`Vuoi scollegare il personaggio ${member.character_data.name}? Rimarrai nella campagna come spettatore (o GM se lo sei).`)) {
                     unlinkBtn.textContent = '...';
                     const { error } = await CampaignService.unlinkCharacter(this.campaignId);
@@ -968,12 +998,12 @@ export class CampaignDetail {
                     if (error) alert("Errore: " + error.message);
                     else this.render(this.container, this.campaignId);
                 }
-            };
+            });
         }
 
         const leaveBtn = menu.querySelector('#ctx-leave');
         if (leaveBtn) {
-            leaveBtn.onclick = async () => {
+            leaveBtn.onclick = wrap(async () => {
                 let msg = "Vuoi lasciare questa avventura? Dovrai essere invitato nuovamente per rientrare.";
                 if (this.myRole === 'gm') msg += " ATTENZIONE: Sei un GM! Se sei l'unico, assicurati di promuovere qualcun altro prima.";
                 if (isCreator) msg += " SEI IL CREATORE: Se abbandoni, potresti perdere l'accesso di gestione se non ci sono altri GM.";
@@ -988,9 +1018,64 @@ export class CampaignDetail {
                         if (this.app?.router) this.app.router.navigate('adventures');
                     }
                 }
-            };
+            });
         }
     }
+
+    openMissiveContextMenu(member) {
+        const existingMenu = document.getElementById('ctx-menu-player');
+        if (existingMenu) existingMenu.remove();
+
+        const menu = document.createElement('div');
+        menu.id = 'ctx-menu-player';
+        menu.className = 'modal-overlay';
+        menu.style.display = 'flex';
+        menu.style.alignItems = 'center';
+        menu.style.justifyContent = 'center';
+        menu.style.background = 'rgba(0,0,0,0.6)';
+        menu.style.zIndex = '10000';
+        menu.style.backdropFilter = 'blur(2px)';
+
+        const targetName = member.character_data?.name || member.profile.username || 'Giocatore';
+
+        menu.innerHTML = `
+            <div class="modal-content" style="width: 90%; max-width: 300px; background: #fdfaf5; border-radius: 8px; padding: 25px; text-align: center; border: 2px solid var(--accent-gold);">
+                <h3 style="margin-bottom: 20px; font-family: var(--font-display); color: var(--accent-navy);">${targetName}</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-primary" id="ctx-missive" style="width: 100%;">📬 Invia Missiva</button>
+                    <button class="btn btn-secondary" id="ctx-profile" style="width: 100%;">📜 Vedi Profilo</button>
+                    <button class="btn btn-secondary" id="ctx-cancel-missive" style="width: 100%; margin-top: 5px;">Annulla</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+        const openTime = Date.now();
+
+        menu.querySelector('.modal-content').onclick = (e) => e.stopPropagation();
+
+        menu.querySelector('#ctx-missive').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+            this.openPlayerPopup(member); // Opens the chat/profile popup
+        };
+        menu.querySelector('#ctx-profile').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+            this.openProfileModal(member);
+        };
+        menu.querySelector('#ctx-cancel-missive').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
+    }
+
     attachEntityInteractionListeners(container, entities) {
         const cards = container.querySelectorAll('.entity-card');
         cards.forEach(card => {
@@ -1087,31 +1172,45 @@ export class CampaignDetail {
 
         document.body.appendChild(menu);
 
+        const openTime = Date.now();
+
         // Prevent props
         menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
 
         // Listeners
         menu.querySelector('#ctx-open').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             this.openViewEntityModal(entity);
         };
 
-        menu.querySelector('#ctx-cancel').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.querySelector('#ctx-cancel').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
 
         if (isGm) {
             menu.querySelector('#ctx-edit').onclick = () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 this.openEditEntityModal(entity);
             };
 
             menu.querySelector('#ctx-toggle').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 await CampaignService.updateEntityVisibility(entity.id, !entity.is_visible);
                 this.loadTabContent();
             };
 
             menu.querySelector('#ctx-delete').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 if (confirm("Eliminare definitivamente?")) {
                     await CampaignService.deleteEntity(entity.id);
@@ -1689,17 +1788,20 @@ export class CampaignDetail {
             </div>
         `;
         document.body.appendChild(menu);
+        const openTime = Date.now();
 
         // Prevent click inside menu from closing it (bubbling to overlay)
         menu.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
 
         menu.querySelector('#st-open').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             this.openViewStoryModal(story);
         };
 
         if (menu.querySelector('#st-delete')) {
             menu.querySelector('#st-delete').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 if (confirm("Sei sicuro di voler eliminare questo diario?")) {
                     menu.remove();
                     await CampaignService.deleteStory(story.id);
@@ -1710,6 +1812,7 @@ export class CampaignDetail {
 
         if (menu.querySelector('#st-edit')) {
             menu.querySelector('#st-edit').onclick = () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 this.openStoryModal(story);
             };
@@ -1717,14 +1820,24 @@ export class CampaignDetail {
 
         if (menu.querySelector('#st-toggle')) {
             menu.querySelector('#st-toggle').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 await CampaignService.updateStoryVisibility(story.id, !story.is_visible);
                 this.loadTabContent();
             };
         }
 
-        menu.querySelector('#st-cancel').onclick = () => menu.remove();
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.querySelector('#st-cancel').onclick = () => {
+            if (Date.now() - openTime < 400) return;
+            menu.remove();
+        };
+
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
     }
 
 

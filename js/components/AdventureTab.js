@@ -286,39 +286,43 @@ export class AdventureTab {
     }
 
     openEditSessionDateModal(campaign) {
-        const modal = this.container.querySelector('#generic-modal');
-        const body = this.container.querySelector('#modal-body');
-        const btnAction = this.container.querySelector('#modal-action-btn');
-
         const currentVal = campaign.next_session ? new Date(campaign.next_session).toISOString().slice(0, 16) : '';
 
-        body.innerHTML = `
-            <h3 class="text-center" style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 20px;">Prossima Sessione</h3>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">Data e Ora</label>
-                <input type="datetime-local" id="session-date-input" class="form-control" value="${currentVal}" style="width: 100%; padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px;">
+        const modalHtml = `
+            <div class="text-center">
+                <h3 style="font-family: var(--font-display); color: var(--accent-gold); margin-bottom: 20px;">Prossima Sessione</h3>
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <label style="display: block; font-size: 0.8rem; color: var(--text-faded); margin-bottom: 5px;">Data e Ora</label>
+                    <input type="datetime-local" id="session-date-input" class="input-field w-100" value="${currentVal}" style="padding: 10px; border: 1px solid var(--border-worn); border-radius: 4px;">
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-faded); font-style: italic; margin-bottom: 20px;">Imposta la data della prossima sessione per informare tutti i giocatori.</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary w-50" id="btn-cancel-session">Annulla</button>
+                    <button class="btn btn-primary w-50" id="btn-save-session">Salva</button>
+                </div>
             </div>
-            <p style="font-size: 0.8rem; color: var(--text-faded); font-style: italic;">Imposta la data della prossima sessione per informare tutti i giocatori.</p>
         `;
 
-        btnAction.textContent = 'Salva';
-        btnAction.onclick = async () => {
-            const newVal = body.querySelector('#session-date-input').value;
-            if (!newVal) {
-                if (!confirm("Rimuovere la data della prossima sessione?")) return;
-            }
+        window.app.showModal(modalHtml);
 
-            const { error } = await CampaignService.updateCampaign(campaign.id, { next_session: newVal || null });
-            if (error) {
-                this.showErrorPopup("Errore durante l'aggiornamento.");
-            } else {
-                this.showSuccessPopup("Data aggiornata!");
-                modal.style.display = 'none';
-                this.renderDashboard(AuthService.user); // Refresh
-            }
-        };
+        setTimeout(() => {
+            document.getElementById('btn-cancel-session').onclick = () => window.app.closeModal();
+            document.getElementById('btn-save-session').onclick = async () => {
+                const newVal = document.getElementById('session-date-input').value;
+                if (!newVal) {
+                    if (!confirm("Rimuovere la data della prossima sessione?")) return;
+                }
 
-        modal.style.display = 'flex';
+                const { error } = await CampaignService.updateCampaign(campaign.id, { next_session: newVal || null });
+                if (error) {
+                    this.showErrorPopup("Errore durante l'aggiornamento.");
+                } else {
+                    this.showSuccessPopup("Data aggiornata!");
+                    window.app.closeModal();
+                    this.renderDashboard(AuthService.user); // Refresh
+                }
+            };
+        }, 100);
     }
 
     openCampaignContextMenu(campaign) {
@@ -344,7 +348,7 @@ export class AdventureTab {
                     <button class="btn btn-primary" id="ctx-open" style="width: 100%; padding: 12px;">Desidera Entrare</button>
                     ${isGm ? `
                         <button class="btn btn-secondary" id="ctx-edit" style="width: 100%; padding: 12px;">✏️ Modifica Titolo</button>
-                        <button class="btn btn-secondary" id="ctx-edit-session" style="width: 100%; padding: 12px; color: var(--accent-gold); border-color: var(--accent-gold);">📅 Modifica Prossima Sessione</button>
+                    <button class="btn btn-secondary" id="ctx-edit-session" style="width: 100%; padding: 12px; color: var(--accent-navy); border-color: var(--accent-navy);">📅 Modifica Prossima Sessione</button>
                         <button class="btn btn-secondary" id="ctx-dup" style="width: 100%; padding: 12px;">👯 Duplica</button>
                         <button class="btn btn-secondary" id="ctx-del" style="width: 100%; padding: 12px; color: var(--accent-red); border-color: var(--accent-red);">🗑️ Elimina</button>
                     ` : ''}
@@ -357,28 +361,40 @@ export class AdventureTab {
 
         document.body.appendChild(menu);
 
+        const openTime = Date.now();
+
         // Actions
         menu.querySelector('#ctx-open').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             menu.remove();
             if (this.navigateCallback) this.navigateCallback('campaign-detail', { id: campaign.id });
         };
         menu.querySelector('#ctx-copy-code').onclick = () => {
+            if (Date.now() - openTime < 400) return;
             navigator.clipboard.writeText(campaign.join_code);
             this.showSuccessPopup("Codice copiato!");
             menu.remove();
         };
-        menu.onclick = (e) => { if (e.target === menu) menu.remove(); };
+        menu.onclick = (e) => {
+            if (e.target === menu) {
+                if (Date.now() - openTime < 400) return;
+                menu.remove();
+            }
+        };
 
         if (isGm) {
             menu.querySelector('#ctx-edit').onclick = () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 this.openEditCampaignModal(campaign);
             };
             menu.querySelector('#ctx-edit-session').onclick = () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 this.openEditSessionDateModal(campaign);
             };
             menu.querySelector('#ctx-dup').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 if (!confirm("Duplicare la campagna?")) return;
                 const { error } = await CampaignService.duplicateCampaign(campaign.id);
@@ -386,6 +402,7 @@ export class AdventureTab {
                 else this.render();
             };
             menu.querySelector('#ctx-del').onclick = async () => {
+                if (Date.now() - openTime < 400) return;
                 menu.remove();
                 if (!confirm("SEI SICURO? Questa azione è irreversibile e cancellerà tutto.")) return;
                 const { error } = await CampaignService.deleteCampaign(campaign.id);
