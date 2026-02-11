@@ -26,15 +26,14 @@ Ho completato il refactoring per supportare sia la 1ª che la 2ª edizione di 7t
 - Updated CSS to support new dice visuals.
 - Fixed layout issues.
 
+### 7. Password Recovery Flow (v0.9.103)
+- **Forgot Password**: Activated the "Password dimenticata?" link on the login screen. It now sends a standard Supabase recovery email.
+- **Recovery Redirect**: When returning from the email link, the app automatically detects the recovery session and opens the "Change Password" section in Settings for a seamless experience.
+
 ### 6. Mobile UX & Group Tab Refinements (v0.9.102)
-- **Ghost Click Protection**: Implemented a robust "ghost click" prevention for long-press actions. The app now ignores clicks immediately following a successful long-press, preventing unintended activation of UI elements that appear under the user's finger.
-- **Group Tab Restoration**: Restored the long-press context menu for players in the Group tab, allowing GMs to manage members once again.
-- **Themed Chat Area**: The group chat has been redesigned with a premium look:
-    - Parchment-style card background.
-    - Improved message bubbles with distinct styling for "me" vs "others".
-    - Added timestamps and sender names in a display font.
-    - New "🏹" send button for a more thematic feel.
-- **Selection Disable**: Text selection and system touch callouts remain disabled globally (v0.9.101) to ensure a smooth app experience.
+- **Ghost Click Protection**: Implemented a robust "ghost click" prevention for long-press actions.
+- **Group Tab Restoration**: Restored the long-press context menu for players.
+- **Themed Chat Area**: Redesigned the group chat with a premium parchment-style look.
 
 ## ✅ Verification Results
 - [x] Database migration successful.

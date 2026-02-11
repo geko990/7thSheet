@@ -47,8 +47,16 @@ class App {
             // Initial navigation
             this.router.initNavigation();
 
-            // Force navigation to characters on load to ensure content
-            await this.router.navigate('characters');
+            // Check for password reset redirect
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('reset_password') === 'true') {
+                // Clear URL params for cleanliness
+                window.history.replaceState({}, document.title, window.location.pathname);
+                await this.router.navigate('settings', { resetMode: true });
+            } else {
+                // Force navigation to characters on load to ensure content
+                await this.router.navigate('characters');
+            }
 
             // Service Worker Registration
             if ('serviceWorker' in navigator) {

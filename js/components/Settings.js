@@ -9,7 +9,7 @@ export default class Settings {
         this.app = app;
     }
 
-    async render() {
+    async render(params = {}) {
         const div = document.createElement('div');
         div.className = 'settings-container';
 
@@ -225,7 +225,7 @@ export default class Settings {
             const { AuthService } = await import('../services/AuthService.js');
             const currentUser = AuthService.getUser();
             if (currentUser) {
-                this.attachProfileListeners(div, currentUser);
+                this.attachProfileListeners(div, currentUser, params);
             } else {
                 this.attachAuthListeners(div);
             }
@@ -235,7 +235,7 @@ export default class Settings {
         return div;
     }
 
-    async attachProfileListeners(container, user) {
+    async attachProfileListeners(container, user, params = {}) {
         const avatarInput = container.querySelector('#profile-avatar-input');
         const avatarPreview = container.querySelector('#settings-avatar-preview');
         const usernameInput = container.querySelector('#profile-username');
@@ -253,6 +253,14 @@ export default class Settings {
                 actionsPanel.style.display = isOpen ? 'none' : 'block';
                 chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
             });
+
+            // Auto-open if in reset mode
+            if (params.resetMode) {
+                actionsPanel.style.display = 'block';
+                chevron.style.transform = 'rotate(90deg)';
+                const changePwArea = container.querySelector('#change-password-area');
+                if (changePwArea) changePwArea.style.display = 'block';
+            }
         }
 
         let currentAvatarUrl = null;
@@ -377,9 +385,28 @@ export default class Settings {
         const btnForgot = container.querySelector('#btn-forgot-password');
 
         if (btnForgot) {
-            btnForgot.addEventListener('click', (e) => {
+            btnForgot.addEventListener('click', async (e) => {
                 e.preventDefault();
-                alert("Non ancora implementato qui!");
+                const email = emailInput.value.trim();
+                if (!email) {
+                    alert("Inserisci la tua email per ricevere il link di ripristino.");
+                    return;
+                }
+
+                btnForgot.textContent = "Invio...";
+                btnForgot.style.pointerEvents = "none";
+
+                const { AuthService } = await import('../services/AuthService.js');
+                const { error } = await AuthService.resetPasswordForEmail(email);
+
+                btnForgot.textContent = "Password dimenticata?";
+                btnForgot.style.pointerEvents = "auto";
+
+                if (error) {
+                    alert("Errore: " + error.message);
+                } else {
+                    alert("Ti abbiamo inviato un'email con le istruzioni per il ripristino!");
+                }
             });
         }
 
