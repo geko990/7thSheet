@@ -61,6 +61,9 @@ body {
     -webkit-tap-highlight-color: transparent;
     position: relative;
     min-height: 100vh;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 body::before {
@@ -84,6 +87,13 @@ textarea,
 select {
     font-size: 16px !important;
     font-family: var(--font-body);
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.selectable {
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 /* App Container */

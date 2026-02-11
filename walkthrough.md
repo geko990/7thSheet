@@ -26,10 +26,9 @@ Ho completato il refactoring per supportare sia la 1ª che la 2ª edizione di 7t
 - Updated CSS to support new dice visuals.
 - Fixed layout issues.
 
-### 5. Next Session Date & UI Refinements (v0.9.100)
-- **Prossima Sessione**: In the main Adventure list, the invite code has been replaced by the "Prossima Sessione" date.
-- **Improved Editing**: Added a dedicated "📅 Modifica Prossima Sessione" button in the campaign's context menu (accessible by long-pressing the campaign card). This provides a more reliable alternative to long-pressing the specific session area.
-- **UI Tab Optimization**: Removed emojis from the "Storia", "Incontri", "Missioni", and "Gruppo" tabs to allow them to fit on a single row without horizontal scrolling.
+### 6. Mobile UX Optimization (v0.9.101)
+- **Selection Disable**: Disabled text selection and system touch callouts (e.g., the context menu for images and links) on mobile platforms via CSS. This ensures that the custom long-press menus in the app trigger immediately without being blocked by system popups (Copy/Paste, Open in New Tab, etc.).
+- **Input Compatibility**: Text selection and native behavior remain enabled for all `input` and `textarea` elements.
 
 ## ✅ Verification Results
 - [x] Database migration successful.
@@ -40,6 +39,8 @@ Ho completato il refactoring per supportare sia la 1ª che la 2ª edizione di 7t
 - [x] Next Session date display and edit functionality verified.
 - [x] Invite code accessibility verified in context menu.
 - [x] Tab UI optimization confirmed.
+- [x] Global text selection disabled (except inputs).
+- [x] System callouts suppressed on long press.
 
 ## Testing Required
 Please test the following flows:
